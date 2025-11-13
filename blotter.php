@@ -189,6 +189,10 @@ function sidepanel($google_picture, $google_name) {
         }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
     <link rel="stylesheet" href="css/main.css">
     <style>
         body { font-family: 'Poppins', sans-serif; }
@@ -243,6 +247,14 @@ function sidepanel($google_picture, $google_name) {
         .sidebar-collapsed .nav-link,
         .sidebar-collapsed .logout-link {
             justify-content: center;
+        }
+
+        /* Map styling */
+        #map {
+            height: 350px;
+            width: 100%;
+            border-radius: 0.375rem;
+            z-index: 1;
         }
     </style>
 </head>
@@ -323,11 +335,12 @@ function sidepanel($google_picture, $google_name) {
 
                             <div class="mb-6">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Lugar ng Pinangyarihan</label>
-                                <div class="bg-gray-200 h-64 flex items-center justify-center rounded-md mb-2">
-                                    <p class="text-gray-500">Map placeholder - Barangay San Miguel</p>
-                                </div>
-                                <input type="text" name="incident_location_display" class="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder="Pasig Hub, 115, Avocado Street..." readonly>
-                                <input type="text" name="incident_location" id="incident_location" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Type location here" required>
+                                <p class="text-xs text-gray-500 mb-2">I-click ang mapa upang pumili ng lokasyon</p>
+                                <div id="map" class="mb-3"></div>
+                                <input type="text" name="incident_location_display" id="incident_location_display" class="w-full p-2 border border-gray-300 rounded-md mb-2 bg-gray-50" placeholder="Awtomatikong papunan mula sa mapa..." readonly>
+                                <input type="text" name="incident_location" id="incident_location" class="w-full p-2 border border-gray-300 rounded-md" placeholder="O mag-type ng lokasyon dito" required>
+                                <input type="hidden" name="incident_latitude" id="incident_latitude">
+                                <input type="hidden" name="incident_longitude" id="incident_longitude">
                             </div>
 
                             <div class="flex justify-end">
@@ -631,9 +644,77 @@ function sidepanel($google_picture, $google_name) {
         </div>
     </div>
 
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-TIBPTWINmPouBtVmBuCLsYGgPZLyIvF4RzDzIHfPnfGGnRdx2BHEE2l3TqkUZBsO" crossorigin=""></script>
+
     <script src="js/sidebar.js" defer></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Map with Leaflet + OpenStreetMap
+        let map, marker;
+
+        // Initialize map centered on Barangay San Miguel, Pasig City
+        map = L.map('map').setView([14.5678, 121.0854], 16);
+
+        // Add OpenStreetMap tiles (free!)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Add click event to place pin
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+
+            // Remove existing marker if any
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            // Add new marker
+            marker = L.marker([lat, lng], {
+                draggable: true
+            }).addTo(map);
+
+            // Save coordinates to hidden fields
+            document.getElementById('incident_latitude').value = lat;
+            document.getElementById('incident_longitude').value = lng;
+
+            // Reverse geocode using Nominatim (free OpenStreetMap service)
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.display_name) {
+                        document.getElementById('incident_location_display').value = data.display_name;
+                        document.getElementById('incident_location').value = data.display_name;
+                    }
+                })
+                .catch(error => {
+                    console.error('Geocoding error:', error);
+                    document.getElementById('incident_location_display').value = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+                });
+
+            // Make marker draggable and update location on drag
+            marker.on('dragend', function(e) {
+                const newLat = e.target.getLatLng().lat;
+                const newLng = e.target.getLatLng().lng;
+
+                document.getElementById('incident_latitude').value = newLat;
+                document.getElementById('incident_longitude').value = newLng;
+
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}&zoom=18&addressdetails=1`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.display_name) {
+                            document.getElementById('incident_location_display').value = data.display_name;
+                            document.getElementById('incident_location').value = data.display_name;
+                        }
+                    })
+                    .catch(error => console.error('Geocoding error:', error));
+            });
+        });
+
         // Tab Navigation
         const tabs = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
@@ -657,6 +738,13 @@ function sidepanel($google_picture, $google_name) {
             });
 
             currentTab = index;
+
+            // Refresh map when switching to tab 1 (Pinangayarihan)
+            if (index === 0 && map) {
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 100);
+            }
         }
 
         tabs.forEach((tab, index) => {
