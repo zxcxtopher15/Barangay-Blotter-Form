@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateChart(lineChart, data.lineChart.labels, data.lineChart.data);
             updateChart(doughnutChart, data.doughnutChart.labels, data.doughnutChart.data);
             updateTopIncidentsList(data.topIncidents, displayPeriod);
+            updateMostReportedStats(data);
 
         } catch (error) {
             console.error('Dashboard Sync Failed:', error);
@@ -73,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const listContainer = document.getElementById('topIncidentsList');
         const periodSpan = document.getElementById('incident-period');
         periodSpan.textContent = period;
-        listContainer.innerHTML = ''; 
+        listContainer.innerHTML = '';
 
         if (!incidentData || incidentData.length === 0) {
             listContainer.innerHTML = '<p class="text-gray-500 text-center">No incident data available for this period.</p>';
@@ -84,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         incidentData.slice(0, 10).forEach((incident, index) => {
             const percentageOfMax = maxCount > 0 ? (incident.count / maxCount) * 100 : 0;
             const percentageOfTotal = incident.total > 0 ? ((incident.count / incident.total) * 100).toFixed(1) : 0;
-            
+
             const incidentElement = document.createElement('div');
             incidentElement.className = 'py-2';
             incidentElement.innerHTML = `
@@ -103,6 +104,37 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             listContainer.appendChild(incidentElement);
         });
+    }
+
+    function updateMostReportedStats(data) {
+        // Update Most Reported Incident Type
+        if (data.mostReportedIncident) {
+            document.getElementById('mostIncidentType').textContent = data.mostReportedIncident.complaint_description;
+            document.getElementById('mostIncidentCount').textContent = data.mostReportedIncident.count;
+            document.getElementById('mostIncidentPercent').textContent = data.mostReportedIncident.percentage;
+        } else {
+            document.getElementById('mostIncidentType').textContent = 'No data';
+            document.getElementById('mostIncidentCount').textContent = '0';
+            document.getElementById('mostIncidentPercent').textContent = '0';
+        }
+
+        // Update Most Active Officer
+        if (data.mostActiveOfficer) {
+            document.getElementById('mostActiveOfficer').textContent = data.mostActiveOfficer.desk_officer_name;
+            document.getElementById('mostActiveOfficerCount').textContent = data.mostActiveOfficer.count;
+        } else {
+            document.getElementById('mostActiveOfficer').textContent = 'No data';
+            document.getElementById('mostActiveOfficerCount').textContent = '0';
+        }
+
+        // Update Most Reported Location
+        if (data.mostReportedLocation) {
+            document.getElementById('mostLocation').textContent = data.mostReportedLocation.incident_location;
+            document.getElementById('mostLocationCount').textContent = data.mostReportedLocation.count;
+        } else {
+            document.getElementById('mostLocation').textContent = 'No data';
+            document.getElementById('mostLocationCount').textContent = '0';
+        }
     }
 
     // --- 3. UI and Event Handlers ---

@@ -27,6 +27,9 @@ $response = [
     'lineChart' => ['labels' => [], 'data' => []],
     'doughnutChart' => ['labels' => [], 'data' => []],
     'topIncidents' => [],
+    'mostReportedIncident' => null,
+    'mostActiveOfficer' => null,
+    'mostReportedLocation' => null,
     'error' => null
 ];
 
@@ -172,6 +175,58 @@ try {
          throw new Exception("Top incidents query failed: " . $conn->error);
     }
     $stmt->close();
+
+    // --- NEW: Most Reported Incident Statistics ---
+
+    // Most reported incident type (all time)
+    $most_reported_incident_sql = "
+        SELECT
+            complaint_description,
+            COUNT(*) as count,
+            ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM complaints WHERE complaint_description != '')), 2) as percentage
+        FROM complaints
+        WHERE complaint_description != ''
+        GROUP BY complaint_description
+        ORDER BY count DESC
+        LIMIT 1
+    ";
+    $most_reported_result = $conn->query($most_reported_incident_sql);
+    if ($most_reported_result && $most_reported_result->num_rows > 0) {
+        $response['mostReportedIncident'] = $most_reported_result->fetch_assoc();
+    }
+
+    // Most active desk officer (all time)
+    $most_active_officer_sql = "
+        SELECT
+            desk_officer_name,
+            COUNT(*) as count
+        FROM complaints
+        WHERE desk_officer_name != ''
+        GROUP BY desk_officer_name
+        ORDER BY count DESC
+        LIMIT 1
+    ";
+    $most_active_result = $conn->query($most_active_officer_sql);
+    if ($most_active_result && $most_active_result->num_rows > 0) {
+        $response['mostActiveOfficer'] = $most_active_result->fetch_assoc();
+    }
+
+    // Most reported location (all time)
+    $most_reported_location_sql = "
+        SELECT
+            incident_location,
+            COUNT(*) as count
+        FROM complaints
+        WHERE incident_location != ''
+        GROUP BY incident_location
+        ORDER BY count DESC
+        LIMIT 1
+    ";
+    $most_location_result = $conn->query($most_reported_location_sql);
+    if ($most_location_result && $most_location_result->num_rows > 0) {
+        $response['mostReportedLocation'] = $most_location_result->fetch_assoc();
+    }
+
     $conn->close();
 
 } catch (Exception $e) {
