@@ -254,36 +254,6 @@ mysqli_close($conn);
                     </div>
                 </div>
                 <!-- END: New Top Incidents Card -->
-
-                <!-- START: Most Reported Statistics Cards -->
-                <div class="bg-white p-6 rounded-xl shadow-md mt-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Overall Statistics (All Time)</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-                            <p class="text-sm text-gray-600 mb-1">Most Reported Incident Type</p>
-                            <p class="text-xl font-bold text-blue-600" id="mostIncidentType">Loading...</p>
-                            <p class="text-sm text-gray-500 mt-1">
-                                <span id="mostIncidentCount">0</span> incidents
-                                (<span id="mostIncidentPercent">0</span>%)
-                            </p>
-                        </div>
-                        <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
-                            <p class="text-sm text-gray-600 mb-1">Most Active Desk Officer</p>
-                            <p class="text-xl font-bold text-green-600" id="mostActiveOfficer">Loading...</p>
-                            <p class="text-sm text-gray-500 mt-1">
-                                <span id="mostActiveOfficerCount">0</span> reports filed
-                            </p>
-                        </div>
-                        <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
-                            <p class="text-sm text-gray-600 mb-1">Most Reported Location</p>
-                            <p class="text-xl font-bold text-purple-600" id="mostLocation">Loading...</p>
-                            <p class="text-sm text-gray-500 mt-1">
-                                <span id="mostLocationCount">0</span> incidents
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <!-- END: Most Reported Statistics Cards -->
             </main>
         </div>
     </div>
