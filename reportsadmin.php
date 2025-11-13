@@ -217,7 +217,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
    <link rel="stylesheet" href="css/main.css">
    <!-- Leaflet CSS -->
-   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
    <style>
         /* Optional: Basic tooltip styling for better visibility */
         [data-tooltip]:hover::after {
@@ -421,7 +421,7 @@
     </div>
 
     <!-- Leaflet JavaScript -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha512-GktFNEWPsYnXXudCt7JGpMlXULlRCuJdLqn1EdGxFqU8n9BVwOjBGSY8tB0h1kLJLbQa1u9vk1NsOjDmwbRvjA==" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="js/sidebar.js" defer></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -849,9 +849,24 @@
 
                     let htmlContent = `<form id="edit-report-form" data-case-no="${data.data.case_no}">`; // Wrap in a form
 
-                    // Display Case Number prominently
+                    // Format datetime for display
+                    let formattedDateTime = 'N/A';
+                    if (data.data.incident_datetime) {
+                        const date = new Date(data.data.incident_datetime);
+                        formattedDateTime = date.toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        });
+                    }
+
+                    // Display Case Number prominently with date/time
                     htmlContent += `<div class="bg-blue-50 p-4 rounded-lg mb-4 border-l-4 border-blue-500">`;
                     htmlContent += `<p class="text-xl font-bold text-blue-900">Case No: ${htmlspecialchars(data.data.case_no)}</p>`;
+                    htmlContent += `<p class="text-sm text-gray-600 mt-1">Incident Date/Time: ${formattedDateTime}</p>`;
                     htmlContent += `</div>`;
 
                     // Show map if coordinates are available
