@@ -613,7 +613,6 @@
         'incident_datetime': 'Date & Time of Incident',
         'incident_location': 'Location of Incident',
         'complaint_description': 'Type of Complaint',
-        'other_complaint': 'Other Complaint Details',
 
         // Complainant Details
         'complainant_first_name': 'Complainant First Name',
@@ -733,7 +732,7 @@
                 inputElement += `<option value="${htmlspecialchars(option.value)}" ${String(value) === String(option.value) ? 'selected' : ''}>${htmlspecialchars(option.text)}</option>`;
             });
             inputElement += `</select>`;
-        } else if (key === 'complaint_statement' || key === 'complaint_description' || key === 'other_complaint') {
+        } else if (key === 'complaint_statement' || key === 'complaint_description') {
             // Use textarea for multi-line text fields
             inputElement = `<textarea name="${key}" class="col-span-2 form-textarea border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-secondary" rows="3">${htmlspecialchars(value)}</textarea>`;
         }
@@ -819,7 +818,7 @@
                     htmlContent += `<p class="text-lg font-semibold mb-4">Case Number: ${data.data.case_no}</p>`;
 
                     const sections = {
-                        'Incident Details': ['incident_datetime', 'incident_location', 'complaint_description', 'other_complaint'],
+                        'Incident Details': ['incident_datetime', 'incident_location', 'complaint_description'],
                         'Complainant Information': ['complainant_first_name', 'complainant_middle_name', 'complainant_last_name', 'complainant_age', 'complainant_gender', 'complainant_phone', 'complainant_address'],
                         'Victim Information': ['victim_first_name', 'victim_middle_name', 'victim_last_name', 'victim_age', 'victim_gender', 'victim_phone', 'victim_address'],
                         'Witness Information': ['witness_first_name', 'witness_middle_name', 'witness_last_name', 'witness_age', 'witness_gender', 'witness_phone', 'witness_address'],
