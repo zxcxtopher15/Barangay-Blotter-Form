@@ -3,7 +3,8 @@ session_start();
 
 // If the user is an admin, do nothing (continue script execution)
 if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'admin') {
-
+    header('Location: dashboardadmin.php');
+    exit;
 }
 // If the user is logged in AND their role is 'Desk Officer', redirect to dashboard.php
 else if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'desk officer') {
@@ -131,10 +132,10 @@ function sidepanel($google_picture, $google_name) {
     $activeClasses = 'bg-blue-500 text-white shadow';
     $inactiveClasses = 'text-gray-600 hover:bg-gray-100';
 
-    $dashboardClick = ($currentPage === 'dashboard.php') ? 'onclick="event.preventDefault()"' : '';
+    $dashboardClick = ($currentPage === 'dashboardadmin.php') ? 'onclick="event.preventDefault()"' : '';
     $blotterClick   = ($currentPage === 'blotteradmin.php')   ? 'onclick="event.preventDefault()"' : '';
-    $reportsClick   = ($currentPage === 'reports.php')   ? 'onclick="event.preventDefault()"' : '';
-    $settingsClick  = ($currentPage === 'settings.php')  ? 'onclick="event.preventDefault()"' : '';
+    $reportsClick   = ($currentPage === 'reportsadmin.php')   ? 'onclick="event.preventDefault()"' : '';
+    $settingsClick  = ($currentPage === 'settingsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
 
     echo '
     <div id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white text-secondary flex flex-col p-4 items-center shadow-lg z-20">
@@ -147,7 +148,7 @@ function sidepanel($google_picture, $google_name) {
         </div>
 
         <nav class="flex flex-col space-y-2 w-full mt-6 text-lg">
-            <a href="dashboard.php" class="nav-link flex items-center px-4 py-3 rounded-lg text-left font-medium ' . ($currentPage === "dashboard.php" ? $activeClasses : $inactiveClasses) . '" ' . $dashboardClick . '>
+            <a href="dashboardadmin.php" class="nav-link flex items-center px-4 py-3 rounded-lg text-left font-medium ' . ($currentPage === "dashboard.php" ? $activeClasses : $inactiveClasses) . '" ' . $dashboardClick . '>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
                 <span class="sidebar-text ml-3">Dashboard</span>
             </a>
@@ -155,11 +156,11 @@ function sidepanel($google_picture, $google_name) {
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 <span class="sidebar-text ml-3">Blotter</span>
             </a>
-            <a href="reports.php" class="nav-link flex items-center px-4 py-3 rounded-lg text-left font-medium ' . ($currentPage === "reports.php" ? $activeClasses : $inactiveClasses) . '" ' . $reportsClick . '>
+            <a href="reportsadmin.php" class="nav-link flex items-center px-4 py-3 rounded-lg text-left font-medium ' . ($currentPage === "reports.php" ? $activeClasses : $inactiveClasses) . '" ' . $reportsClick . '>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                 <span class="sidebar-text ml-3">Reports</span>
             </a>
-            <a href="settings.php" class="nav-link flex items-center px-4 py-3 rounded-lg text-left font-medium ' . ($currentPage === "settings.php" ? $activeClasses : $inactiveClasses) . '" ' . $settingsClick . '>
+            <a href="settingsadmin.php" class="nav-link flex items-center px-4 py-3 rounded-lg text-left font-medium ' . ($currentPage === "settings.php" ? $activeClasses : $inactiveClasses) . '" ' . $settingsClick . '>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 <span class="sidebar-text ml-3">Settings</span>
             </a>
@@ -181,6 +182,7 @@ function sidepanel($google_picture, $google_name) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -201,11 +203,13 @@ function sidepanel($google_picture, $google_name) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 
     <link rel="stylesheet" href="css/main.css">
     <style>
-        body { font-family: 'Poppins', sans-serif; }
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
 
         .tab-button {
             padding: 12px 24px;
@@ -235,7 +239,8 @@ function sidepanel($google_picture, $google_name) {
             display: block;
         }
 
-        #sidebar, #mainContent {
+        #sidebar,
+        #mainContent {
             transition: all 0.3s ease-in-out;
         }
 
@@ -268,6 +273,7 @@ function sidepanel($google_picture, $google_name) {
         }
     </style>
 </head>
+
 <body class="bg-gray-100">
     <?php
     echo '<script>';
@@ -324,14 +330,14 @@ function sidepanel($google_picture, $google_name) {
                                     <label class="block text-sm font-medium text-gray-700 mb-1">HH</label>
                                     <select name="incident_hour" class="w-full p-2 border border-gray-300 rounded-md" required>
                                         <option value="">HH</option>
-                                        <?php for($i = 1; $i <= 12; $i++): ?><option value="<?= $i ?>"><?= str_pad($i, 2, '0', STR_PAD_LEFT) ?></option><?php endfor; ?>
+                                        <?php for ($i = 1; $i <= 12; $i++): ?><option value="<?= $i ?>"><?= str_pad($i, 2, '0', STR_PAD_LEFT) ?></option><?php endfor; ?>
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">MM</label>
                                     <select name="incident_minute" class="w-full p-2 border border-gray-300 rounded-md" required>
                                         <option value="">MM</option>
-                                        <?php for($i = 0; $i <= 59; $i++): ?><option value="<?= str_pad($i, 2, '0', STR_PAD_LEFT) ?>"><?= str_pad($i, 2, '0', STR_PAD_LEFT) ?></option><?php endfor; ?>
+                                        <?php for ($i = 0; $i <= 59; $i++): ?><option value="<?= str_pad($i, 2, '0', STR_PAD_LEFT) ?>"><?= str_pad($i, 2, '0', STR_PAD_LEFT) ?></option><?php endfor; ?>
                                     </select>
                                 </div>
                                 <div>
@@ -397,7 +403,7 @@ function sidepanel($google_picture, $google_name) {
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Edad</label>
                                     <select name="complainant_age" class="w-full p-2 border border-gray-300 rounded-md">
                                         <option value="">Pumili ng Edad</option>
-                                        <?php for($i = 18; $i <= 100; $i++): ?><option value="<?= $i ?>"><?= $i ?></option><?php endfor; ?>
+                                        <?php for ($i = 18; $i <= 100; $i++): ?><option value="<?= $i ?>"><?= $i ?></option><?php endfor; ?>
                                     </select>
                                 </div>
                                 <div>
@@ -466,7 +472,7 @@ function sidepanel($google_picture, $google_name) {
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Edad</label>
                                     <select name="victim_age" class="w-full p-2 border border-gray-300 rounded-md" required>
                                         <option value="">Pumili ng Edad</option>
-                                        <?php for($i = 1; $i <= 100; $i++): ?><option value="<?= $i ?>"><?= $i ?></option><?php endfor; ?>
+                                        <?php for ($i = 1; $i <= 100; $i++): ?><option value="<?= $i ?>"><?= $i ?></option><?php endfor; ?>
                                     </select>
                                 </div>
                                 <div>
@@ -518,7 +524,7 @@ function sidepanel($google_picture, $google_name) {
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Edad</label>
                                     <select name="witness_age" class="w-full p-2 border border-gray-300 rounded-md">
                                         <option value="">Pumili ng Edad</option>
-                                        <?php for($i = 1; $i <= 100; $i++): ?><option value="<?= $i ?>"><?= $i ?></option><?php endfor; ?>
+                                        <?php for ($i = 1; $i <= 100; $i++): ?><option value="<?= $i ?>"><?= $i ?></option><?php endfor; ?>
                                     </select>
                                 </div>
                                 <div>
@@ -570,7 +576,7 @@ function sidepanel($google_picture, $google_name) {
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Edad</label>
                                     <select name="respondent_age" class="w-full p-2 border border-gray-300 rounded-md">
                                         <option value="">Pumili ng Edad</option>
-                                        <?php for($i = 1; $i <= 100; $i++): ?><option value="<?= $i ?>"><?= $i ?></option><?php endfor; ?>
+                                        <?php for ($i = 1; $i <= 100; $i++): ?><option value="<?= $i ?>"><?= $i ?></option><?php endfor; ?>
                                     </select>
                                 </div>
                                 <div>
@@ -762,10 +768,14 @@ function sidepanel($google_picture, $google_name) {
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="mt-3 text-center">
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
                 </div>
                 <h3 class="text-lg leading-6 font-medium text-gray-900">Submitted Successfully</h3>
-                <div class="mt-2 px-7 py-3"><p class="text-sm text-gray-500">The blotter report has been saved.</p></div>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">The blotter report has been saved.</p>
+                </div>
                 <div class="items-center px-4 py-3">
                     <button id="ok-btn" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-green-600">OK</button>
                 </div>
@@ -778,141 +788,120 @@ function sidepanel($google_picture, $google_name) {
 
     <script src="js/sidebar.js" defer></script>
     <script>
-    // Toggle checkbox function for initial modal (only allow one selection)
-    function toggleInitialCheckbox(checkboxId) {
-        const checkbox = document.getElementById(checkboxId);
-        const allCheckboxes = [
-            document.getElementById('sameAsVictim'),
-            document.getElementById('noWitness'),
-            document.getElementById('noRespondent')
-        ];
+        // Toggle checkbox function for initial modal (only allow one selection)
+        function toggleInitialCheckbox(checkboxId) {
+            const checkbox = document.getElementById(checkboxId);
+            const allCheckboxes = [
+                document.getElementById('sameAsVictim'),
+                document.getElementById('noWitness'),
+                document.getElementById('noRespondent')
+            ];
 
-        // Uncheck all others
-        allCheckboxes.forEach(cb => {
-            if (cb.id !== checkboxId) {
-                cb.checked = false;
-            }
-        });
+            // Uncheck all others
+            allCheckboxes.forEach(cb => {
+                if (cb.id !== checkboxId) {
+                    cb.checked = false;
+                }
+            });
 
-        // Toggle the clicked one
-        checkbox.checked = !checkbox.checked;
+            // Toggle the clicked one
+            checkbox.checked = !checkbox.checked;
 
-        // Hide error message
-        document.getElementById('initialModalError').classList.add('hidden');
-    }
+            // Hide error message
+            document.getElementById('initialModalError').classList.add('hidden');
+        }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initial Questions Modal Logic
-        const initialQuestionsModal = document.getElementById('initialQuestionsModal');
-        const startBlotterBtn = document.getElementById('startBlotterBtn');
-        const sameAsVictimCheckbox = document.getElementById('sameAsVictim');
-        const noWitnessCheckbox = document.getElementById('noWitness');
-        const noRespondentCheckbox = document.getElementById('noRespondent');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial Questions Modal Logic
+            const initialQuestionsModal = document.getElementById('initialQuestionsModal');
+            const startBlotterBtn = document.getElementById('startBlotterBtn');
+            const sameAsVictimCheckbox = document.getElementById('sameAsVictim');
+            const noWitnessCheckbox = document.getElementById('noWitness');
+            const noRespondentCheckbox = document.getElementById('noRespondent');
 
-        // Tab references
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const nagrereklamo_tab = tabButtons[1]; // Nagrereklamo
-        const saksi_tab = tabButtons[3]; // Saksi
-        const inireklamo_tab = tabButtons[4]; // Inireklamo
+            // Tab references
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const nagrereklamo_tab = tabButtons[1]; // Nagrereklamo
+            const saksi_tab = tabButtons[3]; // Saksi
+            const inireklamo_tab = tabButtons[4]; // Inireklamo
 
-        startBlotterBtn.addEventListener('click', function() {
-            // Check if at least one checkbox is selected
-            if (!sameAsVictimCheckbox.checked && !noWitnessCheckbox.checked && !noRespondentCheckbox.checked) {
-                document.getElementById('initialModalError').classList.remove('hidden');
-                return;
-            }
+            startBlotterBtn.addEventListener('click', function() {
+                // Check if at least one checkbox is selected
+                if (!sameAsVictimCheckbox.checked && !noWitnessCheckbox.checked && !noRespondentCheckbox.checked) {
+                    document.getElementById('initialModalError').classList.remove('hidden');
+                    return;
+                }
 
-            // Hide/show tabs based on selections
-            if (sameAsVictimCheckbox.checked) {
-                // Hide Nagrereklamo tab
-                nagrereklamo_tab.style.display = 'none';
-                // Remove required from Nagrereklamo fields
-                document.getElementById('tab2').querySelectorAll('[required]').forEach(field => {
-                    field.removeAttribute('required');
-                });
-            }
+                // Hide/show tabs based on selections
+                if (sameAsVictimCheckbox.checked) {
+                    // Hide Nagrereklamo tab
+                    nagrereklamo_tab.style.display = 'none';
+                    // Remove required from Nagrereklamo fields
+                    document.getElementById('tab2').querySelectorAll('[required]').forEach(field => {
+                        field.removeAttribute('required');
+                    });
+                }
 
-            if (noWitnessCheckbox.checked) {
-                // Hide Saksi tab
-                saksi_tab.style.display = 'none';
-                // Remove required from Saksi fields
-                document.getElementById('tab4').querySelectorAll('[required]').forEach(field => {
-                    field.removeAttribute('required');
-                });
-            }
+                if (noWitnessCheckbox.checked) {
+                    // Hide Saksi tab
+                    saksi_tab.style.display = 'none';
+                    // Remove required from Saksi fields
+                    document.getElementById('tab4').querySelectorAll('[required]').forEach(field => {
+                        field.removeAttribute('required');
+                    });
+                }
 
-            if (noRespondentCheckbox.checked) {
-                // Hide Inireklamo tab
-                inireklamo_tab.style.display = 'none';
-                // Remove required from Inireklamo fields
-                document.getElementById('tab5').querySelectorAll('[required]').forEach(field => {
-                    field.removeAttribute('required');
-                });
-            }
+                if (noRespondentCheckbox.checked) {
+                    // Hide Inireklamo tab
+                    inireklamo_tab.style.display = 'none';
+                    // Remove required from Inireklamo fields
+                    document.getElementById('tab5').querySelectorAll('[required]').forEach(field => {
+                        field.removeAttribute('required');
+                    });
+                }
 
-            // If complainant is same as victim, copy victim data to complainant on form submit
-            if (sameAsVictimCheckbox.checked) {
-                window.complainantIsVictim = true;
-            }
+                // If complainant is same as victim, copy victim data to complainant on form submit
+                if (sameAsVictimCheckbox.checked) {
+                    window.complainantIsVictim = true;
+                }
 
-            // Close modal
-            initialQuestionsModal.style.display = 'none';
-        });
+                // Close modal
+                initialQuestionsModal.style.display = 'none';
+            });
 
-        // Initialize Map with Leaflet + OpenStreetMap
-        let map, marker;
+            // Initialize Map with Leaflet + OpenStreetMap
+            let map, marker;
 
-        // Initialize map centered on Barangay San Miguel, Pasig City
-        map = L.map('map').setView([14.5678, 121.0854], 16);
+            // Initialize map centered on Barangay San Miguel, Pasig City
+            map = L.map('map').setView([14.5678, 121.0854], 16);
 
-        // Add OpenStreetMap tiles (free!)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 19
-        }).addTo(map);
-
-        // Add click event to place pin
-        map.on('click', function(e) {
-            const lat = e.latlng.lat;
-            const lng = e.latlng.lng;
-
-            // Remove existing marker if any
-            if (marker) {
-                map.removeLayer(marker);
-            }
-
-            // Add new marker
-            marker = L.marker([lat, lng], {
-                draggable: true
+            // Add OpenStreetMap tiles (free!)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
             }).addTo(map);
 
-            // Save coordinates to hidden fields
-            document.getElementById('incident_latitude').value = lat;
-            document.getElementById('incident_longitude').value = lng;
+            // Add click event to place pin
+            map.on('click', function(e) {
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
 
-            // Reverse geocode using Nominatim (free OpenStreetMap service)
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.display_name) {
-                        document.getElementById('incident_location_display').value = data.display_name;
-                        document.getElementById('incident_location').value = data.display_name;
-                    }
-                })
-                .catch(error => {
-                    console.error('Geocoding error:', error);
-                    document.getElementById('incident_location_display').value = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
-                });
+                // Remove existing marker if any
+                if (marker) {
+                    map.removeLayer(marker);
+                }
 
-            // Make marker draggable and update location on drag
-            marker.on('dragend', function(e) {
-                const newLat = e.target.getLatLng().lat;
-                const newLng = e.target.getLatLng().lng;
+                // Add new marker
+                marker = L.marker([lat, lng], {
+                    draggable: true
+                }).addTo(map);
 
-                document.getElementById('incident_latitude').value = newLat;
-                document.getElementById('incident_longitude').value = newLng;
+                // Save coordinates to hidden fields
+                document.getElementById('incident_latitude').value = lat;
+                document.getElementById('incident_longitude').value = lng;
 
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}&zoom=18&addressdetails=1`)
+                // Reverse geocode using Nominatim (free OpenStreetMap service)
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.display_name) {
@@ -920,301 +909,322 @@ function sidepanel($google_picture, $google_name) {
                             document.getElementById('incident_location').value = data.display_name;
                         }
                     })
-                    .catch(error => console.error('Geocoding error:', error));
+                    .catch(error => {
+                        console.error('Geocoding error:', error);
+                        document.getElementById('incident_location_display').value = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+                    });
+
+                // Make marker draggable and update location on drag
+                marker.on('dragend', function(e) {
+                    const newLat = e.target.getLatLng().lat;
+                    const newLng = e.target.getLatLng().lng;
+
+                    document.getElementById('incident_latitude').value = newLat;
+                    document.getElementById('incident_longitude').value = newLng;
+
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}&zoom=18&addressdetails=1`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.display_name) {
+                                document.getElementById('incident_location_display').value = data.display_name;
+                                document.getElementById('incident_location').value = data.display_name;
+                            }
+                        })
+                        .catch(error => console.error('Geocoding error:', error));
+                });
             });
-        });
 
-        // Tab Navigation
-        const tabs = document.querySelectorAll('.tab-button');
-        const tabContents = document.querySelectorAll('.tab-content');
-        let currentTab = 0;
+            // Tab Navigation
+            const tabs = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            let currentTab = 0;
 
-        function showTab(index) {
-            tabContents.forEach((content, i) => {
-                content.classList.remove('active');
-                if (i === index) {
-                    content.classList.add('active');
+            function showTab(index) {
+                tabContents.forEach((content, i) => {
+                    content.classList.remove('active');
+                    if (i === index) {
+                        content.classList.add('active');
+                    }
+                });
+
+                tabs.forEach((tab, i) => {
+                    tab.classList.remove('active', 'completed');
+                    if (i < index) {
+                        tab.classList.add('completed');
+                    } else if (i === index) {
+                        tab.classList.add('active');
+                    }
+                });
+
+                currentTab = index;
+
+                // Refresh map when switching to tab 1 (Pinangayarihan)
+                if (index === 0 && map) {
+                    setTimeout(() => {
+                        map.invalidateSize();
+                    }, 100);
                 }
-            });
-
-            tabs.forEach((tab, i) => {
-                tab.classList.remove('active', 'completed');
-                if (i < index) {
-                    tab.classList.add('completed');
-                } else if (i === index) {
-                    tab.classList.add('active');
-                }
-            });
-
-            currentTab = index;
-
-            // Refresh map when switching to tab 1 (Pinangayarihan)
-            if (index === 0 && map) {
-                setTimeout(() => {
-                    map.invalidateSize();
-                }, 100);
             }
-        }
 
-        tabs.forEach((tab, index) => {
-            tab.addEventListener('click', () => {
-                // Don't allow clicking on tabs if they're hidden
-                if (tab.style.display === 'none') {
+            tabs.forEach((tab, index) => {
+                tab.addEventListener('click', () => {
+                    // Don't allow clicking on tabs if they're hidden
+                    if (tab.style.display === 'none') {
+                        return;
+                    }
+
+                    // If clicking a forward tab (higher index), validate current tab first
+                    if (index > currentTab) {
+                        if (!validateCurrentTab()) {
+                            return;
+                        }
+                    }
+
+                    // If clicking backward, allow it without validation
+                    showTab(index);
+                });
+            });
+
+            // Next/Previous buttons
+            document.querySelectorAll('.next-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Validate current tab before moving to next
+                    if (!validateCurrentTab()) {
+                        return;
+                    }
+
+                    if (currentTab < tabs.length - 1) {
+                        // Find next visible tab
+                        let nextTab = currentTab + 1;
+                        while (nextTab < tabs.length && tabs[nextTab].style.display === 'none') {
+                            nextTab++;
+                        }
+                        if (nextTab < tabs.length) {
+                            showTab(nextTab);
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('.prev-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (currentTab > 0) {
+                        // Find previous visible tab
+                        let prevTab = currentTab - 1;
+                        while (prevTab >= 0 && tabs[prevTab].style.display === 'none') {
+                            prevTab--;
+                        }
+                        if (prevTab >= 0) {
+                            showTab(prevTab);
+                        }
+                    }
+                });
+            });
+
+            // Complaint Description "Others" field toggle
+            const complaintDescSelect = document.getElementById('complaint_description');
+            const otherComplaintInput = document.getElementById('other_complaint');
+
+            if (complaintDescSelect) {
+                complaintDescSelect.addEventListener('change', function() {
+                    if (this.value === 'Others') {
+                        otherComplaintInput.classList.remove('hidden');
+                        otherComplaintInput.setAttribute('required', 'required');
+                    } else {
+                        otherComplaintInput.classList.add('hidden');
+                        otherComplaintInput.removeAttribute('required');
+                        otherComplaintInput.value = '';
+                    }
+                });
+            }
+
+            // Form Validation Function
+            function validateCurrentTab() {
+                const currentTabContent = tabContents[currentTab];
+                const requiredFields = currentTabContent.querySelectorAll('[required]');
+
+                for (let field of requiredFields) {
+                    if (!field.value || field.value.trim() === '') {
+                        field.focus();
+                        field.classList.add('border-red-500');
+                        setTimeout(() => field.classList.remove('border-red-500'), 3000);
+
+                        // Show error message
+                        const errorMsg = document.createElement('div');
+                        errorMsg.className = 'fixed top-20 right-5 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                        errorMsg.textContent = 'Pakipunan ang lahat ng kinakailangang field';
+                        document.body.appendChild(errorMsg);
+                        setTimeout(() => errorMsg.remove(), 3000);
+
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            // Review Modal Logic
+            const reviewBtn = document.getElementById('reviewBtn');
+            const reviewModal = document.getElementById('reviewModal');
+            const closeReviewModal = document.getElementById('closeReviewModal');
+            const editBtn = document.getElementById('editBtn');
+
+            reviewBtn.addEventListener('click', function() {
+                // Validate that checkboxes are checked
+                const reportedBy = document.querySelector('[name="reported_by"]');
+                const isAffirmed = document.querySelector('[name="is_affirmed"]');
+
+                if (!reportedBy.checked) {
+                    reportedBy.focus();
+                    alert('Mangyaring i-check ang "Inuulat sa pamamagitan ng: Personal"');
                     return;
                 }
 
-                // If clicking a forward tab (higher index), validate current tab first
-                if (index > currentTab) {
-                    if (!validateCurrentTab()) {
+                if (!isAffirmed.checked) {
+                    isAffirmed.focus();
+                    alert('Mangyaring i-check ang patunay na ang mga detalye ay totoo at tama');
+                    return;
+                }
+
+                // Validate all required fields in the form
+                const allRequiredFields = document.getElementById('blotterForm').querySelectorAll('[required]');
+                for (let field of allRequiredFields) {
+                    // Skip fields in hidden tabs
+                    const parentTab = field.closest('.tab-content');
+                    if (parentTab && parentTab.style.display === 'none') continue;
+
+                    // Skip hidden fields
+                    if (field.classList.contains('hidden')) continue;
+
+                    if (!field.value || field.value.trim() === '') {
+                        // Find which tab this field belongs to
+                        const tabIndex = Array.from(tabContents).indexOf(parentTab);
+                        if (tabIndex !== -1) {
+                            showTab(tabIndex);
+                        }
+
+                        field.focus();
+                        field.classList.add('border-red-500');
+                        setTimeout(() => field.classList.remove('border-red-500'), 3000);
+
+                        alert('Pakipunan ang lahat ng kinakailangang field sa lahat ng mga tab');
                         return;
                     }
                 }
 
-                // If clicking backward, allow it without validation
-                showTab(index);
+                // Populate review modal with form data
+                const incidentDate = document.querySelector('[name="incident_date"]').value;
+                const incidentHour = document.querySelector('[name="incident_hour"]').value;
+                const incidentMinute = document.querySelector('[name="incident_minute"]').value;
+                const incidentPeriod = document.querySelector('[name="incident_period"]').value;
+
+                document.getElementById('review_incident_datetime').textContent = `${incidentDate} ${incidentHour}:${incidentMinute} ${incidentPeriod}`;
+                document.getElementById('review_incident_location').textContent = document.querySelector('[name="incident_location"]').value;
+
+                // Complaint Type
+                const complaintType = document.getElementById('complaint_description').value;
+                const otherComplaint = document.getElementById('other_complaint').value;
+                document.getElementById('review_complaint_type').textContent = complaintType === 'Others' ? otherComplaint : complaintType;
+
+                // Complainant
+                document.getElementById('review_complainant_first').textContent = document.querySelector('[name="complainant_first_name"]').value || 'N/A';
+                document.getElementById('review_complainant_middle').textContent = document.querySelector('[name="complainant_middle_name"]').value || 'N/A';
+                document.getElementById('review_complainant_last').textContent = document.querySelector('[name="complainant_last_name"]').value || 'N/A';
+                document.getElementById('review_complainant_age').textContent = document.querySelector('[name="complainant_age"]').value || 'N/A';
+                document.getElementById('review_complainant_gender').textContent = document.querySelector('[name="complainant_gender"]').value || 'N/A';
+                document.getElementById('review_complainant_phone').textContent = document.querySelector('[name="complainant_phone"]').value || 'N/A';
+                document.getElementById('review_complainant_address').textContent = document.querySelector('[name="complainant_address"]').value || 'N/A';
+
+                // Victim
+                document.getElementById('review_victim_first').textContent = document.querySelector('[name="victim_first_name"]').value;
+                document.getElementById('review_victim_middle').textContent = document.querySelector('[name="victim_middle_name"]').value || 'N/A';
+                document.getElementById('review_victim_last').textContent = document.querySelector('[name="victim_last_name"]').value;
+                document.getElementById('review_victim_age').textContent = document.querySelector('[name="victim_age"]').value;
+                document.getElementById('review_victim_gender').textContent = document.querySelector('[name="victim_gender"]').value;
+                document.getElementById('review_victim_phone').textContent = document.querySelector('[name="victim_phone"]').value;
+                document.getElementById('review_victim_address').textContent = document.querySelector('[name="victim_address"]').value;
+
+                // Witness
+                document.getElementById('review_witness_first').textContent = document.querySelector('[name="witness_first_name"]').value || 'N/A';
+                document.getElementById('review_witness_middle').textContent = document.querySelector('[name="witness_middle_name"]').value || 'N/A';
+                document.getElementById('review_witness_last').textContent = document.querySelector('[name="witness_last_name"]').value || 'N/A';
+                document.getElementById('review_witness_age').textContent = document.querySelector('[name="witness_age"]').value || 'N/A';
+                document.getElementById('review_witness_gender').textContent = document.querySelector('[name="witness_gender"]').value || 'N/A';
+                document.getElementById('review_witness_phone').textContent = document.querySelector('[name="witness_phone"]').value || 'N/A';
+                document.getElementById('review_witness_address').textContent = document.querySelector('[name="witness_address"]').value || 'N/A';
+
+                // Respondent
+                document.getElementById('review_respondent_first').textContent = document.querySelector('[name="respondent_first_name"]').value || 'N/A';
+                document.getElementById('review_respondent_middle').textContent = document.querySelector('[name="respondent_middle_name"]').value || 'N/A';
+                document.getElementById('review_respondent_last').textContent = document.querySelector('[name="respondent_last_name"]').value || 'N/A';
+                document.getElementById('review_respondent_age').textContent = document.querySelector('[name="respondent_age"]').value || 'N/A';
+                document.getElementById('review_respondent_gender').textContent = document.querySelector('[name="respondent_gender"]').value || 'N/A';
+                document.getElementById('review_respondent_phone').textContent = document.querySelector('[name="respondent_phone"]').value || 'N/A';
+                document.getElementById('review_respondent_address').textContent = document.querySelector('[name="respondent_address"]').value || 'N/A';
+
+                // Statement
+                document.getElementById('review_statement').textContent = document.querySelector('[name="complaint_statement"]').value;
+
+                // Hide sections that were disabled in initial modal
+                if (window.complainantIsVictim || nagrereklamo_tab.style.display === 'none') {
+                    document.getElementById('review_complainant_section').style.display = 'none';
+                }
+                if (saksi_tab.style.display === 'none') {
+                    document.getElementById('review_witness_section').style.display = 'none';
+                }
+                if (inireklamo_tab.style.display === 'none') {
+                    document.getElementById('review_respondent_section').style.display = 'none';
+                }
+
+                // Show modal
+                reviewModal.classList.remove('hidden');
             });
-        });
 
-        // Next/Previous buttons
-        document.querySelectorAll('.next-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Validate current tab before moving to next
-                if (!validateCurrentTab()) {
-                    return;
-                }
+            closeReviewModal.addEventListener('click', function() {
+                reviewModal.classList.add('hidden');
+            });
 
-                if (currentTab < tabs.length - 1) {
-                    // Find next visible tab
-                    let nextTab = currentTab + 1;
-                    while (nextTab < tabs.length && tabs[nextTab].style.display === 'none') {
-                        nextTab++;
-                    }
-                    if (nextTab < tabs.length) {
-                        showTab(nextTab);
-                    }
+            editBtn.addEventListener('click', function() {
+                reviewModal.classList.add('hidden');
+            });
+
+            // Prevent closing review modal by clicking outside
+            reviewModal.addEventListener('click', function(e) {
+                if (e.target === reviewModal) {
+                    e.stopPropagation();
                 }
             });
-        });
 
-        document.querySelectorAll('.prev-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (currentTab > 0) {
-                    // Find previous visible tab
-                    let prevTab = currentTab - 1;
-                    while (prevTab >= 0 && tabs[prevTab].style.display === 'none') {
-                        prevTab--;
-                    }
-                    if (prevTab >= 0) {
-                        showTab(prevTab);
-                    }
+            // Form submission: Copy victim data to complainant if they're the same
+            document.getElementById('blotterForm').addEventListener('submit', function(e) {
+                if (window.complainantIsVictim) {
+                    // Copy victim data to complainant fields
+                    document.querySelector('[name="complainant_first_name"]').value = document.querySelector('[name="victim_first_name"]').value;
+                    document.querySelector('[name="complainant_middle_name"]').value = document.querySelector('[name="victim_middle_name"]').value;
+                    document.querySelector('[name="complainant_last_name"]').value = document.querySelector('[name="victim_last_name"]').value;
+                    document.querySelector('[name="complainant_age"]').value = document.querySelector('[name="victim_age"]').value;
+                    document.querySelector('[name="complainant_gender"]').value = document.querySelector('[name="victim_gender"]').value;
+                    document.querySelector('[name="complainant_phone"]').value = document.querySelector('[name="victim_phone"]').value;
+                    document.querySelector('[name="complainant_address"]').value = document.querySelector('[name="victim_address"]').value;
                 }
             });
-        });
 
-        // Complaint Description "Others" field toggle
-        const complaintDescSelect = document.getElementById('complaint_description');
-        const otherComplaintInput = document.getElementById('other_complaint');
+            // Sidebar Toggle
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const root = document.documentElement;
 
-        if (complaintDescSelect) {
-            complaintDescSelect.addEventListener('change', function() {
-                if (this.value === 'Others') {
-                    otherComplaintInput.classList.remove('hidden');
-                    otherComplaintInput.setAttribute('required', 'required');
-                } else {
-                    otherComplaintInput.classList.add('hidden');
-                    otherComplaintInput.removeAttribute('required');
-                    otherComplaintInput.value = '';
-                }
+            sidebarToggle.addEventListener('click', () => {
+                root.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('sidebarState', root.classList.contains('sidebar-collapsed') ? 'collapsed' : 'expanded');
             });
-        }
 
-        // Form Validation Function
-        function validateCurrentTab() {
-            const currentTabContent = tabContents[currentTab];
-            const requiredFields = currentTabContent.querySelectorAll('[required]');
-
-            for (let field of requiredFields) {
-                if (!field.value || field.value.trim() === '') {
-                    field.focus();
-                    field.classList.add('border-red-500');
-                    setTimeout(() => field.classList.remove('border-red-500'), 3000);
-
-                    // Show error message
-                    const errorMsg = document.createElement('div');
-                    errorMsg.className = 'fixed top-20 right-5 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-                    errorMsg.textContent = 'Pakipunan ang lahat ng kinakailangang field';
-                    document.body.appendChild(errorMsg);
-                    setTimeout(() => errorMsg.remove(), 3000);
-
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        // Review Modal Logic
-        const reviewBtn = document.getElementById('reviewBtn');
-        const reviewModal = document.getElementById('reviewModal');
-        const closeReviewModal = document.getElementById('closeReviewModal');
-        const editBtn = document.getElementById('editBtn');
-
-        reviewBtn.addEventListener('click', function() {
-            // Validate that checkboxes are checked
-            const reportedBy = document.querySelector('[name="reported_by"]');
-            const isAffirmed = document.querySelector('[name="is_affirmed"]');
-
-            if (!reportedBy.checked) {
-                reportedBy.focus();
-                alert('Mangyaring i-check ang "Inuulat sa pamamagitan ng: Personal"');
-                return;
+            if (localStorage.getItem('sidebarState') === 'collapsed') {
+                root.classList.add('sidebar-collapsed');
             }
 
-            if (!isAffirmed.checked) {
-                isAffirmed.focus();
-                alert('Mangyaring i-check ang patunay na ang mga detalye ay totoo at tama');
-                return;
-            }
-
-            // Validate all required fields in the form
-            const allRequiredFields = document.getElementById('blotterForm').querySelectorAll('[required]');
-            for (let field of allRequiredFields) {
-                // Skip fields in hidden tabs
-                const parentTab = field.closest('.tab-content');
-                if (parentTab && parentTab.style.display === 'none') continue;
-
-                // Skip hidden fields
-                if (field.classList.contains('hidden')) continue;
-
-                if (!field.value || field.value.trim() === '') {
-                    // Find which tab this field belongs to
-                    const tabIndex = Array.from(tabContents).indexOf(parentTab);
-                    if (tabIndex !== -1) {
-                        showTab(tabIndex);
-                    }
-
-                    field.focus();
-                    field.classList.add('border-red-500');
-                    setTimeout(() => field.classList.remove('border-red-500'), 3000);
-
-                    alert('Pakipunan ang lahat ng kinakailangang field sa lahat ng mga tab');
-                    return;
-                }
-            }
-
-            // Populate review modal with form data
-            const incidentDate = document.querySelector('[name="incident_date"]').value;
-            const incidentHour = document.querySelector('[name="incident_hour"]').value;
-            const incidentMinute = document.querySelector('[name="incident_minute"]').value;
-            const incidentPeriod = document.querySelector('[name="incident_period"]').value;
-
-            document.getElementById('review_incident_datetime').textContent = `${incidentDate} ${incidentHour}:${incidentMinute} ${incidentPeriod}`;
-            document.getElementById('review_incident_location').textContent = document.querySelector('[name="incident_location"]').value;
-
-            // Complaint Type
-            const complaintType = document.getElementById('complaint_description').value;
-            const otherComplaint = document.getElementById('other_complaint').value;
-            document.getElementById('review_complaint_type').textContent = complaintType === 'Others' ? otherComplaint : complaintType;
-
-            // Complainant
-            document.getElementById('review_complainant_first').textContent = document.querySelector('[name="complainant_first_name"]').value || 'N/A';
-            document.getElementById('review_complainant_middle').textContent = document.querySelector('[name="complainant_middle_name"]').value || 'N/A';
-            document.getElementById('review_complainant_last').textContent = document.querySelector('[name="complainant_last_name"]').value || 'N/A';
-            document.getElementById('review_complainant_age').textContent = document.querySelector('[name="complainant_age"]').value || 'N/A';
-            document.getElementById('review_complainant_gender').textContent = document.querySelector('[name="complainant_gender"]').value || 'N/A';
-            document.getElementById('review_complainant_phone').textContent = document.querySelector('[name="complainant_phone"]').value || 'N/A';
-            document.getElementById('review_complainant_address').textContent = document.querySelector('[name="complainant_address"]').value || 'N/A';
-
-            // Victim
-            document.getElementById('review_victim_first').textContent = document.querySelector('[name="victim_first_name"]').value;
-            document.getElementById('review_victim_middle').textContent = document.querySelector('[name="victim_middle_name"]').value || 'N/A';
-            document.getElementById('review_victim_last').textContent = document.querySelector('[name="victim_last_name"]').value;
-            document.getElementById('review_victim_age').textContent = document.querySelector('[name="victim_age"]').value;
-            document.getElementById('review_victim_gender').textContent = document.querySelector('[name="victim_gender"]').value;
-            document.getElementById('review_victim_phone').textContent = document.querySelector('[name="victim_phone"]').value;
-            document.getElementById('review_victim_address').textContent = document.querySelector('[name="victim_address"]').value;
-
-            // Witness
-            document.getElementById('review_witness_first').textContent = document.querySelector('[name="witness_first_name"]').value || 'N/A';
-            document.getElementById('review_witness_middle').textContent = document.querySelector('[name="witness_middle_name"]').value || 'N/A';
-            document.getElementById('review_witness_last').textContent = document.querySelector('[name="witness_last_name"]').value || 'N/A';
-            document.getElementById('review_witness_age').textContent = document.querySelector('[name="witness_age"]').value || 'N/A';
-            document.getElementById('review_witness_gender').textContent = document.querySelector('[name="witness_gender"]').value || 'N/A';
-            document.getElementById('review_witness_phone').textContent = document.querySelector('[name="witness_phone"]').value || 'N/A';
-            document.getElementById('review_witness_address').textContent = document.querySelector('[name="witness_address"]').value || 'N/A';
-
-            // Respondent
-            document.getElementById('review_respondent_first').textContent = document.querySelector('[name="respondent_first_name"]').value || 'N/A';
-            document.getElementById('review_respondent_middle').textContent = document.querySelector('[name="respondent_middle_name"]').value || 'N/A';
-            document.getElementById('review_respondent_last').textContent = document.querySelector('[name="respondent_last_name"]').value || 'N/A';
-            document.getElementById('review_respondent_age').textContent = document.querySelector('[name="respondent_age"]').value || 'N/A';
-            document.getElementById('review_respondent_gender').textContent = document.querySelector('[name="respondent_gender"]').value || 'N/A';
-            document.getElementById('review_respondent_phone').textContent = document.querySelector('[name="respondent_phone"]').value || 'N/A';
-            document.getElementById('review_respondent_address').textContent = document.querySelector('[name="respondent_address"]').value || 'N/A';
-
-            // Statement
-            document.getElementById('review_statement').textContent = document.querySelector('[name="complaint_statement"]').value;
-
-            // Hide sections that were disabled in initial modal
-            if (window.complainantIsVictim || nagrereklamo_tab.style.display === 'none') {
-                document.getElementById('review_complainant_section').style.display = 'none';
-            }
-            if (saksi_tab.style.display === 'none') {
-                document.getElementById('review_witness_section').style.display = 'none';
-            }
-            if (inireklamo_tab.style.display === 'none') {
-                document.getElementById('review_respondent_section').style.display = 'none';
-            }
-
-            // Show modal
-            reviewModal.classList.remove('hidden');
-        });
-
-        closeReviewModal.addEventListener('click', function() {
-            reviewModal.classList.add('hidden');
-        });
-
-        editBtn.addEventListener('click', function() {
-            reviewModal.classList.add('hidden');
-        });
-
-        // Prevent closing review modal by clicking outside
-        reviewModal.addEventListener('click', function(e) {
-            if (e.target === reviewModal) {
-                e.stopPropagation();
-            }
-        });
-
-        // Form submission: Copy victim data to complainant if they're the same
-        document.getElementById('blotterForm').addEventListener('submit', function(e) {
-            if (window.complainantIsVictim) {
-                // Copy victim data to complainant fields
-                document.querySelector('[name="complainant_first_name"]').value = document.querySelector('[name="victim_first_name"]').value;
-                document.querySelector('[name="complainant_middle_name"]').value = document.querySelector('[name="victim_middle_name"]').value;
-                document.querySelector('[name="complainant_last_name"]').value = document.querySelector('[name="victim_last_name"]').value;
-                document.querySelector('[name="complainant_age"]').value = document.querySelector('[name="victim_age"]').value;
-                document.querySelector('[name="complainant_gender"]').value = document.querySelector('[name="victim_gender"]').value;
-                document.querySelector('[name="complainant_phone"]').value = document.querySelector('[name="victim_phone"]').value;
-                document.querySelector('[name="complainant_address"]').value = document.querySelector('[name="victim_address"]').value;
-            }
-        });
-
-        // Sidebar Toggle
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const root = document.documentElement;
-
-        sidebarToggle.addEventListener('click', () => {
-            root.classList.toggle('sidebar-collapsed');
-            localStorage.setItem('sidebarState', root.classList.contains('sidebar-collapsed') ? 'collapsed' : 'expanded');
-        });
-
-        if (localStorage.getItem('sidebarState') === 'collapsed') {
-            root.classList.add('sidebar-collapsed');
-        }
-
-        // Success Modal
-        <?php
-        if (isset($_SESSION['status']) && $_SESSION['status'] == 'success') {
-            echo "
+            // Success Modal
+            <?php
+            if (isset($_SESSION['status']) && $_SESSION['status'] == 'success') {
+                echo "
             const successModal = document.getElementById('successModal');
             const okBtn = document.getElementById('ok-btn');
 
@@ -1226,10 +1236,11 @@ function sidepanel($google_picture, $google_name) {
                 showTab(0);
             }
             ";
-            unset($_SESSION['status']);
-        }
-        ?>
-    });
+                unset($_SESSION['status']);
+            }
+            ?>
+        });
     </script>
 </body>
+
 </html>
