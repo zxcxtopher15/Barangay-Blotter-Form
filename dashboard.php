@@ -243,10 +243,10 @@ function sidepanel($google_picture, $google_name) {
                     </div>
                     <div>
                         <p class="text-gray-600">Most # of Reported Incidents</p>
-                        <p id="top-incident-description" class="text-xl font-bold text-gray-800">
+                        <p class="text-xl font-bold text-gray-800">
                             <?php echo $top_incident_type; ?>
                         </p>
-                        <p id="top-incident-count" class="text-gray-500 text-sm">
+                        <p class="text-gray-500 text-sm">
                             <?php echo $top_incident_count; ?> Reports
                         </p>
                     </div>

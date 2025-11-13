@@ -20,7 +20,6 @@ $response = [
     'lineChart' => ['labels' => [], 'data' => []],
     'doughnutChart' => ['labels' => [], 'data' => []],
     'topIncidents' => [],
-    'topIncident' => ['description' => 'No Data', 'count' => 0],
     'error' => null
 ];
 
@@ -122,16 +121,8 @@ try {
         foreach ($top_incidents_data as &$incident) {
             $incident['total'] = $total_incidents_in_period;
         }
-        unset($incident);
+        unset($incident); 
         $response['topIncidents'] = $top_incidents_data;
-
-        // Set the #1 top incident for the "Most # of Reported Incidents" card
-        if (count($top_incidents_data) > 0) {
-            $response['topIncident'] = [
-                'description' => $top_incidents_data[0]['name'],
-                'count' => $top_incidents_data[0]['count']
-            ];
-        }
 
         // Prepare Doughnut Chart Data (Top 5 + "Others")
         $doughnut_items = array_slice($top_incidents_data, 0, 5);
