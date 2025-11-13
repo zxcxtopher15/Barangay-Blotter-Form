@@ -1,0 +1,69 @@
+body { font-family: 'Poppins', sans-serif; }
+        
+        /* --- Sidebar & Main Content Transitions --- */
+        #sidebar, #mainContent {
+            transition: all 0.3s ease-in-out;
+        }
+        #sidebar .sidebar-text {
+            /* Added margin-left to the transition for a smoother effect */
+            transition: opacity 0.2s ease-in-out, margin-left 0.3s ease-in-out;
+
+        }
+
+        /* --- Collapsed State Styles --- */
+        #sidebar.collapsed {
+            width: 5rem; /* 80px */
+        }
+        #mainContent.collapsed {
+            margin-left: 5rem; /* 80px */
+        }
+        #sidebar.collapsed .sidebar-text,
+        #sidebar.collapsed .sidebar-header-text {
+            opacity: 0;
+            visibility: hidden;
+            width: 0;
+            white-space: nowrap;
+        }
+        #sidebar.collapsed .nav-link {
+            justify-content: center;
+        }
+        #sidebar.collapsed .nav-link svg {
+            margin-right: 0;
+        }
+        /* --- FIX: This is the added rule --- */
+        #sidebar.collapsed .sidebar-text {
+            margin-left: 0;
+        }
+        #sidebar.collapsed .logout-link {
+             justify-content: center;
+        }
+
+        /* --- Initial Load State to Prevent Flicker --- */
+        html.js-sidebar-initial-collapsed #sidebar {
+            width: 5rem !important;
+            transition: none !important;
+        }
+        html.js-sidebar-initial-collapsed #mainContent {
+            margin-left: 5rem !important;
+            transition: none !important;
+        }
+        html.js-sidebar-initial-collapsed #sidebar .sidebar-text,
+        html.js-sidebar-initial-collapsed #sidebar .sidebar-header-text {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            white-space: nowrap !important;
+            transition: none !important;
+        }
+        html.js-sidebar-initial-collapsed #sidebar .nav-link {
+            justify-content: center !important;
+            transition: none !important;
+        }
+        html.js-sidebar-initial-collapsed #sidebar .nav-link svg {
+            margin-right: 0 !important;
+            transition: none !important;
+        }
+        html.js-sidebar-initial-collapsed #sidebar .logout-link {
+            justify-content: center !important;
+            transition: none !important;
+        }
