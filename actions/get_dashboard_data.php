@@ -20,7 +20,6 @@ $google_loggedin = $_SESSION['google_loggedin'];
 $google_email = $_SESSION['google_email'];
 $google_name = $_SESSION['google_name'];
 $google_picture = $_SESSION['google_picture'];
-$user_role = $_SESSION['user_role'] ?? '';
 
 header('Content-Type: application/json');
 
@@ -48,12 +47,6 @@ try {
     $year = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
     $month = isset($_GET['month']) ? (int)$_GET['month'] : date('n');
 
-    // Build WHERE clause based on user role
-    $role_filter = '';
-    if ($user_role === 'desk officer') {
-        $role_filter = ' AND desk_officer_name = ?';
-    }
-
     $line_sql = '';
     $top_incidents_sql = '';
     $params = [];
@@ -62,19 +55,13 @@ try {
     switch ($period) {
         case 'yearly':
             // Line Chart: Show incident counts for each month of the selected year
-            $line_sql = "SELECT MONTH(incident_datetime) as month_num, COUNT(*) as count
-                         FROM complaints
-                         WHERE YEAR(incident_datetime) = ?" . $role_filter . "
-                         GROUP BY MONTH(incident_datetime)
+            $line_sql = "SELECT MONTH(incident_datetime) as month_num, COUNT(*) as count 
+                         FROM complaints 
+                         WHERE YEAR(incident_datetime) = ?
+                         GROUP BY MONTH(incident_datetime) 
                          ORDER BY MONTH(incident_datetime);";
-
-            if ($user_role === 'desk officer') {
-                $param_types = "is";
-                $params = [$year, $google_name];
-            } else {
-                $param_types = "i";
-                $params = [$year];
-            }
+            $param_types = "i";
+            $params = [$year];
 
             // Top Incidents for the whole selected year
             $top_incidents_sql = "SELECT
@@ -84,7 +71,7 @@ try {
                                     END as name,
                                     COUNT(*) as count
                                   FROM complaints
-                                  WHERE YEAR(incident_datetime) = ?" . $role_filter . "
+                                  WHERE YEAR(incident_datetime) = ?
                                   GROUP BY name
                                   ORDER BY count DESC;";
             break;
@@ -94,17 +81,11 @@ try {
              // Line Chart: Show incident counts for each day of the selected month and year
             $line_sql = "SELECT DAY(incident_datetime) as label, COUNT(*) as count
                          FROM complaints
-                         WHERE YEAR(incident_datetime) = ? AND MONTH(incident_datetime) = ?" . $role_filter . "
+                         WHERE YEAR(incident_datetime) = ? AND MONTH(incident_datetime) = ?
                          GROUP BY DAY(incident_datetime)
                          ORDER BY DAY(incident_datetime);";
-
-            if ($user_role === 'desk officer') {
-                $param_types = "iis";
-                $params = [$year, $month, $google_name];
-            } else {
-                $param_types = "ii";
-                $params = [$year, $month];
-            }
+            $param_types = "ii";
+            $params = [$year, $month];
 
              // Top Incidents for the selected month and year
             $top_incidents_sql = "SELECT
@@ -114,7 +95,7 @@ try {
                                     END as name,
                                     COUNT(*) as count
                                   FROM complaints
-                                  WHERE YEAR(incident_datetime) = ? AND MONTH(incident_datetime) = ?" . $role_filter . "
+                                  WHERE YEAR(incident_datetime) = ? AND MONTH(incident_datetime) = ?
                                   GROUP BY name
                                   ORDER BY count DESC;";
             break;
