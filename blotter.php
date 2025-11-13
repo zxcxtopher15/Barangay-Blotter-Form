@@ -352,6 +352,21 @@ function sidepanel($google_picture, $google_name) {
                         <div id="tab2" class="tab-content">
                             <h2 class="text-2xl font-bold text-gray-800 mb-6">Impormasyon ng Nagrereklamo</h2>
 
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Uri ng Reklamo *</label>
+                                <select name="complaint_description" id="complaint_description" class="w-full p-2 border border-gray-300 rounded-md" required>
+                                    <option value="">Pumili ng Uri ng Reklamo</option>
+                                    <option value="Physical Injuries">Physical Injuries</option>
+                                    <option value="Theft">Theft</option>
+                                    <option value="Vandalism">Vandalism</option>
+                                    <option value="Noise Complaints">Noise Complaints</option>
+                                    <option value="Domestic Violence">Domestic Violence</option>
+                                    <option value="Trespassing">Trespassing</option>
+                                    <option value="Others">Others (Specify)</option>
+                                </select>
+                                <input type="text" name="other_complaint" id="other_complaint" class="w-full p-2 border border-gray-300 rounded-md mt-2 hidden" placeholder="Ilagay ang iba pang uri ng reklamo">
+                            </div>
+
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Unang Pangalan</label>
@@ -409,7 +424,6 @@ function sidepanel($google_picture, $google_name) {
                                     <label class="block text-xs text-gray-600 mb-1">Street Name, Building, House No. *</label>
                                     <input type="text" name="complainant_address" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter detailed street address">
                                 </div>
-                                <button type="button" class="mt-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-md text-sm">Bumalik</button>
                             </div>
 
                             <div class="flex justify-between">
@@ -599,7 +613,7 @@ function sidepanel($google_picture, $google_name) {
 
                             <div class="flex justify-between">
                                 <button type="button" class="prev-btn px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">Bumalik</button>
-                                <button type="submit" name="submit_complaint" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Magsalita</button>
+                                <button type="button" id="reviewBtn" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">I-Check</button>
                             </div>
                         </div>
 
@@ -680,16 +694,28 @@ function sidepanel($google_picture, $google_name) {
             if (sameAsVictimCheckbox.checked) {
                 // Hide Nagrereklamo tab
                 nagrereklamo_tab.style.display = 'none';
+                // Remove required from Nagrereklamo fields
+                document.getElementById('tab2').querySelectorAll('[required]').forEach(field => {
+                    field.removeAttribute('required');
+                });
             }
 
             if (noWitnessCheckbox.checked) {
                 // Hide Saksi tab
                 saksi_tab.style.display = 'none';
+                // Remove required from Saksi fields
+                document.getElementById('tab4').querySelectorAll('[required]').forEach(field => {
+                    field.removeAttribute('required');
+                });
             }
 
             if (noRespondentCheckbox.checked) {
                 // Hide Inireklamo tab
                 inireklamo_tab.style.display = 'none';
+                // Remove required from Inireklamo fields
+                document.getElementById('tab5').querySelectorAll('[required]').forEach(field => {
+                    field.removeAttribute('required');
+                });
             }
 
             // If complainant is same as victim, copy victim data to complainant on form submit
