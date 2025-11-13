@@ -191,7 +191,7 @@ function sidepanel($google_picture, $google_name) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
     <link rel="stylesheet" href="css/main.css">
     <style>
@@ -645,7 +645,7 @@ function sidepanel($google_picture, $google_name) {
     </div>
 
     <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-TIBPTWINmPouBtVmBuCLsYGgPZLyIvF4RzDzIHfPnfGGnRdx2BHEE2l3TqkUZBsO" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
     <script src="js/sidebar.js" defer></script>
     <script>
