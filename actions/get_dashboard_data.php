@@ -64,15 +64,10 @@ try {
             $params = [$year];
 
             // Top Incidents for the whole selected year
-            $top_incidents_sql = "SELECT
-                                    CASE
-                                        WHEN complaint_description = 'Others' THEN other_complaint
-                                        ELSE complaint_description
-                                    END as name,
-                                    COUNT(*) as count
-                                  FROM complaints
+            $top_incidents_sql = "SELECT complaint_description as name, COUNT(*) as count 
+                                  FROM complaints 
                                   WHERE YEAR(incident_datetime) = ?
-                                  GROUP BY name
+                                  GROUP BY complaint_description 
                                   ORDER BY count DESC;";
             break;
 
@@ -88,15 +83,10 @@ try {
             $params = [$year, $month];
 
              // Top Incidents for the selected month and year
-            $top_incidents_sql = "SELECT
-                                    CASE
-                                        WHEN complaint_description = 'Others' THEN other_complaint
-                                        ELSE complaint_description
-                                    END as name,
-                                    COUNT(*) as count
-                                  FROM complaints
+            $top_incidents_sql = "SELECT complaint_description as name, COUNT(*) as count 
+                                  FROM complaints 
                                   WHERE YEAR(incident_datetime) = ? AND MONTH(incident_datetime) = ?
-                                  GROUP BY name
+                                  GROUP BY complaint_description 
                                   ORDER BY count DESC;";
             break;
     }
