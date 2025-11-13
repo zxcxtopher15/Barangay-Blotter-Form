@@ -624,28 +624,30 @@ function sidepanel($google_picture, $google_name) {
     </div>
 
     <!-- Initial Questions Modal -->
-    <div id="initialQuestionsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div id="initialQuestionsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-40">
         <div class="relative top-20 mx-auto p-6 border w-full max-w-md shadow-lg rounded-md bg-white">
             <div class="mt-3">
                 <h3 class="text-xl font-bold text-gray-900 mb-4">Paunang mga Katanungan</h3>
-                <p class="text-sm text-gray-600 mb-4">Pumili ng mga angkop sa pagpapahayag bago magsalita</p>
+                <p class="text-sm text-gray-600 mb-4">Pumili ng KAHIT ISA sa mga sumusunod (Piliin lang ang mga naaaangkop)</p>
 
-                <div class="space-y-3 mb-6">
-                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer" onclick="document.getElementById('sameAsVictim').click()">
-                        <input type="checkbox" id="sameAsVictim" class="mt-1">
+                <div class="space-y-3 mb-2">
+                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer" onclick="toggleInitialCheckbox('sameAsVictim')">
+                        <input type="checkbox" id="sameAsVictim" class="mt-1 pointer-events-none">
                         <label for="sameAsVictim" class="text-sm font-medium cursor-pointer flex-1">Ang nagrereklamo ay ang biktima rin</label>
                     </div>
 
-                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer" onclick="document.getElementById('noWitness').click()">
-                        <input type="checkbox" id="noWitness" class="mt-1">
+                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer" onclick="toggleInitialCheckbox('noWitness')">
+                        <input type="checkbox" id="noWitness" class="mt-1 pointer-events-none">
                         <label for="noWitness" class="text-sm font-medium cursor-pointer flex-1">Walang Saksi</label>
                     </div>
 
-                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer" onclick="document.getElementById('noRespondent').click()">
-                        <input type="checkbox" id="noRespondent" class="mt-1">
+                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer" onclick="toggleInitialCheckbox('noRespondent')">
+                        <input type="checkbox" id="noRespondent" class="mt-1 pointer-events-none">
                         <label for="noRespondent" class="text-sm font-medium cursor-pointer flex-1">Walang Inireklamo</label>
                     </div>
                 </div>
+
+                <p id="initialModalError" class="text-red-600 text-sm mb-3 hidden">Pumili ng kahit isa sa mga pagpipilian</p>
 
                 <div class="flex justify-end">
                     <button id="startBlotterBtn" class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700">Magpatuloy</button>
@@ -766,6 +768,29 @@ function sidepanel($google_picture, $google_name) {
 
     <script src="js/sidebar.js" defer></script>
     <script>
+    // Toggle checkbox function for initial modal (only allow one selection)
+    function toggleInitialCheckbox(checkboxId) {
+        const checkbox = document.getElementById(checkboxId);
+        const allCheckboxes = [
+            document.getElementById('sameAsVictim'),
+            document.getElementById('noWitness'),
+            document.getElementById('noRespondent')
+        ];
+
+        // Uncheck all others
+        allCheckboxes.forEach(cb => {
+            if (cb.id !== checkboxId) {
+                cb.checked = false;
+            }
+        });
+
+        // Toggle the clicked one
+        checkbox.checked = !checkbox.checked;
+
+        // Hide error message
+        document.getElementById('initialModalError').classList.add('hidden');
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Initial Questions Modal Logic
         const initialQuestionsModal = document.getElementById('initialQuestionsModal');
@@ -781,6 +806,12 @@ function sidepanel($google_picture, $google_name) {
         const inireklamo_tab = tabButtons[4]; // Inireklamo
 
         startBlotterBtn.addEventListener('click', function() {
+            // Check if at least one checkbox is selected
+            if (!sameAsVictimCheckbox.checked && !noWitnessCheckbox.checked && !noRespondentCheckbox.checked) {
+                document.getElementById('initialModalError').classList.remove('hidden');
+                return;
+            }
+
             // Hide/show tabs based on selections
             if (sameAsVictimCheckbox.checked) {
                 // Hide Nagrereklamo tab
@@ -926,6 +957,11 @@ function sidepanel($google_picture, $google_name) {
         // Next/Previous buttons
         document.querySelectorAll('.next-btn').forEach(btn => {
             btn.addEventListener('click', () => {
+                // Validate current tab before moving to next
+                if (!validateCurrentTab()) {
+                    return;
+                }
+
                 if (currentTab < tabs.length - 1) {
                     // Find next visible tab
                     let nextTab = currentTab + 1;
@@ -971,6 +1007,30 @@ function sidepanel($google_picture, $google_name) {
             });
         }
 
+        // Form Validation Function
+        function validateCurrentTab() {
+            const currentTabContent = tabContents[currentTab];
+            const requiredFields = currentTabContent.querySelectorAll('[required]');
+
+            for (let field of requiredFields) {
+                if (!field.value || field.value.trim() === '') {
+                    field.focus();
+                    field.classList.add('border-red-500');
+                    setTimeout(() => field.classList.remove('border-red-500'), 3000);
+
+                    // Show error message
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'fixed top-20 right-5 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                    errorMsg.textContent = 'Pakipunan ang lahat ng kinakailangang field';
+                    document.body.appendChild(errorMsg);
+                    setTimeout(() => errorMsg.remove(), 3000);
+
+                    return false;
+                }
+            }
+            return true;
+        }
+
         // Review Modal Logic
         const reviewBtn = document.getElementById('reviewBtn');
         const reviewModal = document.getElementById('reviewModal');
@@ -978,6 +1038,48 @@ function sidepanel($google_picture, $google_name) {
         const editBtn = document.getElementById('editBtn');
 
         reviewBtn.addEventListener('click', function() {
+            // Validate that checkboxes are checked
+            const reportedBy = document.querySelector('[name="reported_by"]');
+            const isAffirmed = document.querySelector('[name="is_affirmed"]');
+
+            if (!reportedBy.checked) {
+                reportedBy.focus();
+                alert('Mangyaring i-check ang "Inuulat sa pamamagitan ng: Personal"');
+                return;
+            }
+
+            if (!isAffirmed.checked) {
+                isAffirmed.focus();
+                alert('Mangyaring i-check ang patunay na ang mga detalye ay totoo at tama');
+                return;
+            }
+
+            // Validate all required fields in the form
+            const allRequiredFields = document.getElementById('blotterForm').querySelectorAll('[required]');
+            for (let field of allRequiredFields) {
+                // Skip fields in hidden tabs
+                const parentTab = field.closest('.tab-content');
+                if (parentTab && parentTab.style.display === 'none') continue;
+
+                // Skip hidden fields
+                if (field.classList.contains('hidden')) continue;
+
+                if (!field.value || field.value.trim() === '') {
+                    // Find which tab this field belongs to
+                    const tabIndex = Array.from(tabContents).indexOf(parentTab);
+                    if (tabIndex !== -1) {
+                        showTab(tabIndex);
+                    }
+
+                    field.focus();
+                    field.classList.add('border-red-500');
+                    setTimeout(() => field.classList.remove('border-red-500'), 3000);
+
+                    alert('Pakipunan ang lahat ng kinakailangang field sa lahat ng mga tab');
+                    return;
+                }
+            }
+
             // Populate review modal with form data
             const incidentDate = document.querySelector('[name="incident_date"]').value;
             const incidentHour = document.querySelector('[name="incident_hour"]').value;
@@ -1052,6 +1154,13 @@ function sidepanel($google_picture, $google_name) {
 
         editBtn.addEventListener('click', function() {
             reviewModal.classList.add('hidden');
+        });
+
+        // Prevent closing review modal by clicking outside
+        reviewModal.addEventListener('click', function(e) {
+            if (e.target === reviewModal) {
+                e.stopPropagation();
+            }
         });
 
         // Form submission: Copy victim data to complainant if they're the same
