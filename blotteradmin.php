@@ -2,7 +2,7 @@
 session_start();
 
 // If the user is an admin, do nothing (continue script execution)
-if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'admin') {
+if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'Admin') {
     header('Location: dashboardadmin.php');
     exit;
 }
