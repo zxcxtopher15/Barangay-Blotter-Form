@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateChart(lineChart, data.lineChart.labels, data.lineChart.data);
             updateChart(doughnutChart, data.doughnutChart.labels, data.doughnutChart.data);
             updateTopIncidentsList(data.topIncidents, displayPeriod);
-            updateMostIncidentCard(data.topIncidents, displayPeriod);
 
         } catch (error) {
             console.error('Dashboard Sync Failed:', error);
@@ -74,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const listContainer = document.getElementById('topIncidentsList');
         const periodSpan = document.getElementById('incident-period');
         periodSpan.textContent = period;
-        listContainer.innerHTML = '';
+        listContainer.innerHTML = ''; 
 
         if (!incidentData || incidentData.length === 0) {
             listContainer.innerHTML = '<p class="text-gray-500 text-center">No incident data available for this period.</p>';
@@ -85,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         incidentData.slice(0, 10).forEach((incident, index) => {
             const percentageOfMax = maxCount > 0 ? (incident.count / maxCount) * 100 : 0;
             const percentageOfTotal = incident.total > 0 ? ((incident.count / incident.total) * 100).toFixed(1) : 0;
-
+            
             const incidentElement = document.createElement('div');
             incidentElement.className = 'py-2';
             incidentElement.innerHTML = `
@@ -104,25 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             listContainer.appendChild(incidentElement);
         });
-    }
-
-    function updateMostIncidentCard(incidentData, period) {
-        const periodSpan = document.getElementById('most-incident-period');
-        const typeElement = document.getElementById('most-incident-type');
-        const countElement = document.getElementById('most-incident-count');
-
-        if (periodSpan) periodSpan.textContent = period;
-
-        if (!incidentData || incidentData.length === 0) {
-            if (typeElement) typeElement.textContent = 'No Data';
-            if (countElement) countElement.textContent = '0 Reports';
-            return;
-        }
-
-        // Get the top incident (first in the array since it's sorted by count DESC)
-        const topIncident = incidentData[0];
-        if (typeElement) typeElement.textContent = topIncident.name;
-        if (countElement) countElement.textContent = `${topIncident.count} Reports`;
     }
 
     // --- 3. UI and Event Handlers ---
