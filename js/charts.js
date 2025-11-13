@@ -53,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             const displayPeriod = currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1);
-            console.log('Dashboard data received:', data);
             updateChart(lineChart, data.lineChart.labels, data.lineChart.data);
             updateChart(doughnutChart, data.doughnutChart.labels, data.doughnutChart.data);
             updateTopIncidentsList(data.topIncidents, displayPeriod);
@@ -112,26 +111,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const typeElement = document.getElementById('most-incident-type');
         const countElement = document.getElementById('most-incident-count');
 
-        // Update period label
-        if (periodSpan) {
-            periodSpan.textContent = period;
-        }
-
-        // Check if elements exist (for dashboards that have this card)
-        if (!typeElement || !countElement) {
-            return; // Elements don't exist on this page
-        }
+        if (periodSpan) periodSpan.textContent = period;
 
         if (!incidentData || incidentData.length === 0) {
-            typeElement.textContent = 'No Data';
-            countElement.textContent = '0 Reports';
+            if (typeElement) typeElement.textContent = 'No Data';
+            if (countElement) countElement.textContent = '0 Reports';
             return;
         }
 
         // Get the top incident (first in the array since it's sorted by count DESC)
         const topIncident = incidentData[0];
-        typeElement.textContent = topIncident.name || 'Unknown';
-        countElement.textContent = `${topIncident.count || 0} Reports`;
+        if (typeElement) typeElement.textContent = topIncident.name;
+        if (countElement) countElement.textContent = `${topIncident.count} Reports`;
     }
 
     // --- 3. UI and Event Handlers ---
