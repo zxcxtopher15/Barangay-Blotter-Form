@@ -948,9 +948,20 @@ function sidepanel($google_picture, $google_name) {
 
         tabs.forEach((tab, index) => {
             tab.addEventListener('click', () => {
-                if (tab.style.display !== 'none') {
-                    showTab(index);
+                // Don't allow clicking on tabs if they're hidden
+                if (tab.style.display === 'none') {
+                    return;
                 }
+
+                // If clicking a forward tab (higher index), validate current tab first
+                if (index > currentTab) {
+                    if (!validateCurrentTab()) {
+                        return;
+                    }
+                }
+
+                // If clicking backward, allow it without validation
+                showTab(index);
             });
         });
 
