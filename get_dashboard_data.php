@@ -14,6 +14,8 @@ $google_picture = $_SESSION['google_picture'];
 
 header('Content-Type: application/json');
 
+require_once __DIR__ . '/includes/db_config.php';
+
 $response = [
     'lineChart' => ['labels' => [], 'data' => []],
     'doughnutChart' => ['labels' => [], 'data' => []],
@@ -21,17 +23,8 @@ $response = [
     'error' => null
 ];
 
-// --- Database Connection ---
-$db_server = "localhost";
-$db_user = "u416486854_p1";
-$db_pass = "2&rnLACGCldK";
-$db_name = "u416486854_p1";
-
 try {
-    $conn = new mysqli($db_server, $db_user, $db_pass, $db_name);
-    if ($conn->connect_error) {
-        throw new Exception("Connection failed: " . $conn->connect_error);
-    }
+    $conn = getDbConnection();
 
     // --- Get Parameters from URL ---
     $period = $_GET['period'] ?? 'monthly';

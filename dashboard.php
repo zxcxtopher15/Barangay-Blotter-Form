@@ -13,43 +13,19 @@ $google_name = $_SESSION['google_name'];
 $google_picture = $_SESSION['google_picture'];
 
 // --- START: DATABASE CONNECTION AND STATS FETCHING ---
-$db_server = "localhost";
-$db_user = "u416486854_p1";
-$db_pass = "2&rnLACGCldK";
-$db_name = "u416486854_p1";
-$conn = "";
+require_once __DIR__ . '/includes/db_config.php';
 
-try {
-    $conn = mysqli_connect($db_server, $db_user, $db_pass, $db_name);
-} catch (mysqli_sql_exception) {
-    die("Database connection failed.");
-}
+$conn = getDbConnection();
 
 // These top-level stats will remain for the current month/year as they are general stats.
 // The charts will be controlled by the new filters.
-$this_month_sql = "SELECT COUNT(*) as count FROM complaints WHERE MONTH(incident_datetime) = MONTH(CURDATE()) AND YEAR(incident_datetime) = YEAR(CURDATE())";
-$this_month_result = mysqli_query($conn, $this_month_sql);
-$this_month_count = mysqli_fetch_assoc($this_month_result)['count'] ?? 0;
+$this_month_count = getThisMonthCount($conn);
+$last_month_count = getLastMonthCount($conn);
+$total_count = getTotalCount($conn);
 
-$last_month_sql = "SELECT COUNT(*) as count FROM complaints WHERE YEAR(incident_datetime) = YEAR(CURDATE() - INTERVAL 1 MONTH) AND MONTH(incident_datetime) = MONTH(CURDATE() - INTERVAL 1 MONTH)";
-$last_month_result = mysqli_query($conn, $last_month_sql);
-$last_month_count = mysqli_fetch_assoc($last_month_result)['count'] ?? 0;
-
-$total_sql = "SELECT COUNT(*) as count FROM complaints";
-$total_result = mysqli_query($conn, $total_sql);
-$total_count = mysqli_fetch_assoc($total_result)['count'] ?? 0;
-
-$top_incident_sql = "
-    SELECT complaint_description, COUNT(*) as count 
-    FROM complaints 
-    GROUP BY complaint_description 
-    ORDER BY count DESC 
-    LIMIT 1
-";
-$top_incident_result = mysqli_query($conn, $top_incident_sql);
-$top_incident_data = mysqli_fetch_assoc($top_incident_result);
-$top_incident_type = $top_incident_data['complaint_description'] ?? 'No Data';
-$top_incident_count = $top_incident_data['count'] ?? 0;
+$top_incident_data = getTopIncident($conn);
+$top_incident_type = $top_incident_data['description'];
+$top_incident_count = $top_incident_data['count'];
 
 mysqli_close($conn);
 // --- END: DATABASE CONNECTION AND STATS FETCHING ---

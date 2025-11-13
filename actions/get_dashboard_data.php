@@ -23,6 +23,8 @@ $google_picture = $_SESSION['google_picture'];
 
 header('Content-Type: application/json');
 
+require_once __DIR__ . '/../includes/db_config.php';
+
 $response = [
     'lineChart' => ['labels' => [], 'data' => []],
     'doughnutChart' => ['labels' => [], 'data' => []],
@@ -30,17 +32,8 @@ $response = [
     'error' => null
 ];
 
-// --- Database Connection ---
-$db_server = "localhost";
-$db_user = "u416486854_p1";
-$db_pass = "2&rnLACGCldK";
-$db_name = "u416486854_p1";
-
 try {
-    $conn = new mysqli($db_server, $db_user, $db_pass, $db_name);
-    if ($conn->connect_error) {
-        throw new Exception("Connection failed: " . $conn->connect_error);
-    }
+    $conn = getDbConnection();
 
     // --- Get Parameters from URL ---
     $period = $_GET['period'] ?? 'monthly';
@@ -54,12 +47,12 @@ try {
 
     switch ($period) {
         case 'yearly':
-            // Line Chart: Show incident counts by complaint type for the selected year
-            $line_sql = "SELECT complaint_description as label, COUNT(*) as count
+            // Line Chart: Show incident counts for each month of the selected year
+            $line_sql = "SELECT MONTH(incident_datetime) as month_num, COUNT(*) as count
                          FROM complaints
                          WHERE YEAR(incident_datetime) = ?
-                         GROUP BY complaint_description
-                         ORDER BY count DESC;";
+                         GROUP BY MONTH(incident_datetime)
+                         ORDER BY MONTH(incident_datetime);";
             $param_types = "i";
             $params = [$year];
 
@@ -73,12 +66,12 @@ try {
 
         case 'monthly':
         default:
-             // Line Chart: Show incident counts by complaint type for the selected month and year
-            $line_sql = "SELECT complaint_description as label, COUNT(*) as count
+             // Line Chart: Show incident counts for each day of the selected month and year
+            $line_sql = "SELECT DAY(incident_datetime) as label, COUNT(*) as count
                          FROM complaints
                          WHERE YEAR(incident_datetime) = ? AND MONTH(incident_datetime) = ?
-                         GROUP BY complaint_description
-                         ORDER BY count DESC;";
+                         GROUP BY DAY(incident_datetime)
+                         ORDER BY DAY(incident_datetime);";
             $param_types = "ii";
             $params = [$year, $month];
 
@@ -98,10 +91,19 @@ try {
     $result = $stmt->get_result();
 
     if ($result) {
-        // Both yearly and monthly now show complaint types on x-axis
-        while ($row = $result->fetch_assoc()) {
-            $response['lineChart']['labels'][] = $row['label'];
-            $response['lineChart']['data'][] = (int)$row['count'];
+        if ($period === 'yearly') {
+            // Create a placeholder array for all 12 months
+            $monthly_counts = array_fill(1, 12, 0);
+            while ($row = $result->fetch_assoc()) {
+                $monthly_counts[(int)$row['month_num']] = (int)$row['count'];
+            }
+            $response['lineChart']['labels'] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            $response['lineChart']['data'] = array_values($monthly_counts);
+        } else { // Monthly
+            while ($row = $result->fetch_assoc()) {
+                $response['lineChart']['labels'][] = $row['label'];
+                $response['lineChart']['data'][] = (int)$row['count'];
+            }
         }
     } else {
         throw new Exception("Line chart query failed: " . $conn->error);
