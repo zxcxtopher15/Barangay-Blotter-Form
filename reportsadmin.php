@@ -1,148 +1,147 @@
 <?php
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-    session_start();
+session_start();
 
-    $message = '';
-    if (isset($_SESSION['message'])) {
-        $message = $_SESSION['message'];
-        unset($_SESSION['message']); // Clear the message after use
-    }
+$message = '';
+if (isset($_SESSION['message'])) {
+    $message = $_SESSION['message'];
+    unset($_SESSION['message']); // Clear the message after use
+}
 
-    // If the user is an admin, do nothing (continue script execution)
-    if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'admin') {
+// If the user is an admin, do nothing (continue script execution)
+if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'admin') {
+}
+// If the user is logged in AND their role is 'Desk Officer', redirect to test.php
+else if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'desk officer') {
+    header('Location: dashboard.php');
+    exit;
+}
+// If not logged in or any other role not explicitly handled, redirect to index.php
+else {
+    header('Location: index.php');
+    exit;
+}
 
-    }
-    // If the user is logged in AND their role is 'Desk Officer', redirect to test.php
-    else if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'desk officer') {
-        header('Location: dashboard.php');
-        exit;
-    }
-    // If not logged in or any other role not explicitly handled, redirect to index.php
-    else {
-        header('Location: index.php');
-        exit;
-    }
+// Retrieve session variables (these will only be accessible if an admin or if the script continues for other reasons)
+$google_loggedin = $_SESSION['google_loggedin'];
+$google_email = $_SESSION['google_email'];
+$google_name = $_SESSION['google_name'];
+$google_picture = $_SESSION['google_picture'];
+$user_role = $_SESSION['user_role'];
 
-    // Retrieve session variables (these will only be accessible if an admin or if the script continues for other reasons)
-    $google_loggedin = $_SESSION['google_loggedin'];
-    $google_email = $_SESSION['google_email'];
-    $google_name = $_SESSION['google_name'];
-    $google_picture = $_SESSION['google_picture'];
-    $user_role = $_SESSION['user_role'];
+// Database connection details
+$db_server = "localhost";
+$db_user = "u416486854_p1";
+$db_pass = "2&rnLACGCldK";
+$db_name = "u416486854_p1";
+$conn = "";
 
-    // Database connection details
-    $db_server = "localhost";
-    $db_user = "u416486854_p1";
-    $db_pass = "2&rnLACGCldK";
-    $db_name = "u416486854_p1";
-    $conn = "";
+try {
+    $conn = mysqli_connect($db_server, $db_user, $db_pass, $db_name);
+} catch (mysqli_sql_exception) {
+    die("Database connection failed.");
+}
 
-    try {
-        $conn = mysqli_connect($db_server, $db_user, $db_pass, $db_name);
-    } catch (mysqli_sql_exception) {
-        die("Database connection failed.");
-    }
-
-    // Determine which table to query
-    $table_to_query = 'complaints';
-    $is_archive_mode = false;
-    if (isset($_GET['mode']) && $_GET['mode'] === 'archive') {
-        $table_to_query = 'reports_archive';
-        $is_archive_mode = true;
-    }
-
-
-    // Pagination variables
-    $limit = 7; // Number of records per page
-    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page, default to 1
-    $offset = ($page - 1) * $limit; // Calculate the offset
-
-    // --- SEARCH AND FILTERING LOGIC ---
-    $search_query = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
-    $start_date = isset($_GET['start_date']) ? mysqli_real_escape_string($conn, $_GET['start_date']) : '';
-    $end_date = isset($_GET['end_date']) ? mysqli_real_escape_string($conn, $_GET['end_date']) : '';
-
-    $where_clauses = [];
-    $query_params = []; // To store query parameters for pagination links
-
-        if (!empty($search_query)) {
-        $where_clauses[] = "(case_no LIKE '%$search_query%' OR complainant_first_name LIKE '%$search_query%' OR complainant_last_name LIKE '%$search_query%' OR complaint_description LIKE '%$search_query%' OR desk_officer_name LIKE '%$search_query%')";
-        $query_params['search'] = $search_query;
-    }
-
-    if (!empty($start_date)) {
-        $where_clauses[] = "incident_datetime >= '$start_date 00:00:00'";
-        $query_params['start_date'] = $start_date;
-    }
-
-    if (!empty($end_date)) {
-        $where_clauses[] = "incident_datetime <= '$end_date 23:59:59'";
-        $query_params['end_date'] = $end_date;
-    }
-
-    // Add archive mode to query params
-    if ($is_archive_mode) {
-        $query_params['mode'] = 'archive';
-    }
-
-    $where_sql = '';
-    if (!empty($where_clauses)) {
-        $where_sql = " WHERE " . implode(" AND ", $where_clauses);
-    }
-
-    // Construct query string for pagination links
-    $query_string = http_build_query($query_params);
-    if (!empty($query_string)) {
-        $query_string = '&' . $query_string; // Prepend & for URL
-    }
-    // --- END SEARCH AND FILTERING LOGIC ---
+// Determine which table to query
+$table_to_query = 'complaints';
+$is_archive_mode = false;
+if (isset($_GET['mode']) && $_GET['mode'] === 'archive') {
+    $table_to_query = 'reports_archive';
+    $is_archive_mode = true;
+}
 
 
-    // Get total number of complaints for pagination links (with filters applied)
-    $total_sql = "SELECT COUNT(*) AS total FROM " . $table_to_query . $where_sql;
-    $total_result = mysqli_query($conn, $total_sql);
-    $total_row = mysqli_fetch_assoc($total_result);
-    $total_complaints = $total_row['total'];
-    $total_pages = ceil($total_complaints / $limit);
+// Pagination variables
+$limit = 7; // Number of records per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page, default to 1
+$offset = ($page - 1) * $limit; // Calculate the offset
 
-    // Fetch complaints with LIMIT and OFFSET (with filters applied)
-    $sql = "SELECT case_no, complainant_first_name, complainant_last_name, incident_datetime, complaint_description, desk_officer_name, received_datetime
+// --- SEARCH AND FILTERING LOGIC ---
+$search_query = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
+$start_date = isset($_GET['start_date']) ? mysqli_real_escape_string($conn, $_GET['start_date']) : '';
+$end_date = isset($_GET['end_date']) ? mysqli_real_escape_string($conn, $_GET['end_date']) : '';
+
+$where_clauses = [];
+$query_params = []; // To store query parameters for pagination links
+
+if (!empty($search_query)) {
+    $where_clauses[] = "(case_no LIKE '%$search_query%' OR complainant_first_name LIKE '%$search_query%' OR complainant_last_name LIKE '%$search_query%' OR complaint_description LIKE '%$search_query%' OR desk_officer_name LIKE '%$search_query%')";
+    $query_params['search'] = $search_query;
+}
+
+if (!empty($start_date)) {
+    $where_clauses[] = "incident_datetime >= '$start_date 00:00:00'";
+    $query_params['start_date'] = $start_date;
+}
+
+if (!empty($end_date)) {
+    $where_clauses[] = "incident_datetime <= '$end_date 23:59:59'";
+    $query_params['end_date'] = $end_date;
+}
+
+// Add archive mode to query params
+if ($is_archive_mode) {
+    $query_params['mode'] = 'archive';
+}
+
+$where_sql = '';
+if (!empty($where_clauses)) {
+    $where_sql = " WHERE " . implode(" AND ", $where_clauses);
+}
+
+// Construct query string for pagination links
+$query_string = http_build_query($query_params);
+if (!empty($query_string)) {
+    $query_string = '&' . $query_string; // Prepend & for URL
+}
+// --- END SEARCH AND FILTERING LOGIC ---
+
+
+// Get total number of complaints for pagination links (with filters applied)
+$total_sql = "SELECT COUNT(*) AS total FROM " . $table_to_query . $where_sql;
+$total_result = mysqli_query($conn, $total_sql);
+$total_row = mysqli_fetch_assoc($total_result);
+$total_complaints = $total_row['total'];
+$total_pages = ceil($total_complaints / $limit);
+
+// Fetch complaints with LIMIT and OFFSET (with filters applied)
+$sql = "SELECT case_no, complainant_first_name, complainant_last_name, incident_datetime, complaint_description, desk_officer_name, received_datetime
         FROM " . $table_to_query . "
         " . $where_sql . "
         ORDER BY case_no DESC
         LIMIT $limit OFFSET $offset";
-    $result = mysqli_query($conn, $sql);
+$result = mysqli_query($conn, $sql);
 
-    // Function to truncate text
-    function truncate_text($text, $max_length = 15) {
-        if (strlen($text) > $max_length) {
-            return substr($text, 0, $max_length) . '...';
-        }
-        return $text;
+// Function to truncate text
+function truncate_text($text, $max_length = 15) {
+    if (strlen($text) > $max_length) {
+        return substr($text, 0, $max_length) . '...';
     }
-    /**
-     * Renders the sidebar navigation panel.
-     *
-     * @param string $google_picture The URL for the user's profile picture.
-     * @param string $google_name The name of the logged-in user.
-     * @return void
-     */
-    function sidepanel($google_picture, $google_name) {
-        $currentPage = basename($_SERVER['PHP_SELF']);
-        $activeClasses = 'bg-blue-500 text-white shadow';
-        $inactiveClasses = 'text-gray-600 hover:bg-gray-100';
+    return $text;
+}
+/**
+ * Renders the sidebar navigation panel.
+ *
+ * @param string $google_picture The URL for the user's profile picture.
+ * @param string $google_name The name of the logged-in user.
+ * @return void
+ */
+function sidepanel($google_picture, $google_name) {
+    $currentPage = basename($_SERVER['PHP_SELF']);
+    $activeClasses = 'bg-blue-500 text-white shadow';
+    $inactiveClasses = 'text-gray-600 hover:bg-gray-100';
 
-        // Prevents reloading the page when clicking the active link
-        $dashboardClick = ($currentPage === 'dashboardadmin.php') ? 'onclick="event.preventDefault()"' : '';
-        $blotterClick   = ($currentPage === 'blotteradmin.php')   ? 'onclick="event.preventDefault()"' : '';
-        $reportsClick   = ($currentPage === 'reportsadmin.php')   ? 'onclick="event.preventDefault()"' : '';
-        $accountsClick  = ($currentPage === 'accountsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
-        $settingsClick  = ($currentPage === 'settingsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
+    // Prevents reloading the page when clicking the active link
+    $dashboardClick = ($currentPage === 'dashboardadmin.php') ? 'onclick="event.preventDefault()"' : '';
+    $blotterClick   = ($currentPage === 'blotteradmin.php')   ? 'onclick="event.preventDefault()"' : '';
+    $reportsClick   = ($currentPage === 'reportsadmin.php')   ? 'onclick="event.preventDefault()"' : '';
+    $accountsClick  = ($currentPage === 'accountsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
+    $settingsClick  = ($currentPage === 'settingsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
 
-        echo '
+    echo '
         <!-- START: Sidebar -->
         <div id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white text-secondary flex flex-col p-4 items-center shadow-lg z-20">
             <div class="text-center py-4">
@@ -191,10 +190,11 @@
         ';
 }
 
-    
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -215,8 +215,8 @@
         }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-   <link rel="stylesheet" href="css/main.css">
-   <style>
+    <link rel="stylesheet" href="css/main.css">
+    <style>
         /* Optional: Basic tooltip styling for better visibility */
         [data-tooltip]:hover::after {
             content: attr(data-tooltip);
@@ -226,21 +226,29 @@
             padding: 5px 10px;
             border-radius: 4px;
             white-space: nowrap;
-            z-index: 50; /* Ensure tooltip is above other content */
-            pointer-events: none; /* Allows interactions with elements behind the tooltip */
-            transform: translateY(-50%); /* Adjust positioning */
+            z-index: 50;
+            /* Ensure tooltip is above other content */
+            pointer-events: none;
+            /* Allows interactions with elements behind the tooltip */
+            transform: translateY(-50%);
+            /* Adjust positioning */
             left: 50%;
-            transform: translateX(-50%) translateY(calc(-100% - 5px)); /* Center above */
+            transform: translateX(-50%) translateY(calc(-100% - 5px));
+            /* Center above */
         }
+
         [data-tooltip] {
             position: relative;
         }
+
         .clickable-row:hover {
-        background-color: #f0f0f0; /* Light gray on hover */
-        cursor: pointer;
-    }
+            background-color: #f0f0f0;
+            /* Light gray on hover */
+            cursor: pointer;
+        }
     </style>
 </head>
+
 <body class="bg-light-gray">
 
     <?php
@@ -253,20 +261,20 @@
 
     <div class="flex h-screen overflow-hidden">
         <?php
-            // Call the function to render the sidebar
-            sidepanel($google_picture, $google_name);
+        // Call the function to render the sidebar
+        sidepanel($google_picture, $google_name);
         ?>
 
         <!-- Main Content -->
         <div id="mainContent" class="flex-1 ml-64 flex flex-col">
 
             <!-- Global Message Container -->
-            <div id="global-message"class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] transition-all duration-300 ease-out transform opacity-0 scale-95 hidden">
+            <div id="global-message" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] transition-all duration-300 ease-out transform opacity-0 scale-95 hidden">
                 <div class="px-6 py-3 rounded-lg shadow-lg text-white text-center w-auto max-w-lg bg-gray-800">
                     <span id="global-message-text" class="font-medium"></span>
                 </div>
             </div>
-            
+
             <!-- Top Header -->
             <header class="bg-primary text-white p-4 flex justify-between items-center shadow-md z-10">
                 <div class="flex items-center">
@@ -289,7 +297,9 @@
                     <div class="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
                         <div class="relative w-full md:w-1/3">
                             <input type="text" id="search-input" placeholder="Search by Case No, Complainant..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary" value="<?= htmlspecialchars($search_query) ?>">
-                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
                         </div>
                         <div class="flex flex-col sm:flex-row w-full md:w-auto gap-4">
                             <input type="date" id="start-date" class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" value="<?= htmlspecialchars($start_date) ?>">
@@ -320,27 +330,27 @@
                                 <?php
                                 if ($result && mysqli_num_rows($result) > 0) {
                                     while ($row = mysqli_fetch_assoc($result)) {
-					$case_no_format = htmlspecialchars($row['case_no'] . '-' . date('Y-m-d-H-i-s', strtotime($row['incident_datetime'])));
+                                        $case_no_format = htmlspecialchars($row['case_no'] . '-' . date('Y-m-d-H-i-s', strtotime($row['incident_datetime'])));
                                         $incident_date = date('Y-m-d', strtotime($row['incident_datetime']));
                                         $complainant_name = htmlspecialchars($row['complainant_first_name'] . ' ' . $row['complainant_last_name']);
                                         $full_description = htmlspecialchars($row['complaint_description']);
                                         $truncated_description = truncate_text($full_description, 20);
                                 ?>
-                                    <tr class="clickable-row"
-                                    data-case-no="<?= htmlspecialchars($row['case_no']) ?>" 
-                                    data-archived="<?= $is_archive_mode ? 'true' : 'false' ?>"
-                                    data-received-datetime="<?= htmlspecialchars($row['received_datetime']) ?>">
-                                        <td class="px-6 py-4 text-sm font-medium text-gray-900 truncate w-[15%]"><?= $case_no_format ?></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 truncate w-[20%]"><?= $complainant_name ?></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 truncate w-[15%]"><?= $incident_date ?></td>
-                                        <td class="px-6 py-4 text-sm text-gray-600 truncate w-[30%]">
-                                        <span class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap" data-tooltip="<?= $full_description ?>">
-                                            <?= $truncated_description ?>
-                                        </span>
-                                        <td class="px-6 py-4 text-sm text-gray-600 w-[25%]"><?= htmlspecialchars($row['desk_officer_name'] ?? 'N/A') ?></td>
-                                            
-                                        </td>
-                                    </tr>
+                                        <tr class="clickable-row"
+                                            data-case-no="<?= htmlspecialchars($row['case_no']) ?>"
+                                            data-archived="<?= $is_archive_mode ? 'true' : 'false' ?>"
+                                            data-received-datetime="<?= htmlspecialchars($row['received_datetime']) ?>">
+                                            <td class="px-6 py-4 text-sm font-medium text-gray-900 truncate w-[15%]"><?= $case_no_format ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 truncate w-[20%]"><?= $complainant_name ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 truncate w-[15%]"><?= $incident_date ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 truncate w-[30%]">
+                                                <span class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap" data-tooltip="<?= $full_description ?>">
+                                                    <?= $truncated_description ?>
+                                                </span>
+                                            <td class="px-6 py-4 text-sm text-gray-600 w-[25%]"><?= htmlspecialchars($row['desk_officer_name'] ?? 'N/A') ?></td>
+
+                                            </td>
+                                        </tr>
                                 <?php
                                     }
                                 } else {
@@ -388,7 +398,7 @@
             <div id="details-modal-content" class="text-gray-700 space-y-2">
                 <!-- Details will be loaded here -->
             </div>
-             <div class="flex justify-end mt-6 pt-4 border-t space-x-3">
+            <div class="flex justify-end mt-6 pt-4 border-t space-x-3">
                 <!-- View Print Format Button -->
                 <button id="view-print-format-btn" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">View Print Format</button>
                 <!-- Archive/Unarchive Button -->
@@ -398,7 +408,7 @@
         </div>
     </div>
 
-    
+
     <!-- For now, I'll keep it, but we'll stop triggering it in the JS -->
     <div id="archive-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
         <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
@@ -413,540 +423,572 @@
 
     <script src="js/sidebar.js" defer></script>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('search-input');
-    const startDateInput = document.getElementById('start-date');
-    const endDateInput = document.getElementById('end-date');
-    const applyFiltersBtn = document.getElementById('apply-filters');
-    const clearFiltersBtn = document.getElementById('clear-filters');
-    const archiveToggleBtn = document.getElementById('archive-toggle-btn');
-    let currentMode = '<?= $is_archive_mode ? "archive" : "active" ?>';
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search-input');
+            const startDateInput = document.getElementById('start-date');
+            const endDateInput = document.getElementById('end-date');
+            const applyFiltersBtn = document.getElementById('apply-filters');
+            const clearFiltersBtn = document.getElementById('clear-filters');
+            const archiveToggleBtn = document.getElementById('archive-toggle-btn');
+            let currentMode = '<?= $is_archive_mode ? "archive" : "active" ?>';
 
-    function buildUrl(includeMode = true) {
-        const searchValue = searchInput.value;
-        const startDateValue = startDateInput.value;
-        const endDateValue = endDateInput.value;
+            function buildUrl(includeMode = true) {
+                const searchValue = searchInput.value;
+                const startDateValue = startDateInput.value;
+                const endDateValue = endDateInput.value;
 
-        let params = new URLSearchParams();
-        params.set('page', '1'); // Always go to page 1 when applying new filters
+                let params = new URLSearchParams();
+                params.set('page', '1'); // Always go to page 1 when applying new filters
 
-        if (searchValue) {
-            params.set('search', searchValue);
-        }
-        if (startDateValue) {
-            params.set('start_date', startDateValue);
-        }
-        if (endDateValue) {
-            params.set('end_date', endDateValue);
-        }
-        if (includeMode && currentMode === 'archive') {
-            params.set('mode', 'archive');
-        }
+                if (searchValue) {
+                    params.set('search', searchValue);
+                }
+                if (startDateValue) {
+                    params.set('start_date', startDateValue);
+                }
+                if (endDateValue) {
+                    params.set('end_date', endDateValue);
+                }
+                if (includeMode && currentMode === 'archive') {
+                    params.set('mode', 'archive');
+                }
 
-        return 'reportsadmin.php?' + params.toString();
-    }
-
-    function applyFilters() {
-        window.location.href = buildUrl(true); // Always include mode when applying filters
-    }
-
-    function clearFilters() {
-        // To clear filters, we reset to the default view (page 1, active mode, no search/dates)
-        // We need to decide if clearing filters should revert to active mode or stay in archive mode
-        // For now, let's assume clearing filters means going back to active reports.
-        window.location.href = 'reportsadmin.php'; // Clears all parameters including 'mode'
-    }
-
-    function toggleArchiveMode() {
-        currentMode = (currentMode === 'active') ? 'archive' : 'active';
-        // When toggling, we want to keep current search/date filters if they exist
-        window.location.href = buildUrl(true);
-    }
-
-    applyFiltersBtn.addEventListener('click', applyFilters);
-    clearFiltersBtn.addEventListener('click', clearFilters);
-    archiveToggleBtn.addEventListener('click', toggleArchiveMode);
-
-    searchInput.addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            applyFilters();
-        }
-    });
-
-    // --- GLOBAL MESSAGE LOGIC START ---
-    const globalMessageContainer = document.getElementById('global-message');
-    const globalMessageContent = globalMessageContainer.querySelector('div'); // Get the inner div
-    const globalMessageText = document.getElementById('global-message-text');
-
-    // PHP-injected message from server-side (only if it exists)
-    const serverMessage = "<?php echo !empty($message) ? htmlspecialchars($message) : ''; ?>";
-
-    if (serverMessage) {
-        globalMessageText.textContent = serverMessage;
-
-        // Clear previous background classes
-        globalMessageContent.classList.remove('bg-red-500', 'bg-green-500');
-
-        if (serverMessage.includes('Error')) {
-            globalMessageContent.classList.add('bg-red-500');
-        } else {
-            globalMessageContent.classList.add('bg-green-500');
-        }
-        globalMessageContent.classList.add('text-white'); // Apply text color to the inner div
-
-        // 1. Ensure pointer-events is initially none (as it's hidden)
-        globalMessageContainer.style.pointerEvents = 'none';
-
-        // 2. Remove 'hidden' and apply initial styles for transition
-        globalMessageContainer.classList.remove('hidden');
-        // Force a reflow to ensure initial styles are applied before transition starts
-        void globalMessageContainer.offsetWidth;
-
-        // 3. Start the fade-in and make it interactive
-        globalMessageContainer.classList.remove('opacity-0', 'scale-95');
-        globalMessageContainer.classList.add('opacity-100', 'scale-100');
-        globalMessageContainer.style.pointerEvents = 'auto'; // Make it clickable (if needed, but mainly to block underneath)
-
-
-        // Automatically hide after a delay
-        setTimeout(() => {
-            // Start fade out and make it non-interactive immediately
-            globalMessageContainer.classList.remove('opacity-100', 'scale-100');
-            globalMessageContainer.classList.add('opacity-0', 'scale-95');
-            globalMessageContainer.style.pointerEvents = 'none'; // Crucial: disable pointer events *as soon as* fade-out starts
-
-            setTimeout(() => {
-                globalMessageContainer.classList.add('hidden'); // Fully hide after fade out animation
-            }, 300); // This should match your transition duration (duration-300)
-        }, 3000); // 3 seconds delay before starting to fade out
-    }
-    // --- GLOBAL MESSAGE LOGIC END ---
-
-
-    // MODAL LOGIC FOR ARCHIVE/UNARCHIVE
-    let caseNoToActOn = null;
-    let isReportCurrentlyArchived = false; // Track the status of the report shown in details modal
-
-    // Details Modal elements
-    const detailsModal = document.getElementById('details-modal');
-    const detailsModalContent = document.getElementById('details-modal-content');
-    const closeDetailsModalBtn = document.getElementById('close-details-modal');
-    const closeDetailsModalFooterBtn = document.getElementById('close-details-modal-footer');
-    const actionButtonInDetailsModal = document.getElementById('action-button-in-details-modal'); // The new button in details modal
-
-    const editButtonInDetailsModal = document.createElement('button');
-    editButtonInDetailsModal.id = 'edit-report-button';
-    editButtonInDetailsModal.className = 'px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600';
-    editButtonInDetailsModal.textContent = 'Edit Report';
-
-    const saveButtonInDetailsModal = document.createElement('button');
-    saveButtonInDetailsModal.id = 'save-report-button';
-    saveButtonInDetailsModal.className = 'px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 hidden';
-    saveButtonInDetailsModal.textContent = 'Save Changes';
-
-    // Insert the new buttons before the close button in the footer
-    const detailsModalFooter = detailsModal.querySelector('.flex.justify-end.mt-6.pt-4.border-t.space-x-3');
-    detailsModalFooter.insertBefore(editButtonInDetailsModal, detailsModalFooter.children[0]);
-    detailsModalFooter.insertBefore(saveButtonInDetailsModal, detailsModalFooter.children[1]);
-
-
-    let isEditMode = false; // State variable for edit mode
-
-    function setEditMode(enable) {
-        isEditMode = enable;
-        const inputs = detailsModalContent.querySelectorAll('input, select, textarea');
-        inputs.forEach(input => {
-            if (input.name !== 'case_no' && input.name !== 'created_at' && input.name !== 'desk_officer_name') { // Keep case_no non-editable
-                input.readOnly = !enable;
-                input.disabled = !enable;
-                input.classList.toggle('bg-gray-50', !enable); // Visual cue for non-editable
-                input.classList.toggle('bg-white', enable); // <--- ADD THIS LINE: Visual cue for editable fields
+                return 'reportsadmin.php?' + params.toString();
             }
-        });
 
-        editButtonInDetailsModal.classList.toggle('hidden', enable);
-        actionButtonInDetailsModal.classList.toggle('hidden', enable); // Hide archive/unarchive when editing
-        saveButtonInDetailsModal.classList.toggle('hidden', !enable);
-
-         // Toggle text for the close button
-        if (enable) {
-            closeDetailsModalFooterBtn.textContent = 'Cancel Edit';
-        } else {
-            closeDetailsModalFooterBtn.textContent = 'Close';
-        }
-    }
-
-    // Function to handle the actual archive/unarchive action
-    function performArchiveUnarchiveAction() {
-        if (caseNoToActOn) {
-            let endpoint = isReportCurrentlyArchived ? 'actions/unarchive_complaint.php' : 'actions/archive_complaint.php';
-            // No need for success/error messages here, as PHP handles the message and reload
-            
-            fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ case_no: caseNoToActOn })
-            })
-            .then(response => response.json()) // Still parse JSON even if we reload, for debugging/fallback
-            .then(data => {
-                // Regardless of 'data.success' we initiate a page reload.
-                // The PHP action scripts are now responsible for setting $_SESSION['message']
-                // and the PHP at the top of reportsadmin.php will pick it up.
-                window.location.reload(); 
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // If the fetch itself fails (e.g., network error), we might want a client-side alert
-                // as the PHP message won't be set.
-                alert('An unexpected error occurred during the action. Please try again.');
-                // Consider reloading here too if you want to ensure state consistency
-                window.location.reload();
-            });
-        }
-    }
-
-
-    const keyMapping = {
-        'case_no': 'Case Number',
-        'incident_datetime': 'Date & Time of Incident',
-        'incident_location': 'Location of Incident',
-        'complaint_description': 'Type of Complaint',
-        'other_complaint': 'Other Complaint Details',
-
-        // Complainant Details
-        'complainant_first_name': 'Complainant First Name',
-        'complainant_middle_name': 'Complainant Middle Name',
-        'complainant_last_name': 'Complainant Last Name',
-        'complainant_age': 'Complainant Age',
-        'complainant_gender': 'Complainant Gender',
-        'complainant_phone': 'Complainant Phone',
-        'complainant_address': 'Complainant Address',
-
-        // Victim Details
-        'victim_first_name': 'Victim First Name',
-        'victim_middle_name': 'Victim Middle Name',
-        'victim_last_name': 'Victim Last Name',
-        'victim_age': 'Victim Age',
-        'victim_gender': 'Victim Gender',
-        'victim_phone': 'Victim Phone',
-        'victim_address': 'Victim Address',
-
-        // Witness Details
-        'witness_first_name': 'Witness First Name',
-        'witness_middle_name': 'Witness Middle Name',
-        'witness_last_name': 'Witness Last Name',
-        'witness_age': 'Witness Age',
-        'witness_gender': 'Witness Gender',
-        'witness_phone': 'Witness Phone',
-        'witness_address': 'Witness Address',
-
-        // Respondent Details
-        'respondent_first_name': 'Respondent First Name',
-        'respondent_middle_name': 'Respondent Middle Name',
-        'respondent_last_name': 'Respondent Last Name',
-        'respondent_age': 'Respondent Age',
-        'respondent_gender': 'Respondent Gender',
-        'respondent_phone': 'Respondent Phone',
-        'respondent_address': 'Respondent Address',
-
-        // Complaint Statement & Other
-        'complaint_statement': 'Complaint Statement',
-        'reported_by': 'Reported By',
-        'is_affirmed': 'Information Affirmed',
-        'desk_officer_name': 'Desk Officer Name',
-        'received_datetime': 'Report Filed On'
-    };
-
-        // Utility function for HTML escaping, as template literals don't escape automatically
-    function htmlspecialchars(str) {
-        if (typeof str !== 'string' && typeof str !== 'number') { // Also handle numbers as-is
-            return str; // Return non-string/non-number values as-is (like null, undefined)
-        }
-        // Convert numbers to string before escaping
-        const s = String(str);
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return s.replace(/[&<>"']/g, function(m) { return map[m]; });
-    }
-
-
-    function formatDetail(key, value) {
-        // Treat null/undefined as empty string for display/input, but allow 0 for age
-        if (value === null || value === undefined) {
-            value = '';
-        }
-
-        let displayValue = value; // This is primarily for non-editable display
-        let inputType = 'text';
-        let isSelect = false;
-        let selectOptions = [];
-        let isEditable = true; // Most fields will be editable by default
-
-        // Specific handling for certain keys
-        if (key === 'reported_by' || key === 'is_affirmed') {
-            isSelect = true;
-            selectOptions = [{value: '1', text: 'Yes'}, {value: '0', text: 'No'}];
-            // For display: 'Yes'/'No', for input: '1'/'0'
-            displayValue = (value == 1) ? 'Yes' : (value == 0 ? 'No' : '');
-        } else if (key === 'complainant_gender' || key === 'victim_gender' || key === 'witness_gender' || key === 'respondent_gender') {
-            isSelect = true;
-            selectOptions = [{value: '', text: 'Select Gender'}, {value: 'Male', text: 'Male'}, {value: 'Female', text: 'Female'}, {value: 'Other', text: 'Other'}];
-        } else if (key.includes('_age')) {
-            inputType = 'number';
-            // HTML number inputs can have empty value, no need to default 0
-        } else if (key === 'incident_datetime') {
-            inputType = 'datetime-local';
-            // Format incident_datetime for datetime-local input
-            if (value) {
-                const date = new Date(value);
-                // Ensure two digits for month, day, hour, minute
-                const year = date.getFullYear();
-                const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                const day = date.getDate().toString().padStart(2, '0');
-                const hours = date.getHours().toString().padStart(2, '0');
-                const minutes = date.getMinutes().toString().padStart(2, '0');
-                displayValue = `${year}-${month}-${day}T${hours}:${minutes}`;
-            } else {
-                displayValue = '';
+            function applyFilters() {
+                window.location.href = buildUrl(true); // Always include mode when applying filters
             }
-        } else if (key === 'created_at' || key === 'case_no' || key === 'desk_officer_name') {
-            isEditable = false; // These fields should not be editable
-        }
 
-        const label = keyMapping[key] || key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+            function clearFilters() {
+                // To clear filters, we reset to the default view (page 1, active mode, no search/dates)
+                // We need to decide if clearing filters should revert to active mode or stay in archive mode
+                // For now, let's assume clearing filters means going back to active reports.
+                window.location.href = 'reportsadmin.php'; // Clears all parameters including 'mode'
+            }
 
-        let inputElement;
-        if (!isEditable) {
-            // Non-editable fields are displayed as plain text (or N/A)
-            inputElement = `<span class="col-span-2 text-gray-700">${value ? (key === 'incident_datetime' || key === 'created_at' ? new Date(value).toLocaleString() : htmlspecialchars(value)) : 'N/A'}</span>`;
-        } else if (isSelect) {
-            inputElement = `<select name="${key}" class="col-span-2 form-select border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-secondary">`;
-            selectOptions.forEach(option => {
-                // Compare string value for selected state
-                inputElement += `<option value="${htmlspecialchars(option.value)}" ${String(value) === String(option.value) ? 'selected' : ''}>${htmlspecialchars(option.text)}</option>`;
+            function toggleArchiveMode() {
+                currentMode = (currentMode === 'active') ? 'archive' : 'active';
+                // When toggling, we want to keep current search/date filters if they exist
+                window.location.href = buildUrl(true);
+            }
+
+            applyFiltersBtn.addEventListener('click', applyFilters);
+            clearFiltersBtn.addEventListener('click', clearFilters);
+            archiveToggleBtn.addEventListener('click', toggleArchiveMode);
+
+            searchInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    applyFilters();
+                }
             });
-            inputElement += `</select>`;
-        } else if (key === 'complaint_statement' || key === 'complaint_description' || key === 'other_complaint') {
-            // Use textarea for multi-line text fields
-            inputElement = `<textarea name="${key}" class="col-span-2 form-textarea border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-secondary" rows="3">${htmlspecialchars(value)}</textarea>`;
-        }
-        else {
-            // Default to text input for other editable fields
-            inputElement = `<input type="${inputType}" name="${key}" value="${htmlspecialchars(value)}" class="col-span-2 form-input border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-secondary">`;
-        }
 
-        return `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 py-1 border-b border-gray-100">
+            // --- GLOBAL MESSAGE LOGIC START ---
+            const globalMessageContainer = document.getElementById('global-message');
+            const globalMessageContent = globalMessageContainer.querySelector('div'); // Get the inner div
+            const globalMessageText = document.getElementById('global-message-text');
+
+            // PHP-injected message from server-side (only if it exists)
+            const serverMessage = "<?php echo !empty($message) ? htmlspecialchars($message) : ''; ?>";
+
+            if (serverMessage) {
+                globalMessageText.textContent = serverMessage;
+
+                // Clear previous background classes
+                globalMessageContent.classList.remove('bg-red-500', 'bg-green-500');
+
+                if (serverMessage.includes('Error')) {
+                    globalMessageContent.classList.add('bg-red-500');
+                } else {
+                    globalMessageContent.classList.add('bg-green-500');
+                }
+                globalMessageContent.classList.add('text-white'); // Apply text color to the inner div
+
+                // 1. Ensure pointer-events is initially none (as it's hidden)
+                globalMessageContainer.style.pointerEvents = 'none';
+
+                // 2. Remove 'hidden' and apply initial styles for transition
+                globalMessageContainer.classList.remove('hidden');
+                // Force a reflow to ensure initial styles are applied before transition starts
+                void globalMessageContainer.offsetWidth;
+
+                // 3. Start the fade-in and make it interactive
+                globalMessageContainer.classList.remove('opacity-0', 'scale-95');
+                globalMessageContainer.classList.add('opacity-100', 'scale-100');
+                globalMessageContainer.style.pointerEvents = 'auto'; // Make it clickable (if needed, but mainly to block underneath)
+
+
+                // Automatically hide after a delay
+                setTimeout(() => {
+                    // Start fade out and make it non-interactive immediately
+                    globalMessageContainer.classList.remove('opacity-100', 'scale-100');
+                    globalMessageContainer.classList.add('opacity-0', 'scale-95');
+                    globalMessageContainer.style.pointerEvents = 'none'; // Crucial: disable pointer events *as soon as* fade-out starts
+
+                    setTimeout(() => {
+                        globalMessageContainer.classList.add('hidden'); // Fully hide after fade out animation
+                    }, 300); // This should match your transition duration (duration-300)
+                }, 3000); // 3 seconds delay before starting to fade out
+            }
+            // --- GLOBAL MESSAGE LOGIC END ---
+
+
+            // MODAL LOGIC FOR ARCHIVE/UNARCHIVE
+            let caseNoToActOn = null;
+            let isReportCurrentlyArchived = false; // Track the status of the report shown in details modal
+
+            // Details Modal elements
+            const detailsModal = document.getElementById('details-modal');
+            const detailsModalContent = document.getElementById('details-modal-content');
+            const closeDetailsModalBtn = document.getElementById('close-details-modal');
+            const closeDetailsModalFooterBtn = document.getElementById('close-details-modal-footer');
+            const actionButtonInDetailsModal = document.getElementById('action-button-in-details-modal'); // The new button in details modal
+
+            const editButtonInDetailsModal = document.createElement('button');
+            editButtonInDetailsModal.id = 'edit-report-button';
+            editButtonInDetailsModal.className = 'px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600';
+            editButtonInDetailsModal.textContent = 'Edit Report';
+
+            const saveButtonInDetailsModal = document.createElement('button');
+            saveButtonInDetailsModal.id = 'save-report-button';
+            saveButtonInDetailsModal.className = 'px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 hidden';
+            saveButtonInDetailsModal.textContent = 'Save Changes';
+
+            // Insert the new buttons before the close button in the footer
+            const detailsModalFooter = detailsModal.querySelector('.flex.justify-end.mt-6.pt-4.border-t.space-x-3');
+            detailsModalFooter.insertBefore(editButtonInDetailsModal, detailsModalFooter.children[0]);
+            detailsModalFooter.insertBefore(saveButtonInDetailsModal, detailsModalFooter.children[1]);
+
+
+            let isEditMode = false; // State variable for edit mode
+
+            function setEditMode(enable) {
+                isEditMode = enable;
+                const inputs = detailsModalContent.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    if (input.name !== 'case_no' && input.name !== 'created_at' && input.name !== 'desk_officer_name') { // Keep case_no non-editable
+                        input.readOnly = !enable;
+                        input.disabled = !enable;
+                        input.classList.toggle('bg-gray-50', !enable); // Visual cue for non-editable
+                        input.classList.toggle('bg-white', enable); // <--- ADD THIS LINE: Visual cue for editable fields
+                    }
+                });
+
+                editButtonInDetailsModal.classList.toggle('hidden', enable);
+                actionButtonInDetailsModal.classList.toggle('hidden', enable); // Hide archive/unarchive when editing
+                saveButtonInDetailsModal.classList.toggle('hidden', !enable);
+
+                // Toggle text for the close button
+                if (enable) {
+                    closeDetailsModalFooterBtn.textContent = 'Cancel Edit';
+                } else {
+                    closeDetailsModalFooterBtn.textContent = 'Close';
+                }
+            }
+
+            // Function to handle the actual archive/unarchive action
+            function performArchiveUnarchiveAction() {
+                if (caseNoToActOn) {
+                    let endpoint = isReportCurrentlyArchived ? 'actions/unarchive_complaint.php' : 'actions/archive_complaint.php';
+                    // No need for success/error messages here, as PHP handles the message and reload
+
+                    fetch(endpoint, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                case_no: caseNoToActOn
+                            })
+                        })
+                        .then(response => response.json()) // Still parse JSON even if we reload, for debugging/fallback
+                        .then(data => {
+                            // Regardless of 'data.success' we initiate a page reload.
+                            // The PHP action scripts are now responsible for setting $_SESSION['message']
+                            // and the PHP at the top of reportsadmin.php will pick it up.
+                            window.location.reload();
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            // If the fetch itself fails (e.g., network error), we might want a client-side alert
+                            // as the PHP message won't be set.
+                            alert('An unexpected error occurred during the action. Please try again.');
+                            // Consider reloading here too if you want to ensure state consistency
+                            window.location.reload();
+                        });
+                }
+            }
+
+
+            const keyMapping = {
+                'case_no': 'Case Number',
+                'incident_datetime': 'Date & Time of Incident',
+                'incident_location': 'Location of Incident',
+                'complaint_description': 'Type of Complaint',
+                'other_complaint': 'Other Complaint Details',
+
+                // Complainant Details
+                'complainant_first_name': 'Complainant First Name',
+                'complainant_middle_name': 'Complainant Middle Name',
+                'complainant_last_name': 'Complainant Last Name',
+                'complainant_age': 'Complainant Age',
+                'complainant_gender': 'Complainant Gender',
+                'complainant_phone': 'Complainant Phone',
+                'complainant_address': 'Complainant Address',
+
+                // Victim Details
+                'victim_first_name': 'Victim First Name',
+                'victim_middle_name': 'Victim Middle Name',
+                'victim_last_name': 'Victim Last Name',
+                'victim_age': 'Victim Age',
+                'victim_gender': 'Victim Gender',
+                'victim_phone': 'Victim Phone',
+                'victim_address': 'Victim Address',
+
+                // Witness Details
+                'witness_first_name': 'Witness First Name',
+                'witness_middle_name': 'Witness Middle Name',
+                'witness_last_name': 'Witness Last Name',
+                'witness_age': 'Witness Age',
+                'witness_gender': 'Witness Gender',
+                'witness_phone': 'Witness Phone',
+                'witness_address': 'Witness Address',
+
+                // Respondent Details
+                'respondent_first_name': 'Respondent First Name',
+                'respondent_middle_name': 'Respondent Middle Name',
+                'respondent_last_name': 'Respondent Last Name',
+                'respondent_age': 'Respondent Age',
+                'respondent_gender': 'Respondent Gender',
+                'respondent_phone': 'Respondent Phone',
+                'respondent_address': 'Respondent Address',
+
+                // Complaint Statement & Other
+                'complaint_statement': 'Complaint Statement',
+                'reported_by': 'Reported By',
+                'is_affirmed': 'Information Affirmed',
+                'desk_officer_name': 'Desk Officer Name',
+                'created_at': 'Report Filed On'
+            };
+
+            // Utility function for HTML escaping, as template literals don't escape automatically
+            function htmlspecialchars(str) {
+                if (typeof str !== 'string' && typeof str !== 'number') { // Also handle numbers as-is
+                    return str; // Return non-string/non-number values as-is (like null, undefined)
+                }
+                // Convert numbers to string before escaping
+                const s = String(str);
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return s.replace(/[&<>"']/g, function(m) {
+                    return map[m];
+                });
+            }
+
+
+            function formatDetail(key, value) {
+                // Treat null/undefined as empty string for display/input, but allow 0 for age
+                if (value === null || value === undefined) {
+                    value = '';
+                }
+
+                let displayValue = value; // This is primarily for non-editable display
+                let inputType = 'text';
+                let isSelect = false;
+                let selectOptions = [];
+                let isEditable = true; // Most fields will be editable by default
+
+                // Specific handling for certain keys
+                if (key === 'reported_by' || key === 'is_affirmed') {
+                    isSelect = true;
+                    selectOptions = [{
+                        value: '1',
+                        text: 'Yes'
+                    }, {
+                        value: '0',
+                        text: 'No'
+                    }];
+                    // For display: 'Yes'/'No', for input: '1'/'0'
+                    displayValue = (value == 1) ? 'Yes' : (value == 0 ? 'No' : '');
+                } else if (key === 'complainant_gender' || key === 'victim_gender' || key === 'witness_gender' || key === 'respondent_gender') {
+                    isSelect = true;
+                    selectOptions = [{
+                        value: '',
+                        text: 'Select Gender'
+                    }, {
+                        value: 'Male',
+                        text: 'Male'
+                    }, {
+                        value: 'Female',
+                        text: 'Female'
+                    }, {
+                        value: 'Other',
+                        text: 'Other'
+                    }];
+                } else if (key.includes('_age')) {
+                    inputType = 'number';
+                    // HTML number inputs can have empty value, no need to default 0
+                } else if (key === 'incident_datetime') {
+                    inputType = 'datetime-local';
+                    // Format incident_datetime for datetime-local input
+                    if (value) {
+                        const date = new Date(value);
+                        // Ensure two digits for month, day, hour, minute
+                        const year = date.getFullYear();
+                        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                        const day = date.getDate().toString().padStart(2, '0');
+                        const hours = date.getHours().toString().padStart(2, '0');
+                        const minutes = date.getMinutes().toString().padStart(2, '0');
+                        displayValue = `${year}-${month}-${day}T${hours}:${minutes}`;
+                    } else {
+                        displayValue = '';
+                    }
+                } else if (key === 'created_at' || key === 'case_no' || key === 'desk_officer_name') {
+                    isEditable = false; // These fields should not be editable
+                }
+
+                const label = keyMapping[key] || key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+
+                let inputElement;
+                if (!isEditable) {
+                    // Non-editable fields are displayed as plain text (or N/A)
+                    inputElement = `<span class="col-span-2 text-gray-700">${value ? (key === 'incident_datetime' || key === 'created_at' ? new Date(value).toLocaleString() : htmlspecialchars(value)) : 'N/A'}</span>`;
+                } else if (isSelect) {
+                    inputElement = `<select name="${key}" class="col-span-2 form-select border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-secondary">`;
+                    selectOptions.forEach(option => {
+                        // Compare string value for selected state
+                        inputElement += `<option value="${htmlspecialchars(option.value)}" ${String(value) === String(option.value) ? 'selected' : ''}>${htmlspecialchars(option.text)}</option>`;
+                    });
+                    inputElement += `</select>`;
+                } else if (key === 'complaint_statement' || key === 'complaint_description' || key === 'other_complaint') {
+                    // Use textarea for multi-line text fields
+                    inputElement = `<textarea name="${key}" class="col-span-2 form-textarea border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-secondary" rows="3">${htmlspecialchars(value)}</textarea>`;
+                } else {
+                    // Default to text input for other editable fields
+                    inputElement = `<input type="${inputType}" name="${key}" value="${htmlspecialchars(value)}" class="col-span-2 form-input border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-secondary">`;
+                }
+
+                return `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 py-1 border-b border-gray-100">
                     <strong class="col-span-1 text-gray-900">${label}:</strong>
                     ${inputElement}
                 </div>`;
-    }
-
-
-    document.querySelectorAll('.clickable-row').forEach(row => {
-        row.addEventListener('click', function(event) {
-            event.stopPropagation(); // Prevent modal from triggering if something inside the row is clicked
-
-            caseNoToActOn = this.dataset.caseNo;
-            isReportCurrentlyArchived = this.dataset.archived === 'true'; // Set global status
-            const receivedDatetimeStr = this.dataset.receivedDatetime; // Get the received_datetime
-            let canEdit = true; // Assume editable by default
-
-            // Check if the report is not archived AND within the 30-minute window
-            if (!isReportCurrentlyArchived && receivedDatetimeStr) {
-                const receivedDate = new Date(receivedDatetimeStr);
-                const currentTime = new Date();
-                const thirtyMinutesAgo = new Date(currentTime.getTime() - (30 * 60 * 1000)); // 30 minutes in milliseconds
-
-                if (receivedDate < thirtyMinutesAgo) {
-                    canEdit = false; // Outside the 30-minute window
-                }
-            } else if (isReportCurrentlyArchived) {
-                canEdit = false; // Archived reports cannot be edited
-            }
-
-            // Enable/disable the edit button based on 'canEdit'
-            if (canEdit) {
-                editButtonInDetailsModal.classList.remove('hidden', 'opacity-50', 'cursor-not-allowed');
-                editButtonInDetailsModal.removeAttribute('disabled');
-                editButtonInDetailsModal.setAttribute('title', 'Edit this report');
-            } else {
-                editButtonInDetailsModal.classList.add('hidden'); // Use hidden to fully remove from layout
-                editButtonInDetailsModal.classList.add('opacity-50', 'cursor-not-allowed');
-                editButtonInDetailsModal.setAttribute('disabled', 'true');
-                // Provide a tooltip explaining why it's disabled
-                if (isReportCurrentlyArchived) {
-                    editButtonInDetailsModal.setAttribute('title', 'Archived reports cannot be edited.');
-                } else {
-                    editButtonInDetailsModal.setAttribute('title', 'Reports can only be edited within 30 minutes of receipt.');
-                }
             }
 
 
-            // Update the action button based on the report's current status
-            if (isReportCurrentlyArchived) {
-                actionButtonInDetailsModal.textContent = 'Unarchive';
-                actionButtonInDetailsModal.className = 'px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600';
-            } else {
-                actionButtonInDetailsModal.textContent = 'Archive';
-                actionButtonInDetailsModal.className = 'px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600';
-            }
+            document.querySelectorAll('.clickable-row').forEach(row => {
+                row.addEventListener('click', function(event) {
+                    event.stopPropagation(); // Prevent modal from triggering if something inside the row is clicked
 
-            //detailsModalContent.innerHTML = '<p class="text-center text-gray-500">Loading details...</p>';
-            detailsModal.classList.remove('hidden');
-             //Fix Scrolling of modal, start at top
-            if (detailsModal) {
-                detailsModal.scrollTop = 0;
-            }
+                    caseNoToActOn = this.dataset.caseNo;
+                    isReportCurrentlyArchived = this.dataset.archived === 'true'; // Set global status
+                    const receivedDatetimeStr = this.dataset.receivedDatetime; // Get the received_datetime
+                    let canEdit = true; // Assume editable by default
 
-            fetch('actions/get_report_details.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ case_no: caseNoToActOn, is_archive_mode: isReportCurrentlyArchived })
-            })
-            .then(response => response.json())
-            .then(data => {
-            if (data.success && data.data) {
-                    let htmlContent = `<form id="edit-report-form" data-case-no="${data.data.case_no}">`; // Wrap in a form
-                    htmlContent += `<p class="text-lg font-semibold mb-4">Case Number: ${data.data.case_no}</p>`;
+                    // Check if the report is not archived AND within the 30-minute window
+                    // Check if the report is not archived AND within the 30-minute window
+                    if (!isReportCurrentlyArchived && receivedDatetimeStr && receivedDatetimeStr !== 'N/A') {
+                        const receivedDate = new Date(receivedDatetimeStr);
 
-                    const sections = {
-                        'Incident Details': ['incident_datetime', 'incident_location', 'complaint_description', 'other_complaint'],
-                        'Complainant Information': ['complainant_first_name', 'complainant_middle_name', 'complainant_last_name', 'complainant_age', 'complainant_gender', 'complainant_phone', 'complainant_address'],
-                        'Victim Information': ['victim_first_name', 'victim_middle_name', 'victim_last_name', 'victim_age', 'victim_gender', 'victim_phone', 'victim_address'],
-                        'Witness Information': ['witness_first_name', 'witness_middle_name', 'witness_last_name', 'witness_age', 'witness_gender', 'witness_phone', 'witness_address'],
-                        'Respondent Information': ['respondent_first_name', 'respondent_middle_name', 'respondent_last_name', 'respondent_age', 'respondent_gender', 'respondent_phone', 'respondent_address'],
-                        'Statement & Administration': ['complaint_statement', 'reported_by', 'is_affirmed', 'desk_officer_name', 'created_at']
-                    };
+                        // Validate that receivedDate is a real date
+                        if (!isNaN(receivedDate)) {
+                            const currentTime = new Date();
+                            const thirtyMinutesAgo = new Date(currentTime.getTime() - (30 * 60 * 1000)); // 30 minutes in ms
 
-                    for (const sectionTitle in sections) {
-                        let sectionHtml = '';
-                        sections[sectionTitle].forEach(key => {
-                            const detailHtml = formatDetail(key, data.data[key]);
-                            if (detailHtml) { // Only add if not empty
-                                sectionHtml += detailHtml;
+                            if (receivedDate < thirtyMinutesAgo) {
+                                canEdit = false; // Outside 30-minute window
                             }
-                        });
+                        } else {
+                            canEdit = false; // Invalid date (N/A or corrupted)
+                        }
+                    } else if (isReportCurrentlyArchived) {
+                        canEdit = false; // Archived reports cannot be edited
+                    }
 
-                        if (sectionHtml) { // Only show section if it has content
-                            htmlContent += `<h4 class="text-lg font-semibold mt-4 mb-2 text-primary border-b pb-1">${sectionTitle}</h4>`;
-                            htmlContent += sectionHtml;
+                    // Enable/disable the edit button based on 'canEdit'
+                    if (canEdit) {
+                        editButtonInDetailsModal.classList.remove('hidden', 'opacity-50', 'cursor-not-allowed');
+                        editButtonInDetailsModal.removeAttribute('disabled');
+                        editButtonInDetailsModal.setAttribute('title', 'Edit this report');
+                    } else {
+                        editButtonInDetailsModal.classList.add('hidden'); // Use hidden to fully remove from layout
+                        editButtonInDetailsModal.classList.add('opacity-50', 'cursor-not-allowed');
+                        editButtonInDetailsModal.setAttribute('disabled', 'true');
+                        // Provide a tooltip explaining why it's disabled
+                        if (isReportCurrentlyArchived) {
+                            editButtonInDetailsModal.setAttribute('title', 'Archived reports cannot be edited.');
+                        } else {
+                            editButtonInDetailsModal.setAttribute('title', 'Reports can only be edited within 30 minutes of receipt.');
                         }
                     }
-                    htmlContent += `</form>`; // Close the form
 
-                    detailsModalContent.innerHTML = htmlContent;
-                    setEditMode(false); // Initially set to view mode when modal opens
 
-                } else {
-                    detailsModalContent.innerHTML = `<p class="text-center text-red-600">Failed to load details: ${data.message || 'Unknown error.'}</p>`;
-                    setEditMode(false); // Ensure buttons are in correct state
+                    // Update the action button based on the report's current status
+                    if (isReportCurrentlyArchived) {
+                        actionButtonInDetailsModal.textContent = 'Unarchive';
+                        actionButtonInDetailsModal.className = 'px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600';
+                    } else {
+                        actionButtonInDetailsModal.textContent = 'Archive';
+                        actionButtonInDetailsModal.className = 'px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600';
+                    }
+
+                    //detailsModalContent.innerHTML = '<p class="text-center text-gray-500">Loading details...</p>';
+                    detailsModal.classList.remove('hidden');
+                    //Fix Scrolling of modal, start at top
+                    if (detailsModal) {
+                        detailsModal.scrollTop = 0;
+                    }
+
+                    fetch('actions/get_report_details.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                case_no: caseNoToActOn,
+                                is_archive_mode: isReportCurrentlyArchived
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.data) {
+                                let htmlContent = `<form id="edit-report-form" data-case-no="${data.data.case_no}">`; // Wrap in a form
+                                htmlContent += `<p class="text-lg font-semibold mb-4">Case Number: ${data.data.case_no}</p>`;
+
+                                const sections = {
+                                    'Incident Details': ['incident_datetime', 'incident_location', 'complaint_description', 'other_complaint'],
+                                    'Complainant Information': ['complainant_first_name', 'complainant_middle_name', 'complainant_last_name', 'complainant_age', 'complainant_gender', 'complainant_phone', 'complainant_address'],
+                                    'Victim Information': ['victim_first_name', 'victim_middle_name', 'victim_last_name', 'victim_age', 'victim_gender', 'victim_phone', 'victim_address'],
+                                    'Witness Information': ['witness_first_name', 'witness_middle_name', 'witness_last_name', 'witness_age', 'witness_gender', 'witness_phone', 'witness_address'],
+                                    'Respondent Information': ['respondent_first_name', 'respondent_middle_name', 'respondent_last_name', 'respondent_age', 'respondent_gender', 'respondent_phone', 'respondent_address'],
+                                    'Statement & Administration': ['complaint_statement', 'reported_by', 'is_affirmed', 'desk_officer_name', 'created_at']
+                                };
+
+                                for (const sectionTitle in sections) {
+                                    let sectionHtml = '';
+                                    sections[sectionTitle].forEach(key => {
+                                        const detailHtml = formatDetail(key, data.data[key]);
+                                        if (detailHtml) { // Only add if not empty
+                                            sectionHtml += detailHtml;
+                                        }
+                                    });
+
+                                    if (sectionHtml) { // Only show section if it has content
+                                        htmlContent += `<h4 class="text-lg font-semibold mt-4 mb-2 text-primary border-b pb-1">${sectionTitle}</h4>`;
+                                        htmlContent += sectionHtml;
+                                    }
+                                }
+                                htmlContent += `</form>`; // Close the form
+
+                                detailsModalContent.innerHTML = htmlContent;
+                                setEditMode(false); // Initially set to view mode when modal opens
+
+                            } else {
+                                detailsModalContent.innerHTML = `<p class="text-center text-red-600">Failed to load details: ${data.message || 'Unknown error.'}</p>`;
+                                setEditMode(false); // Ensure buttons are in correct state
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching details:', error);
+                            detailsModalContent.innerHTML = '<p class="text-center text-red-600">An error occurred while fetching report details.</p>';
+                        });
+                });
+            });
+
+            // Action button inside the details modal
+            editButtonInDetailsModal.addEventListener('click', function() {
+                setEditMode(true);
+            });
+
+            // Add event listener for the "Save Changes" button
+            saveButtonInDetailsModal.addEventListener('click', function() {
+                const form = document.getElementById('edit-report-form');
+                const formData = new FormData(form);
+                const jsonData = {};
+
+                // Convert FormData to JSON
+                // IMPORTANT: Ensure the names in your HTML inputs/selects match your DB column names
+                // or your PHP script needs to handle the mapping.
+                for (let [key, value] of formData.entries()) {
+                    // Special handling for boolean-like values if needed, e.g., 'on' for checkboxes
+                    // For 'is_affirmed' from a select, '0' or '1' string values are fine.
+                    jsonData[key] = value;
                 }
-            })
-            .catch(error => {
-                console.error('Error fetching details:', error);
-                detailsModalContent.innerHTML = '<p class="text-center text-red-600">An error occurred while fetching report details.</p>';
+                jsonData['case_no'] = form.dataset.caseNo; // Ensure case_no is included
+
+                // Pass the current archive status to the server, so it knows which table to update
+                jsonData['is_archive_mode'] = isReportCurrentlyArchived; // This is good, ensure it's passed
+
+                const endpoint = 'actions/update_report.php';
+
+                fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json', // This header is correct for sending JSON
+                        },
+                        body: JSON.stringify(jsonData) // Send JSON string
+                    })
+                    .then(response => {
+                        // If the response is not ok (e.g., 404, 500) AND it's not JSON,
+                        // response.json() will throw an error. Catch it.
+                        if (!response.ok) {
+                            // Try to read as text first to see the PHP error message
+                            return response.text().then(text => {
+                                throw new Error(`HTTP error! Status: ${response.status}. Response: ${text}`);
+                            });
+                        }
+                        return response.json(); // Attempt to parse as JSON
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // The PHP script should now be setting the session message before reload
+                            window.location.reload();
+                        } else {
+                            alert('Error updating report: ' + (data.message || 'Unknown error.'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error saving changes:', error);
+                        alert('An unexpected error occurred while saving changes: ' + error.message);
+                    });
             });
+            actionButtonInDetailsModal.addEventListener('click', function() {
+                performArchiveUnarchiveAction();
+            });
+
+            // View Print Format button event listener
+            const viewPrintFormatBtn = document.getElementById('view-print-format-btn');
+            viewPrintFormatBtn.addEventListener('click', function() {
+                if (caseNoToActOn) {
+                    const archiveParam = isReportCurrentlyArchived ? 'true' : 'false';
+                    window.open(`print_report.php?case_no=${encodeURIComponent(caseNoToActOn)}&archive=${archiveParam}`, '_blank');
+                }
+            });
+
+            // Close details modal event listeners
+            closeDetailsModalBtn.addEventListener('click', function() {
+                detailsModal.classList.add('hidden');
+                setEditMode(false); // <--- ADD THIS LINE
+            });
+            closeDetailsModalFooterBtn.addEventListener('click', function() {
+                detailsModal.classList.add('hidden');
+                setEditMode(false); // <--- ADD THIS LINE
+            });
+            detailsModal.addEventListener('click', function(event) {
+                if (event.target === detailsModal) {
+                    detailsModal.classList.add('hidden');
+                    setEditMode(false); // <--- ADD THIS LINE
+                }
+            });
+
         });
-    });
-
-    // Action button inside the details modal
-    editButtonInDetailsModal.addEventListener('click', function() {
-        setEditMode(true);
-    });
-
-    // Add event listener for the "Save Changes" button
-    saveButtonInDetailsModal.addEventListener('click', function() {
-    const form = document.getElementById('edit-report-form');
-    const formData = new FormData(form);
-    const jsonData = {};
-
-    // Convert FormData to JSON
-    // IMPORTANT: Ensure the names in your HTML inputs/selects match your DB column names
-    // or your PHP script needs to handle the mapping.
-    for (let [key, value] of formData.entries()) {
-        // Special handling for boolean-like values if needed, e.g., 'on' for checkboxes
-        // For 'is_affirmed' from a select, '0' or '1' string values are fine.
-        jsonData[key] = value;
-    }
-    jsonData['case_no'] = form.dataset.caseNo; // Ensure case_no is included
-
-    // Pass the current archive status to the server, so it knows which table to update
-    jsonData['is_archive_mode'] = isReportCurrentlyArchived; // This is good, ensure it's passed
-
-    const endpoint = 'actions/update_report.php';
-
-    fetch(endpoint, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json', // This header is correct for sending JSON
-        },
-        body: JSON.stringify(jsonData) // Send JSON string
-    })
-    .then(response => {
-        // If the response is not ok (e.g., 404, 500) AND it's not JSON,
-        // response.json() will throw an error. Catch it.
-        if (!response.ok) {
-            // Try to read as text first to see the PHP error message
-            return response.text().then(text => {
-                throw new Error(`HTTP error! Status: ${response.status}. Response: ${text}`);
-            });
-        }
-        return response.json(); // Attempt to parse as JSON
-    })
-    .then(data => {
-        if (data.success) {
-            // The PHP script should now be setting the session message before reload
-            window.location.reload();
-        } else {
-            alert('Error updating report: ' + (data.message || 'Unknown error.'));
-        }
-    })
-    .catch(error => {
-        console.error('Error saving changes:', error);
-        alert('An unexpected error occurred while saving changes: ' + error.message);
-    });
-});
-    actionButtonInDetailsModal.addEventListener('click', function() {
-        performArchiveUnarchiveAction();
-    });
-
-    // View Print Format button event listener
-    const viewPrintFormatBtn = document.getElementById('view-print-format-btn');
-    viewPrintFormatBtn.addEventListener('click', function() {
-        if (caseNoToActOn) {
-            const archiveParam = isReportCurrentlyArchived ? 'true' : 'false';
-            window.open(`print_report.php?case_no=${encodeURIComponent(caseNoToActOn)}&archive=${archiveParam}`, '_blank');
-        }
-    });
-
-    // Close details modal event listeners
-    closeDetailsModalBtn.addEventListener('click', function() {
-        detailsModal.classList.add('hidden');
-        setEditMode(false); // <--- ADD THIS LINE
-    });
-    closeDetailsModalFooterBtn.addEventListener('click', function() {
-        detailsModal.classList.add('hidden');
-        setEditMode(false); // <--- ADD THIS LINE
-    });
-    detailsModal.addEventListener('click', function(event) {
-        if (event.target === detailsModal) {
-            detailsModal.classList.add('hidden');
-            setEditMode(false); // <--- ADD THIS LINE
-        }
-    });
-
-});
     </script>
 </body>
+
 </html>
 <?php
 // Close the database connection here, after all PHP processing is done
