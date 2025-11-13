@@ -3,9 +3,9 @@
 session_start();
 
 // Google OAuth Configuration (Place these at the top of your file or in a config file)
-$google_oauth_client_id = '589364515350-c28kinpbr705n1apdmt6idihpre6jdp9.apps.googleusercontent.com';
-$google_oauth_client_secret = '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';
-$google_oauth_redirect_uri = 'http://localhost/p2/google-oauth.php';
+$google_oauth_client_id = '680691446532-5i5855fnioaje5kujjv57ikj121crfot.apps.googleusercontent.com';
+$google_oauth_client_secret = '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';
+$google_oauth_redirect_uri = 'http://barangay-blotter-form/google-oauth.php';
 //$google_oauth_redirect_uri = 'http://127.0.0.1:8080/p2/google-oauth.php';
 $google_oauth_version = 'v3';
 
