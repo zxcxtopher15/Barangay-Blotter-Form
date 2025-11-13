@@ -47,13 +47,20 @@ $complaint_type = $report['complaint_description'];
 if ($complaint_type === 'Others' && !empty($report['other_complaint'])) {
     $complaint_type = $report['other_complaint'];
 }
+
+// Format case number as: complaint_no-YYYY-MM-DD-HH-MM-SS
+$display_case_no = $report['case_no']; // Default
+if (!empty($report['complaint_no']) && !empty($report['incident_datetime'])) {
+    $date = new DateTime($report['incident_datetime']);
+    $display_case_no = $report['complaint_no'] . '-' . $date->format('Y-m-d-H-i-s');
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Incident Report - <?= htmlspecialchars($report['case_no']) ?></title>
+    <title>Incident Report - <?= htmlspecialchars($display_case_no) ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -94,7 +101,7 @@ if ($complaint_type === 'Others' && !empty($report['other_complaint'])) {
             <!-- Case Number -->
             <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
                 <p class="text-sm text-gray-600">Care Number:</p>
-                <p class="text-2xl font-bold text-blue-700"><?= htmlspecialchars($report['case_no']) ?></p>
+                <p class="text-2xl font-bold text-blue-700"><?= htmlspecialchars($display_case_no) ?></p>
             </div>
 
             <!-- Incident Details -->

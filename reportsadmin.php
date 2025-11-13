@@ -849,6 +849,19 @@
 
                     let htmlContent = `<form id="edit-report-form" data-case-no="${data.data.case_no}">`; // Wrap in a form
 
+                    // Format case number as: complaint_no-YYYY-MM-DD-HH-MM-SS
+                    let displayCaseNo = data.data.case_no; // Default to case_no
+                    if (data.data.complaint_no && data.data.incident_datetime) {
+                        const date = new Date(data.data.incident_datetime);
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const hours = String(date.getHours()).padStart(2, '0');
+                        const minutes = String(date.getMinutes()).padStart(2, '0');
+                        const seconds = String(date.getSeconds()).padStart(2, '0');
+                        displayCaseNo = `${data.data.complaint_no}-${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+                    }
+
                     // Format datetime for display
                     let formattedDateTime = 'N/A';
                     if (data.data.incident_datetime) {
@@ -865,7 +878,7 @@
 
                     // Display Case Number prominently with date/time
                     htmlContent += `<div class="bg-blue-50 p-4 rounded-lg mb-4 border-l-4 border-blue-500">`;
-                    htmlContent += `<p class="text-xl font-bold text-blue-900">Case No: ${htmlspecialchars(data.data.case_no)}</p>`;
+                    htmlContent += `<p class="text-xl font-bold text-blue-900">Case No: ${displayCaseNo}</p>`;
                     htmlContent += `<p class="text-sm text-gray-600 mt-1">Incident Date/Time: ${formattedDateTime}</p>`;
                     htmlContent += `</div>`;
 

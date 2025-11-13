@@ -59,13 +59,13 @@ if (isset($_POST['submit_complaint'])) {
     }
 
     $stmt = $conn->prepare("INSERT INTO complaints (
-        incident_datetime, complaint_description, incident_location,
+        incident_datetime, complaint_description, incident_location, incident_latitude, incident_longitude,
         complainant_first_name, complainant_middle_name, complainant_last_name, complainant_age, complainant_gender, complainant_phone, complainant_address,
         victim_first_name, victim_middle_name, victim_last_name, victim_age, victim_gender, victim_phone, victim_address,
         witness_first_name, witness_middle_name, witness_last_name, witness_age, witness_gender, witness_phone, witness_address,
         respondent_first_name, respondent_middle_name, respondent_last_name, respondent_age, respondent_gender, respondent_phone, respondent_address,
         complaint_statement, reported_by, is_affirmed, desk_officer_name
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
     $desk_officer_name = $google_name;
     $reported_by = isset($_POST['reported_by']) ? 1 : 0;
@@ -75,6 +75,8 @@ if (isset($_POST['submit_complaint'])) {
         $incident_datetime,
         $complaint_description,
         empty($_POST['incident_location']) ? null : $_POST['incident_location'],
+        empty($_POST['incident_latitude']) ? null : $_POST['incident_latitude'],
+        empty($_POST['incident_longitude']) ? null : $_POST['incident_longitude'],
         empty($_POST['complainant_first_name']) ? null : $_POST['complainant_first_name'],
         empty($_POST['complainant_middle_name']) ? null : $_POST['complainant_middle_name'],
         empty($_POST['complainant_last_name']) ? null : $_POST['complainant_last_name'],
@@ -109,7 +111,7 @@ if (isset($_POST['submit_complaint'])) {
         $desk_officer_name,
     ];
 
-    $types = "ssssssissssssissssssissssssisssiiss";
+    $types = "sssddsssissssssissssssissssssissssiss";
     $stmt->bind_param($types, ...$params);
 
     if ($stmt->execute()) {
