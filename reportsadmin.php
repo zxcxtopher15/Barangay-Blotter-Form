@@ -556,7 +556,7 @@
         isEditMode = enable;
         const inputs = detailsModalContent.querySelectorAll('input, select, textarea');
         inputs.forEach(input => {
-            if (input.name !== 'case_no' && input.name !== 'created_at' && input.name !== 'desk_officer_name') { // Keep case_no non-editable
+            if (input.name !== 'case_no' && input.name !== 'received_datetime' && input.name !== 'desk_officer_name') { // Keep case_no non-editable
                 input.readOnly = !enable;
                 input.disabled = !enable;
                 input.classList.toggle('bg-gray-50', !enable); // Visual cue for non-editable
@@ -655,7 +655,7 @@
         'reported_by': 'Reported By',
         'is_affirmed': 'Information Affirmed',
         'desk_officer_name': 'Desk Officer Name',
-        'created_at': 'Report Filed On'
+        'received_datetime': 'Report Filed On'
     };
 
         // Utility function for HTML escaping, as template literals don't escape automatically
@@ -715,7 +715,7 @@
             } else {
                 displayValue = '';
             }
-        } else if (key === 'created_at' || key === 'case_no' || key === 'desk_officer_name') {
+        } else if (key === 'received_datetime' || key === 'case_no' || key === 'desk_officer_name') {
             isEditable = false; // These fields should not be editable
         }
 
@@ -724,7 +724,7 @@
         let inputElement;
         if (!isEditable) {
             // Non-editable fields are displayed as plain text (or N/A)
-            inputElement = `<span class="col-span-2 text-gray-700">${value ? (key === 'incident_datetime' || key === 'created_at' ? new Date(value).toLocaleString() : htmlspecialchars(value)) : 'N/A'}</span>`;
+            inputElement = `<span class="col-span-2 text-gray-700">${value ? (key === 'incident_datetime' || key === 'received_datetime' ? new Date(value).toLocaleString() : htmlspecialchars(value)) : 'N/A'}</span>`;
         } else if (isSelect) {
             inputElement = `<select name="${key}" class="col-span-2 form-select border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-secondary">`;
             selectOptions.forEach(option => {
@@ -823,7 +823,7 @@
                         'Victim Information': ['victim_first_name', 'victim_middle_name', 'victim_last_name', 'victim_age', 'victim_gender', 'victim_phone', 'victim_address'],
                         'Witness Information': ['witness_first_name', 'witness_middle_name', 'witness_last_name', 'witness_age', 'witness_gender', 'witness_phone', 'witness_address'],
                         'Respondent Information': ['respondent_first_name', 'respondent_middle_name', 'respondent_last_name', 'respondent_age', 'respondent_gender', 'respondent_phone', 'respondent_address'],
-                        'Statement & Administration': ['complaint_statement', 'reported_by', 'is_affirmed', 'desk_officer_name', 'created_at']
+                        'Statement & Administration': ['complaint_statement', 'reported_by', 'is_affirmed', 'desk_officer_name', 'received_datetime']
                     };
 
                     for (const sectionTitle in sections) {
