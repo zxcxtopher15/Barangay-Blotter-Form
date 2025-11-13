@@ -1,12 +1,9 @@
 <?php
 session_start();
-
 // If the user is an admin, do nothing (continue script execution)
-if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'Admin') {
-    header('Location: dashboardadmin.php');
-    exit;
+if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'admin') {
 }
-// If the user is logged in AND their role is 'Desk Officer', redirect to dashboard.php
+// If the user is logged in AND their role is 'Desk Officer', redirect to test.php
 else if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'desk officer') {
     header('Location: dashboard.php');
     exit;
@@ -17,11 +14,12 @@ else {
     exit;
 }
 
-// Retrieve session variables
+// Retrieve session variables (these will only be accessible if an admin or if the script continues for other reasons)
 $google_loggedin = $_SESSION['google_loggedin'];
 $google_email = $_SESSION['google_email'];
 $google_name = $_SESSION['google_name'];
 $google_picture = $_SESSION['google_picture'];
+$user_role = $_SESSION['user_role'];
 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
