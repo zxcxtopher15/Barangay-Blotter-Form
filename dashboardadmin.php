@@ -1,37 +1,38 @@
 <?php
-session_start();
-// If the user is an admin, do nothing (continue script execution)
-if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'admin') {
-}
-// If the user is logged in AND their role is 'Desk Officer', redirect to test.php
-else if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'desk officer') {
-    header('Location: dashboard.php');
-    exit;
-}
-// If not logged in or any other role not explicitly handled, redirect to index.php
-else {
-    header('Location: index.php');
-    exit;
-}
+    session_start();
+    // If the user is an admin, do nothing (continue script execution)
+    if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'admin') {
+        
+    } 
+    // If the user is logged in AND their role is 'Desk Officer', redirect to test.php
+    else if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'desk officer') {
+        header('Location: dashboard.php');
+        exit;
+    } 
+    // If not logged in or any other role not explicitly handled, redirect to index.php
+    else {
+        header('Location: index.php');
+        exit;
+    }
 
-// Retrieve session variables (these will only be accessible if an admin or if the script continues for other reasons)
-$google_loggedin = $_SESSION['google_loggedin'];
-$google_email = $_SESSION['google_email'];
-$google_name = $_SESSION['google_name'];
-$google_picture = $_SESSION['google_picture'];
-$user_role = $_SESSION['user_role'];
+    // Retrieve session variables (these will only be accessible if an admin or if the script continues for other reasons)
+    $google_loggedin = $_SESSION['google_loggedin'];
+    $google_email = $_SESSION['google_email'];
+    $google_name = $_SESSION['google_name'];
+    $google_picture = $_SESSION['google_picture'];
+    $user_role = $_SESSION['user_role'];
 
 // --- START: DATABASE CONNECTION AND STATS FETCHING ---
 $db_server = "localhost";
-$db_user = "u416486854_p1";
-$db_pass = "2&rnLACGCldK";
-$db_name = "u416486854_p1";
+$db_user = "root";
+$db_pass = "";
+$db_name = "p1";
 $conn = "";
 
 try {
     $conn = mysqli_connect($db_server, $db_user, $db_pass, $db_name);
 } catch (mysqli_sql_exception) {
-    die("Database connection failed.");
+    die("Database connection failed."); 
 }
 
 // These top-level stats will remain for the current month/year as they are general stats.
@@ -48,41 +49,28 @@ $total_sql = "SELECT COUNT(*) as count FROM complaints";
 $total_result = mysqli_query($conn, $total_sql);
 $total_count = mysqli_fetch_assoc($total_result)['count'] ?? 0;
 
-$top_incident_sql = "
-    SELECT incident_type, COUNT(*) as count 
-    FROM complaints 
-    GROUP BY incident_type 
-    ORDER BY count DESC 
-    LIMIT 1
-";
-$top_incident_result = mysqli_query($conn, $top_incident_sql);
-$top_incident_data = mysqli_fetch_assoc($top_incident_result);
-$top_incident_type = $top_incident_data['incident_type'] ?? 'No Data';
-$top_incident_count = $top_incident_data['count'] ?? 0;
-
-
 mysqli_close($conn);
 // --- END: DATABASE CONNECTION AND STATS FETCHING ---
 /**
- * Renders the sidebar navigation panel.
- *
- * @param string $google_picture The URL for the user's profile picture.
- * @param string $google_name The name of the logged-in user.
- * @return void
- */
-function sidepanel($google_picture, $google_name) {
-    $currentPage = basename($_SERVER['PHP_SELF']);
-    $activeClasses = 'bg-blue-500 text-white shadow';
-    $inactiveClasses = 'text-gray-600 hover:bg-gray-100';
+     * Renders the sidebar navigation panel.
+     *
+     * @param string $google_picture The URL for the user's profile picture.
+     * @param string $google_name The name of the logged-in user.
+     * @return void
+     */
+    function sidepanel($google_picture, $google_name) {
+        $currentPage = basename($_SERVER['PHP_SELF']);
+        $activeClasses = 'bg-blue-500 text-white shadow';
+        $inactiveClasses = 'text-gray-600 hover:bg-gray-100';
 
-    // Prevents reloading the page when clicking the active link
-    $dashboardClick = ($currentPage === 'dashboardadmin.php') ? 'onclick="event.preventDefault()"' : '';
-    $blotterClick   = ($currentPage === 'blotteradmin.php')   ? 'onclick="event.preventDefault()"' : '';
-    $reportsClick   = ($currentPage === 'reportsadmin.php')   ? 'onclick="event.preventDefault()"' : '';
-    $accountsClick  = ($currentPage === 'accountsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
-    $settingsClick  = ($currentPage === 'settingsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
+        // Prevents reloading the page when clicking the active link
+        $dashboardClick = ($currentPage === 'dashboardadmin.php') ? 'onclick="event.preventDefault()"' : '';
+        $blotterClick   = ($currentPage === 'blotteradmin.php')   ? 'onclick="event.preventDefault()"' : '';
+        $reportsClick   = ($currentPage === 'reportsadmin.php')   ? 'onclick="event.preventDefault()"' : '';
+        $accountsClick  = ($currentPage === 'accountsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
+        $settingsClick  = ($currentPage === 'settingsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
 
-    echo '
+        echo '
         <!-- START: Sidebar -->
         <div id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white text-secondary flex flex-col p-4 items-center shadow-lg z-20">
             <div class="text-center py-4">
@@ -133,7 +121,6 @@ function sidepanel($google_picture, $google_name) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -154,9 +141,8 @@ function sidepanel($google_picture, $google_name) {
         }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/main.css"> 
 </head>
-
 <body class="bg-light-gray">
 
     <?php
@@ -169,8 +155,8 @@ function sidepanel($google_picture, $google_name) {
 
     <div class="flex h-screen overflow-hidden">
         <?php
-        // Call the function to render the sidebar
-        sidepanel($google_picture, $google_name);
+            // Call the function to render the sidebar
+            sidepanel($google_picture, $google_name);
         ?>
 
         <!-- Main Content -->
@@ -198,29 +184,23 @@ function sidepanel($google_picture, $google_name) {
                     Run Incident Classifier
                 </a>
                 <!-- Stat Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                     <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4 transition hover:shadow-lg">
-                        <div class="bg-gray-100 p-3 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg></div>
+                        <div class="bg-gray-100 p-3 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
                         <div>
                             <p class="text-gray-600">This Month Incident Report</p>
                             <p class="text-3xl font-bold text-gray-800"><?php echo $this_month_count; ?></p>
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4 transition hover:shadow-lg">
-                        <div class="bg-gray-100 p-3 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg></div>
+                        <div class="bg-gray-100 p-3 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
                         <div>
                             <p class="text-gray-600">Last Month Incident Report</p>
                             <p class="text-3xl font-bold text-gray-800"><?php echo $last_month_count; ?></p>
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4 transition hover:shadow-lg">
-                        <div class="bg-gray-100 p-3 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg></div>
+                        <div class="bg-gray-100 p-3 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
                         <div>
                             <p class="text-gray-600">Total Incident Report</p>
                             <p class="text-3xl font-bold text-gray-800"><?php echo $total_count; ?></p>
@@ -236,19 +216,19 @@ function sidepanel($google_picture, $google_name) {
                                 <!-- START: NEW DROPDOWNS -->
                                 <select id="yearSelector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2">
                                     <?php
-                                    $currentYear = date('Y');
-                                    for ($year = $currentYear; $year >= 2010; $year--) {
-                                        echo "<option value='{$year}'" . ($year == $currentYear ? ' selected' : '') . ">{$year}</option>";
-                                    }
+                                        $currentYear = date('Y');
+                                        for ($year = $currentYear; $year >= 2010; $year--) {
+                                            echo "<option value='{$year}'" . ($year == $currentYear ? ' selected' : '') . ">{$year}</option>";
+                                        }
                                     ?>
                                 </select>
                                 <select id="monthSelector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2">
                                     <?php
-                                    $currentMonth = date('n');
-                                    for ($m = 1; $m <= 12; $m++) {
-                                        $monthName = date('F', mktime(0, 0, 0, $m, 10));
-                                        echo "<option value='{$m}'" . ($m == $currentMonth ? ' selected' : '') . ">{$monthName}</option>";
-                                    }
+                                        $currentMonth = date('n');
+                                        for ($m = 1; $m <= 12; $m++) {
+                                            $monthName = date('F', mktime(0, 0, 0, $m, 10));
+                                            echo "<option value='{$m}'" . ($m == $currentMonth ? ' selected' : '') . ">{$monthName}</option>";
+                                        }
                                     ?>
                                 </select>
                                 <!-- END: NEW DROPDOWNS -->
@@ -274,25 +254,6 @@ function sidepanel($google_picture, $google_name) {
                     </div>
                 </div>
                 <!-- END: New Top Incidents Card -->
-
-                <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4 transition hover:shadow-lg">
-                    <div class="bg-gray-100 p-3 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-gray-600">Most # of Reported Incidents</p>
-                        <p class="text-xl font-bold text-gray-800">
-                            <?php echo $top_incident_type; ?>
-                        </p>
-                        <p class="text-gray-500 text-sm">
-                            <?php echo $top_incident_count; ?> Reports
-                        </p>
-                    </div>
-                </div>
-
             </main>
         </div>
     </div>
@@ -302,10 +263,9 @@ function sidepanel($google_picture, $google_name) {
     <script src="js/charts.js" defer></script>
 
     <script>
-        if (localStorage.getItem('sidebarState') === 'collapsed') {
-            document.documentElement.classList.add('sidebar-collapsed');
-        }
+    if (localStorage.getItem('sidebarState') === 'collapsed') {
+        document.documentElement.classList.add('sidebar-collapsed');
+    }
     </script>
 </body>
-
 </html>
