@@ -31,9 +31,9 @@ if (isset($_SESSION['google_loggedin']) && $_SESSION['google_loggedin'] === TRUE
 
 // Database connection (example using PDO)
 $db_server = "localhost";
-$db_user = "root";
-$db_pass = "";
-$db_name = "p1"; // Make sure this database exists and has your 'users' table
+$db_user = "u416486854_p1";
+$db_pass = "2&rnLACGCldK";
+$db_name = "u416486854_p1"; // Make sure this database exists and has your 'users' table
 
 try {
     $pdo = new PDO("mysql:host=$db_server;dbname=$db_name", $db_user, $db_pass);

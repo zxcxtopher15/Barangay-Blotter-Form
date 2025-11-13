@@ -12,9 +12,9 @@ header('Content-Type: application/json');
 
 // Database connection details
 $db_server = "localhost";
-$db_user = "root";
-$db_pass = "";
-$db_name = "p1";
+$db_user = "u416486854_p1";
+$db_pass = "2&rnLACGCldK";
+$db_name = "u416486854_p1";
 $conn = null;
 
 try {
