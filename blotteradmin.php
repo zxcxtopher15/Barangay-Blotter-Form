@@ -56,20 +56,21 @@ if (isset($_POST['submit_complaint'])) {
     $hour_formatted = str_pad($hour, 2, '0', STR_PAD_LEFT);
     $incident_datetime = "$incident_date $hour_formatted:$minute:00";
 
+    // Get complaint description (handle 'Others')
     $complaint_description = $_POST['complaint_description'];
-    $other_complaint = null;
     if ($complaint_description === 'Others') {
-        $other_complaint = $_POST['other_complaint'];
+        $complaint_description = $_POST['other_complaint'];
     }
 
+    // Use prepared statements to prevent SQL injection
     $stmt = $conn->prepare("INSERT INTO complaints (
-        incident_datetime, complaint_description, other_complaint, incident_location,
+        incident_datetime, complaint_description, incident_location,
         complainant_first_name, complainant_middle_name, complainant_last_name, complainant_age, complainant_gender, complainant_phone, complainant_address,
         victim_first_name, victim_middle_name, victim_last_name, victim_age, victim_gender, victim_phone, victim_address,
         witness_first_name, witness_middle_name, witness_last_name, witness_age, witness_gender, witness_phone, witness_address,
         respondent_first_name, respondent_middle_name, respondent_last_name, respondent_age, respondent_gender, respondent_phone, respondent_address,
         complaint_statement, reported_by, is_affirmed, desk_officer_name
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
     // Set values for fields not in the form
     $desk_officer_name = $google_name; // As seen in the HTML, or can be dynamic
@@ -80,7 +81,6 @@ if (isset($_POST['submit_complaint'])) {
     $params = [
         $incident_datetime,
         $complaint_description,
-        $other_complaint,
         empty($_POST['incident_location']) ? null : $_POST['incident_location'],
         empty($_POST['complainant_first_name']) ? null : $_POST['complainant_first_name'],
         empty($_POST['complainant_middle_name']) ? null : $_POST['complainant_middle_name'],
@@ -116,7 +116,8 @@ if (isset($_POST['submit_complaint'])) {
         $desk_officer_name,
     ];
 
-    $types = "sssssssissssssissssssissssssisssiiss";
+    // Corrected type string for bind_param. Must match the number of columns (35).
+    $types = "ssssssissssssissssssissssssissssiss";
     
     // Bind parameters dynamically
     $stmt->bind_param($types, ...$params);
