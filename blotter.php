@@ -583,25 +583,6 @@ function sidepanel($google_picture, $google_name) {
                                 <textarea name="complaint_statement" rows="6" class="w-full p-2 border border-gray-300 rounded-md" required></textarea>
                             </div>
 
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Paunang mga Katanungan</label>
-                                <p class="text-sm text-gray-600 mb-2">Pumili ng mga angkop sa pagpapahayag bago magsalita</p>
-                                <div class="space-y-2">
-                                    <div class="flex items-center">
-                                        <input type="checkbox" name="complaint_description" value="Noise Complaints" class="mr-2">
-                                        <label class="text-sm">Ang nagrereklamo ay ang biktima rin</label>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <input type="checkbox" class="mr-2">
-                                        <label class="text-sm">Walang Saksi</label>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <input type="checkbox" class="mr-2">
-                                        <label class="text-sm">Walang Inireklamo</label>
-                                    </div>
-                                </div>
-                            </div>
-
                             <div class="bg-gray-50 p-4 rounded-lg mb-4">
                                 <div class="flex items-start space-x-3">
                                     <input type="checkbox" name="reported_by" value="1" class="mt-1" required>
@@ -628,6 +609,37 @@ function sidepanel($google_picture, $google_name) {
         </div>
     </div>
 
+    <!-- Initial Questions Modal -->
+    <div id="initialQuestionsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-6 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Paunang mga Katanungan</h3>
+                <p class="text-sm text-gray-600 mb-4">Pumili ng mga angkop sa pagpapahayag bago magsalita</p>
+
+                <div class="space-y-3 mb-6">
+                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer" onclick="document.getElementById('sameAsVictim').click()">
+                        <input type="checkbox" id="sameAsVictim" class="mt-1">
+                        <label for="sameAsVictim" class="text-sm font-medium cursor-pointer flex-1">Ang nagrereklamo ay ang biktima rin</label>
+                    </div>
+
+                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer" onclick="document.getElementById('noWitness').click()">
+                        <input type="checkbox" id="noWitness" class="mt-1">
+                        <label for="noWitness" class="text-sm font-medium cursor-pointer flex-1">Walang Saksi</label>
+                    </div>
+
+                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer" onclick="document.getElementById('noRespondent').click()">
+                        <input type="checkbox" id="noRespondent" class="mt-1">
+                        <label for="noRespondent" class="text-sm font-medium cursor-pointer flex-1">Walang Inireklamo</label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button id="startBlotterBtn" class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700">Magpatuloy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Success Modal -->
     <div id="successModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
@@ -650,6 +662,45 @@ function sidepanel($google_picture, $google_name) {
     <script src="js/sidebar.js" defer></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Initial Questions Modal Logic
+        const initialQuestionsModal = document.getElementById('initialQuestionsModal');
+        const startBlotterBtn = document.getElementById('startBlotterBtn');
+        const sameAsVictimCheckbox = document.getElementById('sameAsVictim');
+        const noWitnessCheckbox = document.getElementById('noWitness');
+        const noRespondentCheckbox = document.getElementById('noRespondent');
+
+        // Tab references
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const nagrereklamo_tab = tabButtons[1]; // Nagrereklamo
+        const saksi_tab = tabButtons[3]; // Saksi
+        const inireklamo_tab = tabButtons[4]; // Inireklamo
+
+        startBlotterBtn.addEventListener('click', function() {
+            // Hide/show tabs based on selections
+            if (sameAsVictimCheckbox.checked) {
+                // Hide Nagrereklamo tab
+                nagrereklamo_tab.style.display = 'none';
+            }
+
+            if (noWitnessCheckbox.checked) {
+                // Hide Saksi tab
+                saksi_tab.style.display = 'none';
+            }
+
+            if (noRespondentCheckbox.checked) {
+                // Hide Inireklamo tab
+                inireklamo_tab.style.display = 'none';
+            }
+
+            // If complainant is same as victim, copy victim data to complainant on form submit
+            if (sameAsVictimCheckbox.checked) {
+                window.complainantIsVictim = true;
+            }
+
+            // Close modal
+            initialQuestionsModal.style.display = 'none';
+        });
+
         // Initialize Map with Leaflet + OpenStreetMap
         let map, marker;
 
@@ -748,14 +799,25 @@ function sidepanel($google_picture, $google_name) {
         }
 
         tabs.forEach((tab, index) => {
-            tab.addEventListener('click', () => showTab(index));
+            tab.addEventListener('click', () => {
+                if (tab.style.display !== 'none') {
+                    showTab(index);
+                }
+            });
         });
 
         // Next/Previous buttons
         document.querySelectorAll('.next-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (currentTab < tabs.length - 1) {
-                    showTab(currentTab + 1);
+                    // Find next visible tab
+                    let nextTab = currentTab + 1;
+                    while (nextTab < tabs.length && tabs[nextTab].style.display === 'none') {
+                        nextTab++;
+                    }
+                    if (nextTab < tabs.length) {
+                        showTab(nextTab);
+                    }
                 }
             });
         });
@@ -763,9 +825,30 @@ function sidepanel($google_picture, $google_name) {
         document.querySelectorAll('.prev-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (currentTab > 0) {
-                    showTab(currentTab - 1);
+                    // Find previous visible tab
+                    let prevTab = currentTab - 1;
+                    while (prevTab >= 0 && tabs[prevTab].style.display === 'none') {
+                        prevTab--;
+                    }
+                    if (prevTab >= 0) {
+                        showTab(prevTab);
+                    }
                 }
             });
+        });
+
+        // Form submission: Copy victim data to complainant if they're the same
+        document.getElementById('blotterForm').addEventListener('submit', function(e) {
+            if (window.complainantIsVictim) {
+                // Copy victim data to complainant fields
+                document.querySelector('[name="complainant_first_name"]').value = document.querySelector('[name="victim_first_name"]').value;
+                document.querySelector('[name="complainant_middle_name"]').value = document.querySelector('[name="victim_middle_name"]').value;
+                document.querySelector('[name="complainant_last_name"]').value = document.querySelector('[name="victim_last_name"]').value;
+                document.querySelector('[name="complainant_age"]').value = document.querySelector('[name="victim_age"]').value;
+                document.querySelector('[name="complainant_gender"]').value = document.querySelector('[name="victim_gender"]').value;
+                document.querySelector('[name="complainant_phone"]').value = document.querySelector('[name="victim_phone"]').value;
+                document.querySelector('[name="complainant_address"]').value = document.querySelector('[name="victim_address"]').value;
+            }
         });
 
         // Sidebar Toggle
