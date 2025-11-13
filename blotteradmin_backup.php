@@ -1,17 +1,7 @@
 <?php
 session_start();
-
-// If the user is an admin, do nothing (continue script execution)
-if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'admin') {
-
-}
-// If the user is logged in AND their role is 'Desk Officer', redirect to dashboard.php
-else if (isset($_SESSION['google_loggedin']) && $_SESSION['user_role'] === 'desk officer') {
-    header('Location: dashboard.php');
-    exit;
-}
-// If not logged in or any other role not explicitly handled, redirect to index.php
-else {
+// Check if the user is logged in
+if (!isset($_SESSION['google_loggedin']) && !isset($_SESSION['user_role'])) {
     header('Location: index.php');
     exit;
 }
