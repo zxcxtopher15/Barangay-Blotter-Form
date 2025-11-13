@@ -656,7 +656,7 @@
         'reported_by': 'Reported By',
         'is_affirmed': 'Information Affirmed',
         'desk_officer_name': 'Desk Officer Name',
-        'created_at': 'Report Filed On'
+        'received_datetime': 'Report Filed On'
     };
 
         // Utility function for HTML escaping, as template literals don't escape automatically
