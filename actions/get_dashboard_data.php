@@ -55,58 +55,38 @@ try {
     switch ($period) {
         case 'yearly':
             // Line Chart: Show incident counts by complaint type for the selected year
-            $line_sql = "SELECT
-                            CASE
-                                WHEN complaint_description = 'Others' THEN other_complaint
-                                ELSE complaint_description
-                            END as label,
-                            COUNT(*) as count
+            $line_sql = "SELECT complaint_description as label, COUNT(*) as count
                          FROM complaints
                          WHERE YEAR(incident_datetime) = ?
-                         GROUP BY label
+                         GROUP BY complaint_description
                          ORDER BY count DESC;";
             $param_types = "i";
             $params = [$year];
 
             // Top Incidents for the whole selected year
-            $top_incidents_sql = "SELECT
-                                    CASE
-                                        WHEN complaint_description = 'Others' THEN other_complaint
-                                        ELSE complaint_description
-                                    END as name,
-                                    COUNT(*) as count
+            $top_incidents_sql = "SELECT complaint_description as name, COUNT(*) as count
                                   FROM complaints
                                   WHERE YEAR(incident_datetime) = ?
-                                  GROUP BY name
+                                  GROUP BY complaint_description
                                   ORDER BY count DESC;";
             break;
 
         case 'monthly':
         default:
              // Line Chart: Show incident counts by complaint type for the selected month and year
-            $line_sql = "SELECT
-                            CASE
-                                WHEN complaint_description = 'Others' THEN other_complaint
-                                ELSE complaint_description
-                            END as label,
-                            COUNT(*) as count
+            $line_sql = "SELECT complaint_description as label, COUNT(*) as count
                          FROM complaints
                          WHERE YEAR(incident_datetime) = ? AND MONTH(incident_datetime) = ?
-                         GROUP BY label
+                         GROUP BY complaint_description
                          ORDER BY count DESC;";
             $param_types = "ii";
             $params = [$year, $month];
 
              // Top Incidents for the selected month and year
-            $top_incidents_sql = "SELECT
-                                    CASE
-                                        WHEN complaint_description = 'Others' THEN other_complaint
-                                        ELSE complaint_description
-                                    END as name,
-                                    COUNT(*) as count
+            $top_incidents_sql = "SELECT complaint_description as name, COUNT(*) as count
                                   FROM complaints
                                   WHERE YEAR(incident_datetime) = ? AND MONTH(incident_datetime) = ?
-                                  GROUP BY name
+                                  GROUP BY complaint_description
                                   ORDER BY count DESC;";
             break;
     }
