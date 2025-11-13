@@ -389,9 +389,7 @@
                 <!-- Details will be loaded here -->
             </div>
              <div class="flex justify-end mt-6 pt-4 border-t space-x-3">
-                <!-- View Print Format Button -->
-                <button id="view-print-format-btn" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">View Print Format</button>
-                <!-- Archive/Unarchive Button -->
+                <!-- NEW BUTTON ADDED HERE -->
                 <button id="action-button-in-details-modal" class="px-6 py-2 rounded-lg"></button>
                 <button id="close-details-modal-footer" class="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">Close</button>
             </div>
@@ -917,15 +915,6 @@
 });
     actionButtonInDetailsModal.addEventListener('click', function() {
         performArchiveUnarchiveAction();
-    });
-
-    // View Print Format button event listener
-    const viewPrintFormatBtn = document.getElementById('view-print-format-btn');
-    viewPrintFormatBtn.addEventListener('click', function() {
-        if (caseNoToActOn) {
-            const archiveParam = isReportCurrentlyArchived ? 'true' : 'false';
-            window.open(`print_report.php?case_no=${encodeURIComponent(caseNoToActOn)}&archive=${archiveParam}`, '_blank');
-        }
     });
 
     // Close details modal event listeners
