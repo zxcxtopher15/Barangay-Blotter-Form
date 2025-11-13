@@ -266,12 +266,12 @@ function sidepanel($google_picture, $google_name) {
                         </svg>
                     </div>
                     <div>
-                        <p class="text-gray-600">Most # of Reported Incidents</p>
-                        <p class="text-xl font-bold text-gray-800">
-                            <?php echo $top_incident_type; ?>
+                        <p class="text-gray-600">Most # of Reported Incidents (<span id="most-incident-period">Monthly</span>)</p>
+                        <p class="text-xl font-bold text-gray-800" id="most-incident-type">
+                            Loading...
                         </p>
-                        <p class="text-gray-500 text-sm">
-                            <?php echo $top_incident_count; ?> Reports
+                        <p class="text-gray-500 text-sm" id="most-incident-count">
+                            0 Reports
                         </p>
                     </div>
                 </div>
