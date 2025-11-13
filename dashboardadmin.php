@@ -275,7 +275,7 @@ function sidepanel($google_picture, $google_name) {
                 </div>
                 <!-- END: New Top Incidents Card -->
 
-                <div class="bg-white p-6 rounded-xl shadow-md">
+                <div class="bg-white p-6 rounded-xl shadow-md flex items-center space-x-4 transition hover:shadow-lg">
                     <div class="bg-gray-100 p-3 rounded-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
