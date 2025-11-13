@@ -109,7 +109,7 @@
     $total_pages = ceil($total_complaints / $limit);
 
     // Fetch complaints with LIMIT and OFFSET (with filters applied)
-    $sql = "SELECT case_no, complainant_first_name, complainant_last_name, incident_datetime, complaint_description, desk_officer_name, received_datetime
+    $sql = "SELECT case_no, complainant_first_name, complainant_last_name, incident_datetime, complaint_description, other_complaint, desk_officer_name, received_datetime
         FROM " . $table_to_query . "
         " . $where_sql . "
         ORDER BY case_no DESC
@@ -216,6 +216,8 @@
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
    <link rel="stylesheet" href="css/main.css">
+   <!-- Leaflet CSS -->
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
    <style>
         /* Optional: Basic tooltip styling for better visibility */
         [data-tooltip]:hover::after {
@@ -238,6 +240,13 @@
         .clickable-row:hover {
         background-color: #f0f0f0; /* Light gray on hover */
         cursor: pointer;
+    }
+    #incident-map {
+        height: 350px;
+        width: 100%;
+        border-radius: 8px;
+        margin-top: 10px;
+        margin-bottom: 20px;
     }
     </style>
 </head>
@@ -376,7 +385,7 @@
 
     <!-- Report Details Modal -->
     <div id="details-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4 border-b pb-2">
                 <h3 class="text-2xl font-bold text-gray-800">Incident Report Details</h3>
                 <button id="close-details-modal" class="text-gray-500 hover:text-gray-700">
@@ -411,6 +420,8 @@
         </div>
     </div>
 
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha512-GktFNEWPsYnXXudCt7JGpMlXULlRCuJdLqn1EdGxFqU8n9BVwOjBGSY8tB0h1kLJLbQa1u9vk1NsOjDmwbRvjA==" crossorigin=""></script>
     <script src="js/sidebar.js" defer></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -676,10 +687,26 @@
     }
 
 
+    let incidentMap = null; // Store map instance globally to avoid multiple initializations
+
     function formatDetail(key, value) {
         // Treat null/undefined as empty string for display/input, but allow 0 for age
         if (value === null || value === undefined) {
             value = '';
+        }
+
+        // Skip GPS coordinates, other_complaint - they're handled separately
+        if (key === 'incident_latitude' || key === 'incident_longitude' || key === 'other_complaint') {
+            return '';
+        }
+
+        // Don't display empty/null values for optional fields (hide fields with no data)
+        if (!value && value !== 0) {
+            // Always show these critical fields even if empty
+            const criticalFields = ['case_no', 'incident_datetime', 'incident_location', 'complaint_description', 'complaint_statement'];
+            if (!criticalFields.includes(key)) {
+                return ''; // Skip this field - hide it
+            }
         }
 
         let displayValue = value; // This is primarily for non-editable display
@@ -814,8 +841,33 @@
             .then(response => response.json())
             .then(data => {
             if (data.success && data.data) {
+                    // Clear existing map if any
+                    if (incidentMap) {
+                        incidentMap.remove();
+                        incidentMap = null;
+                    }
+
                     let htmlContent = `<form id="edit-report-form" data-case-no="${data.data.case_no}">`; // Wrap in a form
-                    htmlContent += `<p class="text-lg font-semibold mb-4">Case Number: ${data.data.case_no}</p>`;
+
+                    // Display Case Number prominently
+                    htmlContent += `<div class="bg-blue-50 p-4 rounded-lg mb-4 border-l-4 border-blue-500">`;
+                    htmlContent += `<p class="text-xl font-bold text-blue-900">Case No: ${htmlspecialchars(data.data.case_no)}</p>`;
+                    htmlContent += `</div>`;
+
+                    // Show map if coordinates are available
+                    const hasCoordinates = data.data.incident_latitude && data.data.incident_longitude;
+                    if (hasCoordinates) {
+                        htmlContent += `<div class="mb-6">`;
+                        htmlContent += `<h4 class="text-lg font-semibold mb-2 text-primary">Incident Location Map</h4>`;
+                        htmlContent += `<div id="incident-map"></div>`;
+                        htmlContent += `</div>`;
+                    }
+
+                    // Handle "Others" complaint type - show other_complaint if complaint_description is "Others"
+                    let complaintToShow = data.data.complaint_description;
+                    if (data.data.complaint_description === 'Others' && data.data.other_complaint) {
+                        complaintToShow = data.data.other_complaint;
+                    }
 
                     const sections = {
                         'Incident Details': ['incident_datetime', 'incident_location', 'complaint_description'],
@@ -829,7 +881,12 @@
                     for (const sectionTitle in sections) {
                         let sectionHtml = '';
                         sections[sectionTitle].forEach(key => {
-                            const detailHtml = formatDetail(key, data.data[key]);
+                            // Use the modified complaint type if this is the complaint_description field
+                            let valueToUse = data.data[key];
+                            if (key === 'complaint_description') {
+                                valueToUse = complaintToShow;
+                            }
+                            const detailHtml = formatDetail(key, valueToUse);
                             if (detailHtml) { // Only add if not empty
                                 sectionHtml += detailHtml;
                             }
@@ -844,6 +901,25 @@
 
                     detailsModalContent.innerHTML = htmlContent;
                     setEditMode(false); // Initially set to view mode when modal opens
+
+                    // Initialize map if coordinates are available
+                    if (hasCoordinates) {
+                        setTimeout(() => {
+                            const lat = parseFloat(data.data.incident_latitude);
+                            const lng = parseFloat(data.data.incident_longitude);
+
+                            incidentMap = L.map('incident-map').setView([lat, lng], 16);
+
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                                maxZoom: 19
+                            }).addTo(incidentMap);
+
+                            L.marker([lat, lng]).addTo(incidentMap)
+                                .bindPopup(`<b>Incident Location</b><br>${htmlspecialchars(data.data.incident_location || 'N/A')}`)
+                                .openPopup();
+                        }, 100);
+                    }
 
                 } else {
                     detailsModalContent.innerHTML = `<p class="text-center text-red-600">Failed to load details: ${data.message || 'Unknown error.'}</p>`;
