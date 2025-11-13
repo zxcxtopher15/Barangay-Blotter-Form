@@ -654,6 +654,97 @@ function sidepanel($google_picture, $google_name) {
         </div>
     </div>
 
+    <!-- Review Modal -->
+    <div id="reviewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-10 mx-auto p-6 border w-full max-w-3xl shadow-lg rounded-md bg-white my-10">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-gray-900">Suriin ang Reklamo</h3>
+                <button id="closeReviewModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+
+            <div class="max-h-96 overflow-y-auto mb-6">
+                <!-- Pinangayarihan Section -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-bold text-lg mb-3 text-blue-800">Pinangayarihan</h4>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div><span class="font-semibold">Petsa at Oras ng Insidente:</span> <span id="review_incident_datetime"></span></div>
+                        <div><span class="font-semibold">Lugar ng Pinangyarihan:</span> <span id="review_incident_location"></span></div>
+                    </div>
+                </div>
+
+                <!-- Nagrereklamo Section -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg" id="review_complainant_section">
+                    <h4 class="font-bold text-lg mb-3 text-blue-800">Nagrereklamo</h4>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div><span class="font-semibold">Uri ng Reklamo:</span> <span id="review_complaint_type"></span></div>
+                        <div><span class="font-semibold">Unang Pangalan:</span> <span id="review_complainant_first"></span></div>
+                        <div><span class="font-semibold">Gitnang Pangalan:</span> <span id="review_complainant_middle"></span></div>
+                        <div><span class="font-semibold">Apelyido:</span> <span id="review_complainant_last"></span></div>
+                        <div><span class="font-semibold">Edad:</span> <span id="review_complainant_age"></span></div>
+                        <div><span class="font-semibold">Kasarian:</span> <span id="review_complainant_gender"></span></div>
+                        <div><span class="font-semibold">Telepono:</span> <span id="review_complainant_phone"></span></div>
+                        <div class="col-span-2"><span class="font-semibold">Tirahan:</span> <span id="review_complainant_address"></span></div>
+                    </div>
+                </div>
+
+                <!-- Biktima Section -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-bold text-lg mb-3 text-blue-800">Biktima</h4>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div><span class="font-semibold">Unang Pangalan:</span> <span id="review_victim_first"></span></div>
+                        <div><span class="font-semibold">Gitnang Pangalan:</span> <span id="review_victim_middle"></span></div>
+                        <div><span class="font-semibold">Apelyido:</span> <span id="review_victim_last"></span></div>
+                        <div><span class="font-semibold">Edad:</span> <span id="review_victim_age"></span></div>
+                        <div><span class="font-semibold">Kasarian:</span> <span id="review_victim_gender"></span></div>
+                        <div><span class="font-semibold">Telepono:</span> <span id="review_victim_phone"></span></div>
+                        <div class="col-span-2"><span class="font-semibold">Tirahan:</span> <span id="review_victim_address"></span></div>
+                    </div>
+                </div>
+
+                <!-- Saksi Section -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg" id="review_witness_section">
+                    <h4 class="font-bold text-lg mb-3 text-blue-800">Saksi</h4>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div><span class="font-semibold">Unang Pangalan:</span> <span id="review_witness_first"></span></div>
+                        <div><span class="font-semibold">Gitnang Pangalan:</span> <span id="review_witness_middle"></span></div>
+                        <div><span class="font-semibold">Apelyido:</span> <span id="review_witness_last"></span></div>
+                        <div><span class="font-semibold">Edad:</span> <span id="review_witness_age"></span></div>
+                        <div><span class="font-semibold">Kasarian:</span> <span id="review_witness_gender"></span></div>
+                        <div><span class="font-semibold">Telepono:</span> <span id="review_witness_phone"></span></div>
+                        <div class="col-span-2"><span class="font-semibold">Tirahan:</span> <span id="review_witness_address"></span></div>
+                    </div>
+                </div>
+
+                <!-- Inireklamo Section -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg" id="review_respondent_section">
+                    <h4 class="font-bold text-lg mb-3 text-blue-800">Inireklamo</h4>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div><span class="font-semibold">Unang Pangalan:</span> <span id="review_respondent_first"></span></div>
+                        <div><span class="font-semibold">Gitnang Pangalan:</span> <span id="review_respondent_middle"></span></div>
+                        <div><span class="font-semibold">Apelyido:</span> <span id="review_respondent_last"></span></div>
+                        <div><span class="font-semibold">Edad:</span> <span id="review_respondent_age"></span></div>
+                        <div><span class="font-semibold">Kasarian:</span> <span id="review_respondent_gender"></span></div>
+                        <div><span class="font-semibold">Telepono:</span> <span id="review_respondent_phone"></span></div>
+                        <div class="col-span-2"><span class="font-semibold">Tirahan:</span> <span id="review_respondent_address"></span></div>
+                    </div>
+                </div>
+
+                <!-- Salaysay Section -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-bold text-lg mb-3 text-blue-800">Salaysay</h4>
+                    <div class="text-sm">
+                        <p id="review_statement" class="whitespace-pre-wrap"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button id="editBtn" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">I-edit</button>
+                <button type="submit" form="blotterForm" name="submit_complaint" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Magsalita</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Success Modal -->
     <div id="successModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
@@ -861,6 +952,106 @@ function sidepanel($google_picture, $google_name) {
                     }
                 }
             });
+        });
+
+        // Complaint Description "Others" field toggle
+        const complaintDescSelect = document.getElementById('complaint_description');
+        const otherComplaintInput = document.getElementById('other_complaint');
+
+        if (complaintDescSelect) {
+            complaintDescSelect.addEventListener('change', function() {
+                if (this.value === 'Others') {
+                    otherComplaintInput.classList.remove('hidden');
+                    otherComplaintInput.setAttribute('required', 'required');
+                } else {
+                    otherComplaintInput.classList.add('hidden');
+                    otherComplaintInput.removeAttribute('required');
+                    otherComplaintInput.value = '';
+                }
+            });
+        }
+
+        // Review Modal Logic
+        const reviewBtn = document.getElementById('reviewBtn');
+        const reviewModal = document.getElementById('reviewModal');
+        const closeReviewModal = document.getElementById('closeReviewModal');
+        const editBtn = document.getElementById('editBtn');
+
+        reviewBtn.addEventListener('click', function() {
+            // Populate review modal with form data
+            const incidentDate = document.querySelector('[name="incident_date"]').value;
+            const incidentHour = document.querySelector('[name="incident_hour"]').value;
+            const incidentMinute = document.querySelector('[name="incident_minute"]').value;
+            const incidentPeriod = document.querySelector('[name="incident_period"]').value;
+
+            document.getElementById('review_incident_datetime').textContent = `${incidentDate} ${incidentHour}:${incidentMinute} ${incidentPeriod}`;
+            document.getElementById('review_incident_location').textContent = document.querySelector('[name="incident_location"]').value;
+
+            // Complaint Type
+            const complaintType = document.getElementById('complaint_description').value;
+            const otherComplaint = document.getElementById('other_complaint').value;
+            document.getElementById('review_complaint_type').textContent = complaintType === 'Others' ? otherComplaint : complaintType;
+
+            // Complainant
+            document.getElementById('review_complainant_first').textContent = document.querySelector('[name="complainant_first_name"]').value || 'N/A';
+            document.getElementById('review_complainant_middle').textContent = document.querySelector('[name="complainant_middle_name"]').value || 'N/A';
+            document.getElementById('review_complainant_last').textContent = document.querySelector('[name="complainant_last_name"]').value || 'N/A';
+            document.getElementById('review_complainant_age').textContent = document.querySelector('[name="complainant_age"]').value || 'N/A';
+            document.getElementById('review_complainant_gender').textContent = document.querySelector('[name="complainant_gender"]').value || 'N/A';
+            document.getElementById('review_complainant_phone').textContent = document.querySelector('[name="complainant_phone"]').value || 'N/A';
+            document.getElementById('review_complainant_address').textContent = document.querySelector('[name="complainant_address"]').value || 'N/A';
+
+            // Victim
+            document.getElementById('review_victim_first').textContent = document.querySelector('[name="victim_first_name"]').value;
+            document.getElementById('review_victim_middle').textContent = document.querySelector('[name="victim_middle_name"]').value || 'N/A';
+            document.getElementById('review_victim_last').textContent = document.querySelector('[name="victim_last_name"]').value;
+            document.getElementById('review_victim_age').textContent = document.querySelector('[name="victim_age"]').value;
+            document.getElementById('review_victim_gender').textContent = document.querySelector('[name="victim_gender"]').value;
+            document.getElementById('review_victim_phone').textContent = document.querySelector('[name="victim_phone"]').value;
+            document.getElementById('review_victim_address').textContent = document.querySelector('[name="victim_address"]').value;
+
+            // Witness
+            document.getElementById('review_witness_first').textContent = document.querySelector('[name="witness_first_name"]').value || 'N/A';
+            document.getElementById('review_witness_middle').textContent = document.querySelector('[name="witness_middle_name"]').value || 'N/A';
+            document.getElementById('review_witness_last').textContent = document.querySelector('[name="witness_last_name"]').value || 'N/A';
+            document.getElementById('review_witness_age').textContent = document.querySelector('[name="witness_age"]').value || 'N/A';
+            document.getElementById('review_witness_gender').textContent = document.querySelector('[name="witness_gender"]').value || 'N/A';
+            document.getElementById('review_witness_phone').textContent = document.querySelector('[name="witness_phone"]').value || 'N/A';
+            document.getElementById('review_witness_address').textContent = document.querySelector('[name="witness_address"]').value || 'N/A';
+
+            // Respondent
+            document.getElementById('review_respondent_first').textContent = document.querySelector('[name="respondent_first_name"]').value || 'N/A';
+            document.getElementById('review_respondent_middle').textContent = document.querySelector('[name="respondent_middle_name"]').value || 'N/A';
+            document.getElementById('review_respondent_last').textContent = document.querySelector('[name="respondent_last_name"]').value || 'N/A';
+            document.getElementById('review_respondent_age').textContent = document.querySelector('[name="respondent_age"]').value || 'N/A';
+            document.getElementById('review_respondent_gender').textContent = document.querySelector('[name="respondent_gender"]').value || 'N/A';
+            document.getElementById('review_respondent_phone').textContent = document.querySelector('[name="respondent_phone"]').value || 'N/A';
+            document.getElementById('review_respondent_address').textContent = document.querySelector('[name="respondent_address"]').value || 'N/A';
+
+            // Statement
+            document.getElementById('review_statement').textContent = document.querySelector('[name="complaint_statement"]').value;
+
+            // Hide sections that were disabled in initial modal
+            if (window.complainantIsVictim || nagrereklamo_tab.style.display === 'none') {
+                document.getElementById('review_complainant_section').style.display = 'none';
+            }
+            if (saksi_tab.style.display === 'none') {
+                document.getElementById('review_witness_section').style.display = 'none';
+            }
+            if (inireklamo_tab.style.display === 'none') {
+                document.getElementById('review_respondent_section').style.display = 'none';
+            }
+
+            // Show modal
+            reviewModal.classList.remove('hidden');
+        });
+
+        closeReviewModal.addEventListener('click', function() {
+            reviewModal.classList.add('hidden');
+        });
+
+        editBtn.addEventListener('click', function() {
+            reviewModal.classList.add('hidden');
         });
 
         // Form submission: Copy victim data to complainant if they're the same
