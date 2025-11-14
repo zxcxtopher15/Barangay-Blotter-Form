@@ -816,12 +816,8 @@ function sidepanel($google_picture, $google_name) {
 
             // Hide/show tabs based on selections
             if (sameAsVictimCheckbox.checked) {
-                // Hide Nagrereklamo tab
-                nagrereklamo_tab.style.display = 'none';
-                // Remove required from Nagrereklamo fields
-                document.getElementById('tab2').querySelectorAll('[required]').forEach(field => {
-                    field.removeAttribute('required');
-                });
+                // Keep Nagrereklamo tab visible - data will be auto-filled from Biktima
+                // Keep required validation
             }
 
             if (noWitnessCheckbox.checked) {
