@@ -125,21 +125,11 @@ $should_endorse_to_pnp = in_array($complaint_type, $pnp_endorsement_types);
             </div>
 
             <!-- PNP Endorsement Status -->
-            <div class="mb-6 p-4 rounded-lg border-2 <?= $should_endorse_to_pnp ? 'bg-red-50 border-red-300' : 'bg-green-50 border-green-300' ?>">
-                <p class="text-sm font-semibold mb-1 <?= $should_endorse_to_pnp ? 'text-red-800' : 'text-green-800' ?>">PNP Endorsement Status:</p>
-                <p class="text-lg font-bold <?= $should_endorse_to_pnp ? 'text-red-900' : 'text-green-900' ?>">
-                    <?= htmlspecialchars($endorsement_status) ?>
-                </p>
-                <?php if ($should_endorse_to_pnp): ?>
-                <p class="text-sm text-red-700 mt-2">
-                    ⚠️ This case involves a serious crime and should be referred to the Philippine National Police for investigation and proper legal action.
-                </p>
-                <?php else: ?>
-                <p class="text-sm text-green-700 mt-2">
-                    ✓ This case can be handled through barangay mediation and settlement procedures.
-                </p>
-                <?php endif; ?>
+            <?php if ($should_endorse_to_pnp): ?>
+            <div class="mb-6 p-4 rounded-lg border-2 bg-red-50 border-red-300">
+                <p class="text-xl font-bold text-red-900">RECOMMENDATION: ENDORSE TO PNP</p>
             </div>
+            <?php endif; ?>
 
             <!-- Incident Details -->
             <div class="mb-6">
