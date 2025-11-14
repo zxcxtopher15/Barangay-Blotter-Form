@@ -74,7 +74,6 @@ $pnp_endorsement_types = [
 ];
 
 $should_endorse_to_pnp = in_array($complaint_type, $pnp_endorsement_types);
-$endorsement_status = $should_endorse_to_pnp ? 'YES - For endorsement to PNP' : 'NO - For barangay resolution';
 ?>
 <!DOCTYPE html>
 <html lang="en">
