@@ -54,6 +54,27 @@ if (!empty($report['complaint_no']) && !empty($report['incident_datetime'])) {
     $date = new DateTime($report['incident_datetime']);
     $display_case_no = $report['complaint_no'] . '-' . $date->format('Y-m-d-H-i-s');
 }
+
+// Determine if incident should be endorsed to PNP
+// Incidents that should be endorsed to PNP (serious crimes)
+$pnp_endorsement_types = [
+    'Theft',
+    'Robbery',
+    'Physical Assault',
+    'Murder',
+    'Homicide',
+    'Rape',
+    'Drug-related',
+    'Illegal Gambling',
+    'Carnapping',
+    'Arson',
+    'Kidnapping',
+    'Illegal Possession of Firearms',
+    'Violation of Special Laws'
+];
+
+$should_endorse_to_pnp = in_array($complaint_type, $pnp_endorsement_types);
+$endorsement_status = $should_endorse_to_pnp ? 'YES - For endorsement to PNP' : 'NO - For barangay resolution';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -102,6 +123,23 @@ if (!empty($report['complaint_no']) && !empty($report['incident_datetime'])) {
             <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
                 <p class="text-sm text-gray-600">Care Number:</p>
                 <p class="text-2xl font-bold text-blue-700"><?= htmlspecialchars($display_case_no) ?></p>
+            </div>
+
+            <!-- PNP Endorsement Status -->
+            <div class="mb-6 p-4 rounded-lg border-2 <?= $should_endorse_to_pnp ? 'bg-red-50 border-red-300' : 'bg-green-50 border-green-300' ?>">
+                <p class="text-sm font-semibold mb-1 <?= $should_endorse_to_pnp ? 'text-red-800' : 'text-green-800' ?>">PNP Endorsement Status:</p>
+                <p class="text-lg font-bold <?= $should_endorse_to_pnp ? 'text-red-900' : 'text-green-900' ?>">
+                    <?= htmlspecialchars($endorsement_status) ?>
+                </p>
+                <?php if ($should_endorse_to_pnp): ?>
+                <p class="text-sm text-red-700 mt-2">
+                    ⚠️ This case involves a serious crime and should be referred to the Philippine National Police for investigation and proper legal action.
+                </p>
+                <?php else: ?>
+                <p class="text-sm text-green-700 mt-2">
+                    ✓ This case can be handled through barangay mediation and settlement procedures.
+                </p>
+                <?php endif; ?>
             </div>
 
             <!-- Incident Details -->

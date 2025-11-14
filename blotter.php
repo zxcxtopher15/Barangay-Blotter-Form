@@ -358,12 +358,35 @@ function sidepanel($google_picture, $google_name) {
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Uri ng Reklamo *</label>
                                 <select name="complaint_description" id="complaint_description" class="w-full p-2 border border-gray-300 rounded-md" required>
                                     <option value="">Pumili ng Uri ng Reklamo</option>
-                                    <option value="Physical Injuries">Physical Injuries</option>
-                                    <option value="Theft">Theft</option>
-                                    <option value="Vandalism">Vandalism</option>
-                                    <option value="Noise Complaints">Noise Complaints</option>
-                                    <option value="Domestic Violence">Domestic Violence</option>
-                                    <option value="Trespassing">Trespassing</option>
+
+                                    <!-- Serious Crimes - For PNP Endorsement -->
+                                    <optgroup label="Serious Crimes (For PNP Endorsement)">
+                                        <option value="Murder">Murder</option>
+                                        <option value="Homicide">Homicide</option>
+                                        <option value="Rape">Rape</option>
+                                        <option value="Robbery">Robbery</option>
+                                        <option value="Theft">Theft</option>
+                                        <option value="Physical Assault">Physical Assault</option>
+                                        <option value="Carnapping">Carnapping</option>
+                                        <option value="Arson">Arson</option>
+                                        <option value="Kidnapping">Kidnapping</option>
+                                        <option value="Drug-related">Drug-related</option>
+                                        <option value="Illegal Gambling">Illegal Gambling</option>
+                                        <option value="Illegal Possession of Firearms">Illegal Possession of Firearms</option>
+                                        <option value="Violation of Special Laws">Violation of Special Laws</option>
+                                    </optgroup>
+
+                                    <!-- Minor Complaints - Barangay Level -->
+                                    <optgroup label="Minor Complaints (Barangay Level)">
+                                        <option value="Physical Injuries">Physical Injuries</option>
+                                        <option value="Vandalism">Vandalism</option>
+                                        <option value="Noise Complaints">Noise Complaints</option>
+                                        <option value="Domestic Violence">Domestic Violence</option>
+                                        <option value="Trespassing">Trespassing</option>
+                                        <option value="Boundary Disputes">Boundary Disputes</option>
+                                        <option value="Property Disputes">Property Disputes</option>
+                                    </optgroup>
+
                                     <option value="Others">Others (Specify)</option>
                                 </select>
                                 <input type="text" name="other_complaint" id="other_complaint" class="w-full p-2 border border-gray-300 rounded-md mt-2 hidden" placeholder="Ilagay ang iba pang uri ng reklamo">
