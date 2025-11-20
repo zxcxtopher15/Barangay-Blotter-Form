@@ -448,7 +448,7 @@
                         </div>
                         <div class="ml-3 flex-1">
                             <p class="text-sm text-blue-700">
-                                <strong>CSV Format Required:</strong> case_title, incident_date, incident_time, complainant_name, victim_name, respondent_name, location
+                                <strong>CSV Format Required:</strong> DATE, CASE NO., CASE TITLE, COMPLAINANT LAST NAME, COMPLAINANT GIVEN NAME, COMPLAINANT MIDDLE NAME, COMPLAINANT ADDRESS, COMPLAINANT CONTACT NO., RESPONDENT LAST NAME, RESPONDENT GIVEN NAME, RESPONDENT MIDDLE NAME, RESPONDENT ADDRESS, RESPONDENT CONTACT NO.
                             </p>
                             <p class="text-xs text-blue-600 mt-2">
                                 AI will automatically generate detailed salaysay (statement) based on the case title.
@@ -462,6 +462,7 @@
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Select CSV File</label>
                         <input type="file" id="import-file" name="import_file" accept=".csv" class="w-full p-2 border border-gray-300 rounded-md" required>
+                        <p class="text-xs text-gray-500 mt-1">Please save Excel file as CSV before uploading</p>
                     </div>
 
                     <div id="import-preview" class="hidden mb-4">

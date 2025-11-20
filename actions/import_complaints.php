@@ -34,8 +34,15 @@ if (!isset($_FILES['import_file']) || $_FILES['import_file']['error'] !== UPLOAD
 
 $csvFile = $_FILES['import_file']['tmp_name'];
 
-// Read CSV file
-$csvData = array_map('str_getcsv', file($csvFile));
+// Read CSV file with proper encoding handling
+$csvData = [];
+if (($handle = fopen($csvFile, "r")) !== FALSE) {
+    while (($data = fgetcsv($handle, 10000, ",")) !== FALSE) {
+        $csvData[] = $data;
+    }
+    fclose($handle);
+}
+
 $headers = array_shift($csvData); // Remove header row
 
 $total = count($csvData);
