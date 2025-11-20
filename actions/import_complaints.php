@@ -159,8 +159,8 @@ foreach ($csvData as $row) {
 
         // Generate DOB from age
         $current_year = date('Y');
-        $complainant_dob = ($current_year - $complainant_age) . '-' . str_pad(rand(1,12), 2, '0', STR_PAD_LEFT) . '-' . str_pad(rand(1,28), 2, '0', STR_PAD_LEFT);
-        $respondent_dob = ($current_year - $respondent_age) . '-' . str_pad(rand(1,12), 2, '0', STR_PAD_LEFT) . '-' . str_pad(rand(1,28), 2, '0', STR_PAD_LEFT);
+        $complainant_dob = ($current_year - $complainant_age) . '-' . str_pad(rand(1, 12), 2, '0', STR_PAD_LEFT) . '-' . str_pad(rand(1, 28), 2, '0', STR_PAD_LEFT);
+        $respondent_dob = ($current_year - $respondent_age) . '-' . str_pad(rand(1, 12), 2, '0', STR_PAD_LEFT) . '-' . str_pad(rand(1, 28), 2, '0', STR_PAD_LEFT);
 
         $incident_datetime = $incident_date . ' 12:00:00';
 
@@ -196,11 +196,12 @@ foreach ($csvData as $row) {
         flush();
 
         $bind_result = $stmt->bind_param(
-            "ssssssssisssssssissssi",
+            "ssssssssissssssissssssi",
             $incident_datetime,
             $complaint_description,
             $pnp_recommendation,
             $location,
+
             $complainant_first,
             $complainant_middle,
             $complainant_last,
@@ -209,14 +210,7 @@ foreach ($csvData as $row) {
             $complainant_gender,
             $complainant_phone,
             $complainant_address,
-            $victim_first,
-            $victim_middle,
-            $victim_last,
-            $victim_dob,
-            $victim_age,
-            $complainant_gender,
-            $victim_phone,
-            $victim_address,
+
             $respondent_first,
             $respondent_middle,
             $respondent_last,
@@ -225,11 +219,14 @@ foreach ($csvData as $row) {
             $respondent_gender,
             $respondent_phone,
             $respondent_address,
+
             $salaysay,
             $desk_officer_name
         );
 
-        echo '<pre>'; print_r($bind_result); exit;
+        echo '<pre>';
+        print_r($bind_result);
+        exit;
 
         if (!$bind_result) {
             echo json_encode([
@@ -265,7 +262,6 @@ foreach ($csvData as $row) {
         }
 
         $stmt->close();
-
     } catch (Exception $e) {
         $failed++;
         echo json_encode([
@@ -439,4 +435,3 @@ Examples:
     // Throw exception if AI fails so we can use fallback
     throw new Exception("AI API returned HTTP $httpCode");
 }
-?>
