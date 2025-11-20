@@ -1512,7 +1512,7 @@ function sidepanel($google_picture, $google_name) {
                         method: "POST",
                         headers: {
                             "Authorization": "Bearer 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",
-                            "HTTP-Referer": window.location.origin,
+                            "HTTP-Referer": window.location.href,
                             "X-Title": "Barangay Blotter System",
                             "Content-Type": "application/json"
                         },
@@ -1562,11 +1562,13 @@ IMPORTANT:
                         })
                     });
 
-                    if (!response.ok) {
-                        throw new Error('AI detection failed');
+                    const data = await response.json();
+
+                    if (!response.ok || data.error) {
+                        console.error('API Error:', data);
+                        throw new Error(data.error?.message || `HTTP ${response.status}: ${response.statusText}`);
                     }
 
-                    const data = await response.json();
                     const detectedType = data.choices[0].message.content.trim();
 
                     // Update UI
@@ -1577,14 +1579,17 @@ IMPORTANT:
 
                 } catch (error) {
                     console.error('Error detecting complaint type:', error);
-                    detectedTypeDisplay.innerHTML = '<span class="text-red-500">Hindi natukoy. Subukang muli.</span>';
+                    const errorMessage = error.message || 'Unknown error';
+                    detectedTypeDisplay.innerHTML = `<span class="text-red-500 text-xs">Error: ${errorMessage}</span>`;
 
-                    // Retry after 2 seconds
-                    setTimeout(() => {
-                        if (complaintStatementField.value.trim().length >= 20) {
-                            detectComplaintType(complaintStatementField.value.trim());
-                        }
-                    }, 2000);
+                    // Don't retry on authentication errors (401)
+                    if (!errorMessage.includes('not found') && !errorMessage.includes('401')) {
+                        setTimeout(() => {
+                            if (complaintStatementField.value.trim().length >= 20) {
+                                detectComplaintType(complaintStatementField.value.trim());
+                            }
+                        }, 3000);
+                    }
                 }
             }
 
