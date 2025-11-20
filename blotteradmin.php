@@ -116,8 +116,14 @@ if (isset($_POST['submit_complaint'])) {
     ];
 
     // Type definitions: s=string, d=double, i=integer
-    // 5 (incident) + 8 (complainant) + 8 (victim) + 8 (witness) + 8 (respondent) + 4 (statement, flags, officer) = 41 total
-    $types = "sssddssssissssssissssssissssssissssiis";
+    // incident: datetime, desc, location, lat, lon = sssdd (5)
+    // complainant: fname, mname, lname, dob, age, gender, phone, address = ssssiss (8)
+    // victim: fname, mname, lname, dob, age, gender, phone, address = ssssiss (8)
+    // witness: fname, mname, lname, dob, age, gender, phone, address = ssssiss (8)
+    // respondent: fname, mname, lname, dob, age, gender, phone, address = ssssiss (8)
+    // final: statement, reported_by, is_affirmed, officer = siis (4)
+    // Total: 5 + 8 + 8 + 8 + 8 + 4 = 41
+    $types = "sssddssssissssissssissssissssisssiis";
     $stmt->bind_param($types, ...$params);
 
     if ($stmt->execute()) {
