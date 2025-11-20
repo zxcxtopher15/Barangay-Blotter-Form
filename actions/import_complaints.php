@@ -1,6 +1,10 @@
 <?php
 session_start();
 
+// Prevent timeout for large imports
+set_time_limit(600); // 10 minutes
+ini_set('max_execution_time', 600);
+
 // Set headers for streaming
 header('Content-Type: application/json');
 header('X-Accel-Buffering: no'); // Disable nginx buffering
@@ -52,12 +56,12 @@ $success = 0;
 $failed = 0;
 $current = 0;
 
-$desk_officer_name = $_SESSION['google_name'];
+$desk_officer_name = $_SESSION['google_name'] ?? 'Admin';
 
 // Send initial status
 echo json_encode([
     'type' => 'info',
-    'message' => "Starting import of $total rows..."
+    'message' => "Starting import of $total rows... Officer: $desk_officer_name"
 ]) . "\n";
 flush();
 
@@ -204,7 +208,7 @@ foreach ($csvData as $row) {
         ]) . "\n";
         flush();
 
-        $stmt->bind_param(
+        $bind_result = $stmt->bind_param(
             "ssssssssisssssisssisssissss",
             $incident_datetime,
             $complaint_description,
@@ -237,6 +241,17 @@ foreach ($csvData as $row) {
             $salaysay,
             $desk_officer_name
         );
+
+        if (!$bind_result) {
+            echo json_encode([
+                'type' => 'error',
+                'message' => "Row $current: Bind failed - " . $stmt->error
+            ]) . "\n";
+            flush();
+            $stmt->close();
+            $failed++;
+            continue;
+        }
 
         echo json_encode([
             'type' => 'info',
