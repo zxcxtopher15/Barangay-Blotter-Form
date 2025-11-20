@@ -910,7 +910,6 @@ function sidepanel($google_picture, $google_name) {
                 maxZoom: 19
             }).addTo(map);
 
-            // Define exact polygon (replace with real boundary later)
             const sanMiguelPolygon = L.polygon([
                 [14.5632, 121.0799],
                 [14.5632, 121.0908],
@@ -919,7 +918,8 @@ function sidepanel($google_picture, $google_name) {
             ], {
                 color: 'blue',
                 fillColor: 'blue',
-                fillOpacity: 0.1
+                fillOpacity: 0.1,
+                interactive: false
             }).addTo(map);
 
             // Fit map to polygon
