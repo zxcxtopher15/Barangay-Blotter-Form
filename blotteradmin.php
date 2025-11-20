@@ -889,7 +889,7 @@ function sidepanel($google_picture, $google_name) {
             // Barangay San Miguel, Pasig City - Complete boundary coverage
             // Coordinates traced to cover the entire barangay area
             const barangayBounds = L.polygon([
-                [14.5765, 121.0825],  // North 1
+                [14.570073, 121.081888],  // North 1
                 [14.5763, 121.0848],  // North 2
                 [14.5759, 121.0870],  // North 3
                 [14.5753, 121.0892],  // Northeast 1
@@ -905,28 +905,27 @@ function sidepanel($google_picture, $google_name) {
                 [14.5655, 121.0860],  // South 2
                 [14.5650, 121.0845],  // South 3
                 [14.5648, 121.0830],  // South 4
-                [14.5650, 121.0815],  // Southwest 1
-                [14.5655, 121.0800],  // Southwest 2
-                [14.5662, 121.0788],  // Southwest 3
-                [14.5670, 121.0780],  // West 1
-                [14.5680, 121.0775],  // West 2
-                [14.5692, 121.0773],  // West 3
-                [14.5705, 121.0775],  // West 4
-                [14.5718, 121.0780],  // West 5
-                [14.5730, 121.0788],  // Northwest 1
-                [14.5742, 121.0798],  // Northwest 2
-                [14.5752, 121.0808],  // Northwest 3
-                [14.5760, 121.0817]   // Northwest 4 (back to start)
+                [14.5650, 121.0815],
+                [14.5655, 121.0800],
+                [14.5662, 121.0788],
+                [14.5670, 121.0780],
+                [14.5680, 121.0775],
+                [14.5692, 121.0773],
+                [14.5705, 121.0775],
+                [14.5718, 121.0780],
+                [14.5730, 121.0788],
+                [14.5742, 121.0798],
+                [14.5752, 121.0808],
+                [14.5760, 121.0817]
             ], {
                 color: '#1e40af',
                 weight: 3,
                 opacity: 0.8,
                 fillColor: '#3b82f6',
                 fillOpacity: 0.15,
-                interactive: false  // Make polygon non-interactive so clicks pass through
+                interactive: false 
             });
 
-            // Initialize map centered on Barangay San Miguel, Pasig City
             map = L.map('map').setView([14.5700, 121.0850], 15);
 
             // Add OpenStreetMap tiles (free!)
