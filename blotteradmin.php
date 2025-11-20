@@ -114,13 +114,13 @@ if (isset($_POST['submit_complaint'])) {
         $is_affirmed,
         $desk_officer_name,
     ];
-    
+
     // Type string: s=string, i=integer, d=double
     // incident_datetime(s), complaint_description(s), pnp_recommendation(s), location(s), lat(d), lng(d),
     // complainant(8: s,s,s,s,i,s,s,s), victim(8), witness(8), respondent(8),
     // statement(s), reported_by(i), is_affirmed(i), desk_officer(s)
     // Total: 3s + 1s + 2d + (8*4) + 1s + 2i + 1s = 3+1+2+32+1+2+1 = 42 parameters
-    $types = "ssssddssssissssissssissssissssisssiis";
+    $types = "ssssssssssisssssssisssssssisssssssissssiis";
     $stmt->bind_param($types, ...$params);
 
     if ($stmt->execute()) {
@@ -137,18 +137,18 @@ if (isset($_POST['submit_complaint'])) {
 }
 
 function sidepanel($google_picture, $google_name) {
-        $currentPage = basename($_SERVER['PHP_SELF']);
-        $activeClasses = 'bg-blue-500 text-white shadow';
-        $inactiveClasses = 'text-gray-600 hover:bg-gray-100';
+    $currentPage = basename($_SERVER['PHP_SELF']);
+    $activeClasses = 'bg-blue-500 text-white shadow';
+    $inactiveClasses = 'text-gray-600 hover:bg-gray-100';
 
-        // Prevents reloading the page when clicking the active link
-        $dashboardClick = ($currentPage === 'dashboardadmin.php') ? 'onclick="event.preventDefault()"' : '';
-        $blotterClick   = ($currentPage === 'blotteradmin.php')   ? 'onclick="event.preventDefault()"' : '';
-        $reportsClick   = ($currentPage === 'reportsadmin.php')   ? 'onclick="event.preventDefault()"' : '';
-        $accountsClick  = ($currentPage === 'accountsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
-        $settingsClick  = ($currentPage === 'settingsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
+    // Prevents reloading the page when clicking the active link
+    $dashboardClick = ($currentPage === 'dashboardadmin.php') ? 'onclick="event.preventDefault()"' : '';
+    $blotterClick   = ($currentPage === 'blotteradmin.php')   ? 'onclick="event.preventDefault()"' : '';
+    $reportsClick   = ($currentPage === 'reportsadmin.php')   ? 'onclick="event.preventDefault()"' : '';
+    $accountsClick  = ($currentPage === 'accountsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
+    $settingsClick  = ($currentPage === 'settingsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
 
-        echo '
+    echo '
         <!-- START: Sidebar -->
         <div id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white text-secondary flex flex-col p-4 items-center shadow-lg z-20">
             <div class="text-center py-4">
@@ -875,13 +875,13 @@ function sidepanel($google_picture, $google_name) {
             // Barangay San Miguel, Pasig City - Complete boundary coverage
             // Coordinates traced to cover the entire barangay area
             const barangayBounds = L.polygon([
-                [14.57010363728592, 121.0818473841725],  // North 1
-                [14.56794188700946, 121.08072370823959],  // North 2
-                [14.567844642158477, 121.08125120248977],  // North 3
-                [14.567917575800728, 121.08137679635885],  // Northeast 1
-                [14.567844642158477, 121.08165310287083],  // Northeast 2
-                [14.567625841086917, 121.08157774654939],  // East 1
-                [14.567723086034412, 121.08079906456103],  // East 2
+                [14.57010363728592, 121.0818473841725], // North 1
+                [14.56794188700946, 121.08072370823959], // North 2
+                [14.567844642158477, 121.08125120248977], // North 3
+                [14.567917575800728, 121.08137679635885], // Northeast 1
+                [14.567844642158477, 121.08165310287083], // Northeast 2
+                [14.567625841086917, 121.08157774654939], // East 1
+                [14.567723086034412, 121.08079906456103], // East 2
                 [14.567115304408842, 121.08064835191814],
                 [14.566922561130774, 121.0811209342382],
                 [14.566819841173118, 121.08126686516077],
@@ -915,7 +915,7 @@ function sidepanel($google_picture, $google_name) {
                 opacity: 0.8,
                 fillColor: '#3b82f6',
                 fillOpacity: 0.15,
-                interactive: false 
+                interactive: false
             });
 
             map = L.map('map').setView([14.5700, 121.0850], 15);
@@ -938,8 +938,10 @@ function sidepanel($google_picture, $google_name) {
                 // Ray casting algorithm for point-in-polygon
                 let inside = false;
                 for (let i = 0, j = polygonCoords.length - 1; i < polygonCoords.length; j = i++) {
-                    const xi = polygonCoords[i].lat, yi = polygonCoords[i].lng;
-                    const xj = polygonCoords[j].lat, yj = polygonCoords[j].lng;
+                    const xi = polygonCoords[i].lat,
+                        yi = polygonCoords[i].lng;
+                    const xj = polygonCoords[j].lat,
+                        yj = polygonCoords[j].lng;
 
                     const intersect = ((yi > lng) !== (yj > lng)) &&
                         (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
@@ -1525,8 +1527,7 @@ function sidepanel($google_picture, $google_name) {
                         },
                         body: JSON.stringify({
                             "model": "llama-3.3-70b-versatile",
-                            "messages": [
-                                {
+                            "messages": [{
                                     "role": "system",
                                     "content": `You are an expert crime classifier and legal advisor for Philippine Barangay incidents. Analyze the complaint and provide TWO things:
 
