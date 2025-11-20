@@ -898,17 +898,37 @@ function sidepanel($google_picture, $google_name) {
             // Initialize Map with Leaflet + OpenStreetMap
             let map, marker;
 
-            // Barangay San Miguel, Pasig City boundaries (accurate)
-            // These coordinates define the polygon boundary of the barangay
+            // Barangay San Miguel, Pasig City - Complete boundary coverage
+            // Coordinates traced to cover the entire barangay area
             const barangayBounds = L.polygon([
-                [14.575421, 121.083611], // Northwest
-                [14.573889, 121.089167], // Northeast
-                [14.569444, 121.090833], // East
-                [14.566944, 121.088889], // Southeast
-                [14.564167, 121.084722], // South
-                [14.565556, 121.081389], // Southwest
-                [14.569167, 121.080278], // West
-                [14.572500, 121.081944]  // Northwest connection
+                [14.5765, 121.0825],  // North 1
+                [14.5763, 121.0848],  // North 2
+                [14.5759, 121.0870],  // North 3
+                [14.5753, 121.0892],  // Northeast 1
+                [14.5745, 121.0905],  // Northeast 2
+                [14.5735, 121.0912],  // East 1
+                [14.5720, 121.0918],  // East 2
+                [14.5705, 121.0920],  // East 3
+                [14.5690, 121.0918],  // East 4
+                [14.5678, 121.0910],  // Southeast 1
+                [14.5670, 121.0900],  // Southeast 2
+                [14.5665, 121.0888],  // Southeast 3
+                [14.5660, 121.0875],  // South 1
+                [14.5655, 121.0860],  // South 2
+                [14.5650, 121.0845],  // South 3
+                [14.5648, 121.0830],  // South 4
+                [14.5650, 121.0815],  // Southwest 1
+                [14.5655, 121.0800],  // Southwest 2
+                [14.5662, 121.0788],  // Southwest 3
+                [14.5670, 121.0780],  // West 1
+                [14.5680, 121.0775],  // West 2
+                [14.5692, 121.0773],  // West 3
+                [14.5705, 121.0775],  // West 4
+                [14.5718, 121.0780],  // West 5
+                [14.5730, 121.0788],  // Northwest 1
+                [14.5742, 121.0798],  // Northwest 2
+                [14.5752, 121.0808],  // Northwest 3
+                [14.5760, 121.0817]   // Northwest 4 (back to start)
             ], {
                 color: '#1e40af',
                 weight: 3,
@@ -919,7 +939,7 @@ function sidepanel($google_picture, $google_name) {
             });
 
             // Initialize map centered on Barangay San Miguel, Pasig City
-            map = L.map('map').setView([14.5695, 121.0855], 16);
+            map = L.map('map').setView([14.5700, 121.0850], 15);
 
             // Add OpenStreetMap tiles (free!)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -997,7 +1017,7 @@ function sidepanel($google_picture, $google_name) {
                     if (!isWithinBarangay(newLat, newLng)) {
                         alert('Mangyaring ilagay ang marker sa loob ng Barangay San Miguel lamang.\nPlease place the marker within Barangay San Miguel only.');
                         // Reset marker to previous valid position or center
-                        marker.setLatLng([14.5695, 121.0855]);
+                        marker.setLatLng([14.5700, 121.0850]);
                         return;
                     }
 
