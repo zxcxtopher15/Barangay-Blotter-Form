@@ -106,7 +106,9 @@ if (isset($_POST['submit_complaint'])) {
         $desk_officer_name,
     ];
 
-    $types = "sssddssssissssssissssssissssssissssiss";
+    // Type definitions: s=string, d=double, i=integer
+    // 5 (incident) + 8 (complainant) + 8 (victim) + 8 (witness) + 8 (respondent) + 4 (statement, flags, officer) = 41 total
+    $types = "sssddssssissssssissssssissssssissssiis";
     $stmt->bind_param($types, ...$params);
 
     if ($stmt->execute()) {
@@ -422,8 +424,8 @@ function sidepanel($google_picture, $google_name) {
 
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan</label>
-                                    <input type="date" name="complainant_dob" id="complainant_dob" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan (18 taong gulang pataas)</label>
+                                    <input type="date" name="complainant_dob" id="complainant_dob" class="w-full p-2 border border-gray-300 rounded-md" max="<?php echo date('Y-m-d', strtotime('-18 years')); ?>">
                                     <input type="hidden" name="complainant_age" id="complainant_age">
                                     <p class="text-xs text-gray-500 mt-1">Edad: <span id="complainant_age_display">-</span></p>
                                 </div>
@@ -473,8 +475,8 @@ function sidepanel($google_picture, $google_name) {
 
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan</label>
-                                    <input type="date" name="victim_dob" id="victim_dob" class="w-full p-2 border border-gray-300 rounded-md" required>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan (1 taong gulang pataas)</label>
+                                    <input type="date" name="victim_dob" id="victim_dob" class="w-full p-2 border border-gray-300 rounded-md" max="<?php echo date('Y-m-d', strtotime('-1 year')); ?>" required>
                                     <input type="hidden" name="victim_age" id="victim_age">
                                     <p class="text-xs text-gray-500 mt-1">Edad: <span id="victim_age_display">-</span></p>
                                 </div>
@@ -524,8 +526,8 @@ function sidepanel($google_picture, $google_name) {
 
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan</label>
-                                    <input type="date" name="witness_dob" id="witness_dob" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan (10 taong gulang pataas)</label>
+                                    <input type="date" name="witness_dob" id="witness_dob" class="w-full p-2 border border-gray-300 rounded-md" max="<?php echo date('Y-m-d', strtotime('-10 years')); ?>">
                                     <input type="hidden" name="witness_age" id="witness_age">
                                     <p class="text-xs text-gray-500 mt-1">Edad: <span id="witness_age_display">-</span></p>
                                 </div>
@@ -575,8 +577,8 @@ function sidepanel($google_picture, $google_name) {
 
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan</label>
-                                    <input type="date" name="respondent_dob" id="respondent_dob" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan (18 taong gulang pataas)</label>
+                                    <input type="date" name="respondent_dob" id="respondent_dob" class="w-full p-2 border border-gray-300 rounded-md" max="<?php echo date('Y-m-d', strtotime('-18 years')); ?>">
                                     <input type="hidden" name="respondent_age" id="respondent_age">
                                     <p class="text-xs text-gray-500 mt-1">Edad: <span id="respondent_age_display">-</span></p>
                                 </div>
