@@ -1495,8 +1495,7 @@ function sidepanel($google_picture, $google_name) {
                         },
                         body: JSON.stringify({
                             "model": "llama-3.3-70b-versatile",
-                            "messages": [
-                                {
+                            "messages": [{
                                     "role": "system",
                                     "content": `You are a complaint classification expert for a Barangay (village) in the Philippines. Analyze the complaint statement and determine the EXACT, SPECIFIC crime or incident type.
 
