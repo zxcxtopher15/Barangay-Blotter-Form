@@ -354,15 +354,15 @@ function sidepanel($google_picture, $google_name) {
 
                             <div class="mb-6">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Magtype ng Lokasyon o Mag-pin sa Mapa</label>
-                                <input type="text" name="incident_location" id="incident_location" list="san_miguel_streets" class="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Pumili ng kalsada/lugar sa San Miguel o mag-click sa mapa" required>
-                                <datalist id="san_miguel_streets">
-                                    <!-- Streets will be loaded dynamically via JavaScript -->
-                                </datalist>
+                                <div style="position: relative;">
+                                    <input type="text" name="incident_location" id="incident_location" class="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Pumili ng kalsada/lugar sa San Miguel o mag-click sa mapa" required autocomplete="off">
+                                    <div id="location_suggestions" style="position: absolute; z-index: 1000; background: white; border: 1px solid #d1d5db; border-radius: 0.375rem; max-height: 300px; overflow-y: auto; width: 100%; display: none; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"></div>
+                                </div>
                                 <div id="map" class="mb-2"></div>
                                 <input type="hidden" name="incident_latitude" id="incident_latitude">
                                 <input type="hidden" name="incident_longitude" id="incident_longitude">
                                 <p class="text-xs text-gray-500 mt-2">
-                                    <span class="text-blue-600">💡 Tip:</span> Pumili sa dropdown ng mga kalsada o mag-click sa mapa para mag-pin ng eksaktong lokasyon
+                                    <span class="text-blue-600">💡 Tip:</span> Mag-type ng address sa San Miguel, Pasig City o mag-click sa mapa para mag-pin ng eksaktong lokasyon
                                 </p>
                             </div>
 
@@ -1019,90 +1019,141 @@ function sidepanel($google_picture, $google_name) {
                 });
             });
 
-            // Load streets from API and setup autocomplete
-            let streetsData = [];
+            // Dynamic location autocomplete with Nominatim API
+            const locationInput = document.getElementById('incident_location');
+            const suggestionsDiv = document.getElementById('location_suggestions');
+            let searchTimeout;
+            let selectedSuggestion = null;
 
-            fetch('api/get_streets.php')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.streets) {
-                        streetsData = data.streets;
-                        const datalist = document.getElementById('san_miguel_streets');
+            // Search for addresses in San Miguel, Pasig City as user types
+            locationInput.addEventListener('input', function() {
+                const query = this.value.trim();
 
-                        // Populate datalist with street options
-                        data.streets.forEach(street => {
-                            const option = document.createElement('option');
-                            option.value = street.display;
-                            option.setAttribute('data-lat', street.lat);
-                            option.setAttribute('data-lon', street.lon);
-                            datalist.appendChild(option);
+                clearTimeout(searchTimeout);
+
+                if (query.length < 3) {
+                    suggestionsDiv.style.display = 'none';
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    // Search using Nominatim API filtered for San Miguel, Pasig City
+                    const searchQuery = `${query}, San Miguel, Pasig City, Philippines`;
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=10&addressdetails=1`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // Filter results to only show San Miguel, Pasig City addresses
+                            const filteredResults = data.filter(item => {
+                                const address = item.address || {};
+                                const displayName = item.display_name.toLowerCase();
+                                return (
+                                    (address.suburb === 'San Miguel' || displayName.includes('san miguel')) &&
+                                    (address.city === 'Pasig' || address.city === 'Pasig City' || displayName.includes('pasig'))
+                                );
+                            });
+
+                            displaySuggestions(filteredResults);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching locations:', error);
+                            suggestionsDiv.style.display = 'none';
                         });
+                }, 500); // Debounce for 500ms
+            });
 
-                        console.log(`Loaded ${data.streets.length} streets/locations from ${data.source}`);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading streets:', error);
+            function displaySuggestions(results) {
+                suggestionsDiv.innerHTML = '';
+
+                if (results.length === 0) {
+                    suggestionsDiv.innerHTML = '<div style="padding: 8px; color: #6b7280;">Walang nahanap na address sa San Miguel, Pasig City</div>';
+                    suggestionsDiv.style.display = 'block';
+                    return;
+                }
+
+                results.forEach(result => {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'padding: 10px; cursor: pointer; border-bottom: 1px solid #e5e7eb;';
+                    div.innerHTML = `
+                        <div style="font-weight: 500; color: #1f2937;">${result.display_name}</div>
+                        <div style="font-size: 0.75rem; color: #6b7280; margin-top: 2px;">Lat: ${parseFloat(result.lat).toFixed(6)}, Lng: ${parseFloat(result.lon).toFixed(6)}</div>
+                    `;
+
+                    div.addEventListener('mouseenter', function() {
+                        this.style.backgroundColor = '#f3f4f6';
+                    });
+
+                    div.addEventListener('mouseleave', function() {
+                        this.style.backgroundColor = 'white';
+                    });
+
+                    div.addEventListener('click', function() {
+                        selectLocation(result);
+                    });
+
+                    suggestionsDiv.appendChild(div);
                 });
 
-            // Listen for location selection and auto-pin on map
-            const locationInput = document.getElementById('incident_location');
-            locationInput.addEventListener('change', function() {
-                const selectedValue = this.value;
+                suggestionsDiv.style.display = 'block';
+            }
 
-                // Find matching street in the data
-                const selectedStreet = streetsData.find(street => street.display === selectedValue);
+            function selectLocation(location) {
+                const lat = parseFloat(location.lat);
+                const lon = parseFloat(location.lon);
 
-                if (selectedStreet && selectedStreet.lat && selectedStreet.lon) {
-                    const lat = parseFloat(selectedStreet.lat);
-                    const lon = parseFloat(selectedStreet.lon);
+                // Check if within barangay
+                if (!isWithinBarangay(lat, lon)) {
+                    alert('Ang napiling lokasyon ay nasa labas ng Barangay San Miguel.\nThe selected location is outside Barangay San Miguel.');
+                    suggestionsDiv.style.display = 'none';
+                    return;
+                }
 
-                    // Check if within barangay
-                    if (!isWithinBarangay(lat, lon)) {
-                        alert('Ang napiling lokasyon ay nasa labas ng Barangay San Miguel.\nThe selected location is outside Barangay San Miguel.');
+                locationInput.value = location.display_name;
+                document.getElementById('incident_latitude').value = lat;
+                document.getElementById('incident_longitude').value = lon;
+                suggestionsDiv.style.display = 'none';
+
+                // Remove existing marker
+                if (marker) {
+                    map.removeLayer(marker);
+                }
+
+                // Add marker at selected location
+                marker = L.marker([lat, lon], {
+                    draggable: true
+                }).addTo(map);
+
+                // Pan map to marker
+                map.setView([lat, lon], 17);
+
+                // Make marker draggable
+                marker.on('dragend', function(e) {
+                    const newLat = e.target.getLatLng().lat;
+                    const newLng = e.target.getLatLng().lng;
+
+                    if (!isWithinBarangay(newLat, newLng)) {
+                        alert('Mangyaring ilagay ang marker sa loob ng Barangay San Miguel lamang.\nPlease place the marker within Barangay San Miguel only.');
+                        marker.setLatLng([lat, lon]);
                         return;
                     }
 
-                    // Remove existing marker
-                    if (marker) {
-                        map.removeLayer(marker);
-                    }
+                    document.getElementById('incident_latitude').value = newLat;
+                    document.getElementById('incident_longitude').value = newLng;
 
-                    // Add marker at selected location
-                    marker = L.marker([lat, lon], {
-                        draggable: true
-                    }).addTo(map);
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}&zoom=18&addressdetails=1`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.display_name) {
+                                document.getElementById('incident_location').value = data.display_name;
+                            }
+                        })
+                        .catch(error => console.error('Geocoding error:', error));
+                });
+            }
 
-                    // Pan map to marker
-                    map.setView([lat, lon], 17);
-
-                    // Save coordinates
-                    document.getElementById('incident_latitude').value = lat;
-                    document.getElementById('incident_longitude').value = lon;
-
-                    // Make marker draggable
-                    marker.on('dragend', function(e) {
-                        const newLat = e.target.getLatLng().lat;
-                        const newLng = e.target.getLatLng().lng;
-
-                        if (!isWithinBarangay(newLat, newLng)) {
-                            alert('Mangyaring ilagay ang marker sa loob ng Barangay San Miguel lamang.\nPlease place the marker within Barangay San Miguel only.');
-                            marker.setLatLng([14.5700, 121.0850]);
-                            return;
-                        }
-
-                        document.getElementById('incident_latitude').value = newLat;
-                        document.getElementById('incident_longitude').value = newLng;
-
-                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}&zoom=18&addressdetails=1`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.display_name) {
-                                    document.getElementById('incident_location').value = data.display_name;
-                                }
-                            })
-                            .catch(error => console.error('Geocoding error:', error));
-                    });
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target !== locationInput && e.target !== suggestionsDiv) {
+                    suggestionsDiv.style.display = 'none';
                 }
             });
 
