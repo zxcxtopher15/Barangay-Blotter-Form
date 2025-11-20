@@ -155,26 +155,15 @@ foreach ($csvData as $row) {
 
         // Generate realistic ages (18-65)
         $complainant_age = rand(18, 65);
-        $victim_age = rand(18, 65);
         $respondent_age = rand(18, 65);
 
         // Generate DOB from age
         $current_year = date('Y');
         $complainant_dob = ($current_year - $complainant_age) . '-' . str_pad(rand(1,12), 2, '0', STR_PAD_LEFT) . '-' . str_pad(rand(1,28), 2, '0', STR_PAD_LEFT);
-        $victim_dob = ($current_year - $victim_age) . '-' . str_pad(rand(1,12), 2, '0', STR_PAD_LEFT) . '-' . str_pad(rand(1,28), 2, '0', STR_PAD_LEFT);
         $respondent_dob = ($current_year - $respondent_age) . '-' . str_pad(rand(1,12), 2, '0', STR_PAD_LEFT) . '-' . str_pad(rand(1,28), 2, '0', STR_PAD_LEFT);
 
-        // Create incident datetime (default time 12:00:00 if not specified)
         $incident_datetime = $incident_date . ' 12:00:00';
 
-        // Use complainant as victim (same person for testing)
-        $victim_first = $complainant_first;
-        $victim_middle = $complainant_middle;
-        $victim_last = $complainant_last;
-        $victim_address = $complainant_address;
-        $victim_phone = $complainant_phone;
-
-        // Insert into database with all fields
         echo json_encode([
             'type' => 'info',
             'message' => "Preparing database insert..."
@@ -185,12 +174,10 @@ foreach ($csvData as $row) {
             incident_datetime, complaint_description, pnp_recommendation, incident_location,
             complainant_first_name, complainant_middle_name, complainant_last_name,
             complainant_dob, complainant_age, complainant_gender, complainant_phone, complainant_address,
-            victim_first_name, victim_middle_name, victim_last_name,
-            victim_dob, victim_age, victim_gender, victim_phone, victim_address,
             respondent_first_name, respondent_middle_name, respondent_last_name,
             respondent_dob, respondent_age, respondent_gender, respondent_phone, respondent_address,
             complaint_statement, reported_by, is_affirmed, desk_officer_name
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, ?)");
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, ?)");
 
         if (!$stmt) {
             echo json_encode([
@@ -209,7 +196,7 @@ foreach ($csvData as $row) {
         flush();
 
         $bind_result = $stmt->bind_param(
-            "ssssssssisssssssisssssisissssiis",
+            "ssssssssisssssssissssi",
             $incident_datetime,
             $complaint_description,
             $pnp_recommendation,
@@ -227,7 +214,7 @@ foreach ($csvData as $row) {
             $victim_last,
             $victim_dob,
             $victim_age,
-            $complainant_gender, // Same gender as complainant
+            $complainant_gender,
             $victim_phone,
             $victim_address,
             $respondent_first,
