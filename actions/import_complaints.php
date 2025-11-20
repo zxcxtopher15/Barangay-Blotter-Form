@@ -196,7 +196,7 @@ foreach ($csvData as $row) {
         flush();
 
         $bind_result = $stmt->bind_param(
-            "ssssssssisssssssissssi",
+            "ssssssssisssssssisssss",
             $incident_datetime,
             $complaint_description,
             $pnp_recommendation,
