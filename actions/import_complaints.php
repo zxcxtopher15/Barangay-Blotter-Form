@@ -221,8 +221,6 @@ foreach ($csvData as $row) {
             $desk_officer_name
         );
 
-        echo '<pre>'; print_r($bind_result); exit;
-
         if (!$bind_result) {
             echo json_encode([
                 'type' => 'error',
