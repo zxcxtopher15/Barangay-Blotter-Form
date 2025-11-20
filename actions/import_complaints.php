@@ -4,8 +4,10 @@ session_start();
 // Set headers for streaming
 header('Content-Type: application/json');
 header('X-Accel-Buffering: no'); // Disable nginx buffering
+if (ob_get_level()) {
+    ob_end_flush();
+}
 ob_implicit_flush(true);
-ob_end_flush();
 
 // Database connection
 $db_server = "localhost";
@@ -51,6 +53,13 @@ $failed = 0;
 $current = 0;
 
 $desk_officer_name = $_SESSION['google_name'];
+
+// Send initial status
+echo json_encode([
+    'type' => 'info',
+    'message' => "Starting import of $total rows..."
+]) . "\n";
+flush();
 
 foreach ($csvData as $row) {
     $current++;
@@ -108,14 +117,32 @@ foreach ($csvData as $row) {
             ? $complainant_address
             : 'San Miguel, Pasig City';
 
+        // For now, skip AI and use fallback to test if import works
+        $salaysay = "Ito ay reklamo tungkol sa: $case_title. Ang nag-reklamo ay si $complainant_full laban kay $respondent_full. Nangyari ito sa $location.";
+        $complaint_description = 'Physical Injuries';
+        $pnp_recommendation = 'BARANGAY_ACTION';
+
+        /* AI generation disabled temporarily for testing
         // Generate AI statement (salaysay) based on case title
-        $salaysay = generateSalaysay($case_title, $complainant_full, $complainant_full, $respondent_full, $location);
+        try {
+            $salaysay = generateSalaysay($case_title, $complainant_full, $complainant_full, $respondent_full, $location);
+        } catch (Exception $e) {
+            // Fallback if AI fails
+            $salaysay = "Ito ay reklamo tungkol sa: $case_title. Ang nag-reklamo ay si $complainant_full laban kay $respondent_full. Nangyari ito sa $location.";
+        }
 
         // Use AI to classify crime and get recommendation
-        $classificationResult = classifyCrime($salaysay);
-        $parts = explode('|', $classificationResult);
-        $complaint_description = trim($parts[0] ?? 'Physical Injuries');
-        $pnp_recommendation = trim($parts[1] ?? 'BARANGAY_ACTION');
+        try {
+            $classificationResult = classifyCrime($salaysay);
+            $parts = explode('|', $classificationResult);
+            $complaint_description = trim($parts[0] ?? 'Physical Injuries');
+            $pnp_recommendation = trim($parts[1] ?? 'BARANGAY_ACTION');
+        } catch (Exception $e) {
+            // Fallback classification
+            $complaint_description = 'Physical Injuries';
+            $pnp_recommendation = 'BARANGAY_ACTION';
+        }
+        */
 
         // Generate realistic test data for missing fields
         $genders = ['Male', 'Female'];
@@ -260,6 +287,8 @@ function generateSalaysay($case_title, $complainant, $victim, $respondent, $loca
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10); // 10 second timeout
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // 5 second connection timeout
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
         'Authorization: Bearer ' . $groq_api_key
@@ -267,15 +296,22 @@ function generateSalaysay($case_title, $complainant, $victim, $respondent, $loca
 
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
     curl_close($ch);
+
+    if ($curlError) {
+        throw new Exception("cURL Error: $curlError");
+    }
 
     if ($httpCode === 200) {
         $result = json_decode($response, true);
-        return trim($result['choices'][0]['message']['content'] ?? 'Salaysay not available.');
+        if (isset($result['choices'][0]['message']['content'])) {
+            return trim($result['choices'][0]['message']['content']);
+        }
     }
 
-    // Fallback if AI fails
-    return "Ito ay reklamo tungkol sa: $case_title. Ang nag-reklamo ay si $complainant laban kay $respondent. Nangyari ito sa $location.";
+    // Throw exception if AI fails so we can use fallback
+    throw new Exception("AI API returned HTTP $httpCode");
 }
 
 // Helper function to classify crime and get recommendation
@@ -345,6 +381,8 @@ Examples:
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10); // 10 second timeout
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // 5 second connection timeout
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
         'Authorization: Bearer ' . $groq_api_key
@@ -352,14 +390,21 @@ Examples:
 
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
     curl_close($ch);
+
+    if ($curlError) {
+        throw new Exception("cURL Error: $curlError");
+    }
 
     if ($httpCode === 200) {
         $result = json_decode($response, true);
-        return trim($result['choices'][0]['message']['content'] ?? 'Physical Injuries|BARANGAY_ACTION');
+        if (isset($result['choices'][0]['message']['content'])) {
+            return trim($result['choices'][0]['message']['content']);
+        }
     }
 
-    // Fallback
-    return 'Physical Injuries|BARANGAY_ACTION';
+    // Throw exception if AI fails so we can use fallback
+    throw new Exception("AI API returned HTTP $httpCode");
 }
 ?>
