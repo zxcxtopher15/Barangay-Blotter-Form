@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `complaints` (
-  `complaint_no` int(11) NOT NULL,
+  `case_no` int(11) NOT NULL,
   `reported_by` tinyint(1) NOT NULL,
   `incident_datetime` datetime NOT NULL,
   `complaint_description` varchar(100) NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE `complaints` (
 -- Dumping data for table `complaints`
 --
 
-INSERT INTO `complaints` (`complaint_no`, `reported_by`, `incident_datetime`, `complaint_description`, `complainant_first_name`, `complainant_middle_name`, `complainant_last_name`, `complainant_age`, `complainant_gender`, `complainant_phone`, `complainant_address`, `incident_location`, `victim_first_name`, `victim_middle_name`, `victim_last_name`, `victim_age`, `victim_gender`, `victim_phone`, `victim_address`, `witness_first_name`, `witness_middle_name`, `witness_last_name`, `witness_age`, `witness_gender`, `witness_phone`, `witness_address`, `respondent_first_name`, `respondent_middle_name`, `respondent_last_name`, `respondent_age`, `respondent_gender`, `respondent_phone`, `respondent_address`, `complaint_statement`, `is_affirmed`, `received_datetime`, `desk_officer_name`) VALUES
+INSERT INTO `complaints` (`case_no`, `reported_by`, `incident_datetime`, `complaint_description`, `complainant_first_name`, `complainant_middle_name`, `complainant_last_name`, `complainant_age`, `complainant_gender`, `complainant_phone`, `complainant_address`, `incident_location`, `victim_first_name`, `victim_middle_name`, `victim_last_name`, `victim_age`, `victim_gender`, `victim_phone`, `victim_address`, `witness_first_name`, `witness_middle_name`, `witness_last_name`, `witness_age`, `witness_gender`, `witness_phone`, `witness_address`, `respondent_first_name`, `respondent_middle_name`, `respondent_last_name`, `respondent_age`, `respondent_gender`, `respondent_phone`, `respondent_address`, `complaint_statement`, `is_affirmed`, `received_datetime`, `desk_officer_name`) VALUES
 (47, 1, '2025-08-25 05:05:00', '', '', '', '', '0', '', '', '', '', 'Jeomaric', '', 'Laureta, Peñaflor', '18', 'Male', '9215834251', 'a', '', '', '', '0', '', '0', '', '', '', '', '0', '', '0', '', 'a', 1, '2025-08-20 14:28:14', 'Joshua Anoos'),
 (48, 1, '2025-08-25 17:05:00', '', '', '', '', '0', '', '', '', '', 'Jeomaric', '', 'Laureta, Peñaflor', '18', 'Male', '9215834251', 'a', '', '', '', '0', '', '0', '', '', '', '', '0', '', '0', '', 'a', 1, '2025-08-20 14:28:50', 'Joshua Anoos'),
 (49, 1, '2025-08-25 17:05:00', '', '', '', '', '0', '', '', '', '', 'Jeomaric', '', 'Laureta, Peñaflor', '18', 'Male', '9215834251', 'a', '', '', '', '0', '', '0', '', '', '', '', '0', '', '0', '', 'a', 1, '2025-08-20 14:29:29', 'Joshua Anoos');
@@ -84,7 +84,7 @@ INSERT INTO `complaints` (`complaint_no`, `reported_by`, `incident_datetime`, `c
 -- Indexes for table `complaints`
 --
 ALTER TABLE `complaints`
-  ADD PRIMARY KEY (`complaint_no`);
+  ADD PRIMARY KEY (`case_no`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -94,7 +94,7 @@ ALTER TABLE `complaints`
 -- AUTO_INCREMENT for table `complaints`
 --
 ALTER TABLE `complaints`
-  MODIFY `complaint_no` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `case_no` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

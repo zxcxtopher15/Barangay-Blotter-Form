@@ -1,0 +1,17 @@
+{
+    "name": "barangay/blotter-form",
+    "description": "Barangay San Miguel Blotter Form System",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Barangay\\": "src/"
+        }
+    },
+    "config": {
+        "vendor-dir": "vendor"
+    }
+}
