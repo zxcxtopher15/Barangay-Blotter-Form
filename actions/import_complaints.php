@@ -189,6 +189,8 @@ foreach ($csvData as $row) {
             continue;
         }
 
+        echo '<pre>'; print_r($current); exit;
+
         echo json_encode([
             'type' => 'info',
             'message' => "Binding parameters..."
