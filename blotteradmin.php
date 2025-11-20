@@ -1511,7 +1511,7 @@ function sidepanel($google_picture, $google_name) {
                     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                         method: "POST",
                         headers: {
-                            "Authorization": "Bearer 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",
+                            "Authorization": "Bearer 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",
                             "HTTP-Referer": window.location.href,
                             "X-Title": "Barangay Blotter System",
                             "Content-Type": "application/json"
