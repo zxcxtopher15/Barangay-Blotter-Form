@@ -171,6 +171,12 @@ foreach ($csvData as $row) {
         $victim_phone = $complainant_phone;
 
         // Insert into database with all fields
+        echo json_encode([
+            'type' => 'info',
+            'message' => "Preparing database insert..."
+        ]) . "\n";
+        flush();
+
         $stmt = $conn->prepare("INSERT INTO complaints (
             incident_datetime, complaint_description, pnp_recommendation, incident_location,
             complainant_first_name, complainant_middle_name, complainant_last_name,
@@ -181,6 +187,22 @@ foreach ($csvData as $row) {
             respondent_dob, respondent_age, respondent_gender, respondent_phone, respondent_address,
             complaint_statement, reported_by, is_affirmed, desk_officer_name
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, ?)");
+
+        if (!$stmt) {
+            echo json_encode([
+                'type' => 'error',
+                'message' => "Row $current: Prepare failed - " . $conn->error
+            ]) . "\n";
+            flush();
+            $failed++;
+            continue;
+        }
+
+        echo json_encode([
+            'type' => 'info',
+            'message' => "Binding parameters..."
+        ]) . "\n";
+        flush();
 
         $stmt->bind_param(
             "ssssssssisssssisssisssissss",
@@ -215,6 +237,12 @@ foreach ($csvData as $row) {
             $salaysay,
             $desk_officer_name
         );
+
+        echo json_encode([
+            'type' => 'info',
+            'message' => "Executing insert..."
+        ]) . "\n";
+        flush();
 
         if ($stmt->execute()) {
             $success++;
