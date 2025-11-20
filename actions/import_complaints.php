@@ -134,7 +134,15 @@ foreach ($csvData as $row) {
 
         // Use case title as complaint description
         $complaint_description = $case_title;
-        $pnp_recommendation = 'BARANGAY_ACTION';
+
+        // Use AI to determine PNP recommendation based on case title
+        try {
+            $recommendation = determinePNPRecommendation($case_title);
+            $pnp_recommendation = $recommendation;
+        } catch (Exception $e) {
+            // Fallback to Barangay action
+            $pnp_recommendation = 'BARANGAY_ACTION';
+        }
 
         // Geocode address using Nominatim API (San Miguel, Pasig City only)
         // Skip geocoding for now due to rate limits - can be done later in batch
@@ -432,6 +440,70 @@ Examples:
         $result = json_decode($response, true);
         if (isset($result['choices'][0]['message']['content'])) {
             return trim($result['choices'][0]['message']['content']);
+        }
+    }
+
+    // Throw exception if AI fails so we can use fallback
+    throw new Exception("AI API returned HTTP $httpCode");
+}
+
+// Helper function to determine PNP recommendation based on case title
+function determinePNPRecommendation($case_title) {
+    $groq_api_key = "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";
+
+    $prompt = "Analyze this case title and determine if it requires PNP (Philippine National Police) endorsement or can be handled at Barangay level.\n\n";
+    $prompt .= "Case Title: $case_title\n\n";
+    $prompt .= "Rules:\n";
+    $prompt .= "PNP_ENDORSEMENT for: Murder, Homicide, Rape, Robbery, Serious Theft, Carnapping, Arson, Kidnapping, Hostage Taking, Drug-related, Illegal Gambling, Illegal Firearms, Physical Assault with weapons, Cyber Crime (serious cases)\n\n";
+    $prompt .= "BARANGAY_ACTION for: Minor disputes, Noise complaints, Trespassing, Vandalism, Minor physical injuries without weapons, Boundary disputes, Property disputes, Minor threats\n\n";
+    $prompt .= "Respond with ONLY one word: PNP_ENDORSEMENT or BARANGAY_ACTION";
+
+    $data = [
+        'model' => 'llama-3.3-70b-versatile',
+        'messages' => [
+            [
+                'role' => 'system',
+                'content' => 'You are a legal expert on Philippine Barangay jurisdiction. Analyze case titles and determine if they need PNP endorsement or can be handled at Barangay level. Respond with ONLY: PNP_ENDORSEMENT or BARANGAY_ACTION'
+            ],
+            [
+                'role' => 'user',
+                'content' => $prompt
+            ]
+        ],
+        'temperature' => 0.2,
+        'max_tokens' => 20
+    ];
+
+    $ch = curl_init('https://api.groq.com/openai/v1/chat/completions');
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10); // 10 second timeout
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // 5 second connection timeout
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $groq_api_key
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    if ($curlError) {
+        throw new Exception("cURL Error: $curlError");
+    }
+
+    if ($httpCode === 200) {
+        $result = json_decode($response, true);
+        if (isset($result['choices'][0]['message']['content'])) {
+            $recommendation = trim($result['choices'][0]['message']['content']);
+            // Ensure valid response
+            if (strpos($recommendation, 'PNP_ENDORSEMENT') !== false) {
+                return 'PNP_ENDORSEMENT';
+            } else if (strpos($recommendation, 'BARANGAY_ACTION') !== false) {
+                return 'BARANGAY_ACTION';
+            }
         }
     }
 

@@ -5,7 +5,9 @@
       "Bash(php -r:*)",
       "Bash(composer show:*)",
       "Bash(/c/xampp/php/php.exe /c/ProgramData/ComposerSetup/bin/composer.phar show:*)",
-      "Bash(/c/xampp/php/php.exe /c/ProgramData/ComposerSetup/bin/composer.phar require:*)"
+      "Bash(/c/xampp/php/php.exe /c/ProgramData/ComposerSetup/bin/composer.phar require:*)",
+      "Bash(c:xamppphpphp.exe -l \"c:\\xampp\\htdocs\\Barangay-Blotter-Form\\actions\\import_complaints.php\")",
+      "Bash(/c/xampp/php/php.exe:*)"
     ],
     "deny": [],
     "ask": []
