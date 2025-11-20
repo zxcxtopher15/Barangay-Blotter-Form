@@ -1,0 +1,16 @@
+{
+    "name": "soniabisquera/barangay-blotter-form",
+    "require": {
+        "phpmailer/phpmailer": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Soniabisquera\\BarangayBlotterForm\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Sonia Marie Bisquera"
+        }
+    ]
+}
