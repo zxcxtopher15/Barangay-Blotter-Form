@@ -44,10 +44,8 @@ if (isset($_POST['submit_complaint'])) {
     $hour_formatted = str_pad($hour, 2, '0', STR_PAD_LEFT);
     $incident_datetime = "$incident_date $hour_formatted:$minute:00";
 
+    // Complaint description is now AI-detected from the statement
     $complaint_description = $_POST['complaint_description'];
-    if ($complaint_description === 'Others') {
-        $complaint_description = $_POST['other_complaint'];
-    }
 
     $stmt = $conn->prepare("INSERT INTO complaints (
         incident_datetime, complaint_description, incident_location, incident_latitude, incident_longitude,
@@ -375,43 +373,8 @@ function sidepanel($google_picture, $google_name) {
                         <div id="tab2" class="tab-content">
                             <h2 class="text-2xl font-bold text-gray-800 mb-6">Impormasyon ng Nagrereklamo</h2>
 
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Uri ng Reklamo *</label>
-                                <select name="complaint_description" id="complaint_description" class="w-full p-2 border border-gray-300 rounded-md" required>
-                                    <option value="">Pumili ng Uri ng Reklamo</option>
-
-                                    <!-- Serious Crimes - For PNP Endorsement -->
-                                    <optgroup label="Serious Crimes (For PNP Endorsement)">
-                                        <option value="Murder">Murder</option>
-                                        <option value="Homicide">Homicide</option>
-                                        <option value="Rape">Rape</option>
-                                        <option value="Robbery">Robbery</option>
-                                        <option value="Theft">Theft</option>
-                                        <option value="Physical Assault">Physical Assault</option>
-                                        <option value="Carnapping">Carnapping</option>
-                                        <option value="Arson">Arson</option>
-                                        <option value="Kidnapping">Kidnapping</option>
-                                        <option value="Drug-related">Drug-related</option>
-                                        <option value="Illegal Gambling">Illegal Gambling</option>
-                                        <option value="Illegal Possession of Firearms">Illegal Possession of Firearms</option>
-                                        <option value="Violation of Special Laws">Violation of Special Laws</option>
-                                    </optgroup>
-
-                                    <!-- Minor Complaints - Barangay Level -->
-                                    <optgroup label="Minor Complaints (Barangay Level)">
-                                        <option value="Physical Injuries">Physical Injuries</option>
-                                        <option value="Vandalism">Vandalism</option>
-                                        <option value="Noise Complaints">Noise Complaints</option>
-                                        <option value="Domestic Violence">Domestic Violence</option>
-                                        <option value="Trespassing">Trespassing</option>
-                                        <option value="Boundary Disputes">Boundary Disputes</option>
-                                        <option value="Property Disputes">Property Disputes</option>
-                                    </optgroup>
-
-                                    <option value="Others">Others (Specify)</option>
-                                </select>
-                                <input type="text" name="other_complaint" id="other_complaint" class="w-full p-2 border border-gray-300 rounded-md mt-2 hidden" placeholder="Ilagay ang iba pang uri ng reklamo">
-                            </div>
+                            <!-- Hidden field for AI-detected complaint type -->
+                            <input type="hidden" name="complaint_description" id="complaint_description" value="">
 
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
@@ -619,7 +582,22 @@ function sidepanel($google_picture, $google_name) {
 
                             <div class="mb-6">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Maikling Salaysay ng Pangyayari</label>
-                                <textarea name="complaint_statement" rows="6" class="w-full p-2 border border-gray-300 rounded-md" required></textarea>
+                                <textarea name="complaint_statement" id="complaint_statement" rows="6" class="w-full p-2 border border-gray-300 rounded-md" required></textarea>
+                                <p class="text-xs text-gray-500 mt-2">Ang uri ng reklamo ay awtomatikong matatanggap batay sa iyong salaysay.</p>
+                            </div>
+
+                            <div id="detected_complaint_type" class="mb-6 hidden">
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div class="flex items-start space-x-3">
+                                        <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-blue-900">Natukoy na Uri ng Reklamo:</p>
+                                            <p class="text-lg font-bold text-blue-700 mt-1" id="detected_type_display"></p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="bg-gray-50 p-4 rounded-lg mb-4">
@@ -1366,10 +1344,9 @@ function sidepanel($google_picture, $google_name) {
                 document.getElementById('review_incident_datetime').textContent = `${incidentDate} ${incidentHour}:${incidentMinute} ${incidentPeriod}`;
                 document.getElementById('review_incident_location').textContent = document.querySelector('[name="incident_location"]').value;
 
-                // Complaint Type
+                // Complaint Type (AI-detected)
                 const complaintType = document.getElementById('complaint_description').value;
-                const otherComplaint = document.getElementById('other_complaint').value;
-                document.getElementById('review_complaint_type').textContent = complaintType === 'Others' ? otherComplaint : complaintType;
+                document.getElementById('review_complaint_type').textContent = complaintType || 'Hindi pa natukoy';
 
                 // Complainant
                 document.getElementById('review_complainant_first').textContent = document.querySelector('[name="complainant_first_name"]').value || 'N/A';
@@ -1480,6 +1457,114 @@ function sidepanel($google_picture, $google_name) {
                 document.getElementById('respondent_age').value = age || '';
                 document.getElementById('respondent_age_display').textContent = age !== null ? age + ' taong gulang' : '-';
             });
+
+            // AI-based Complaint Type Detection
+            let detectionTimeout;
+            const complaintStatementField = document.getElementById('complaint_statement');
+            const detectedTypeContainer = document.getElementById('detected_complaint_type');
+            const detectedTypeDisplay = document.getElementById('detected_type_display');
+            const complaintDescriptionField = document.getElementById('complaint_description');
+
+            complaintStatementField?.addEventListener('input', function() {
+                clearTimeout(detectionTimeout);
+
+                const statement = this.value.trim();
+
+                if (statement.length < 20) {
+                    detectedTypeContainer.classList.add('hidden');
+                    return;
+                }
+
+                // Show loading state
+                detectedTypeContainer.classList.remove('hidden');
+                detectedTypeDisplay.innerHTML = '<span class="text-gray-500">Tinutukoy ang uri ng reklamo...</span>';
+
+                detectionTimeout = setTimeout(() => {
+                    detectComplaintType(statement);
+                }, 1000); // Debounce for 1 second
+            });
+
+            async function detectComplaintType(statement) {
+                try {
+                    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": "Bearer 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",
+                            "HTTP-Referer": window.location.origin,
+                            "X-Title": "Barangay Blotter System",
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            "model": "meta-llama/llama-3.3-70b-instruct:free",
+                            "messages": [
+                                {
+                                    "role": "system",
+                                    "content": `You are a complaint classification system for a Barangay (village) in the Philippines. Analyze the complaint statement and classify it into ONE of these categories:
+
+SERIOUS CRIMES (For PNP Endorsement):
+- Murder
+- Homicide
+- Rape
+- Robbery
+- Theft
+- Physical Assault
+- Carnapping
+- Arson
+- Kidnapping
+- Drug-related
+- Illegal Gambling
+- Illegal Possession of Firearms
+- Violation of Special Laws
+
+MINOR COMPLAINTS (Barangay Level):
+- Physical Injuries
+- Vandalism
+- Noise Complaints
+- Domestic Violence
+- Trespassing
+- Boundary Disputes
+- Property Disputes
+
+IMPORTANT:
+- Respond with ONLY the category name, nothing else.
+- Choose the most appropriate category based on the severity and nature of the incident.
+- If uncertain, classify based on the most serious aspect mentioned.`
+                                },
+                                {
+                                    "role": "user",
+                                    "content": `Classify this complaint statement:\n\n${statement}`
+                                }
+                            ],
+                            "temperature": 0.3,
+                            "max_tokens": 50
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('AI detection failed');
+                    }
+
+                    const data = await response.json();
+                    const detectedType = data.choices[0].message.content.trim();
+
+                    // Update UI
+                    detectedTypeDisplay.textContent = detectedType;
+                    complaintDescriptionField.value = detectedType;
+
+                    console.log('Detected complaint type:', detectedType);
+
+                } catch (error) {
+                    console.error('Error detecting complaint type:', error);
+                    detectedTypeDisplay.innerHTML = '<span class="text-red-500">Hindi natukoy. Subukang muli.</span>';
+
+                    // Retry after 2 seconds
+                    setTimeout(() => {
+                        if (complaintStatementField.value.trim().length >= 20) {
+                            detectComplaintType(complaintStatementField.value.trim());
+                        }
+                    }, 2000);
+                }
+            }
 
             // Form submission: Copy victim data to complainant if they're the same
             document.getElementById('blotterForm').addEventListener('submit', function(e) {
