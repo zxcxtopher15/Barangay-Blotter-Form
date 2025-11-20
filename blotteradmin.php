@@ -899,6 +899,17 @@ function sidepanel($google_picture, $google_name) {
             // Initialize Map with Leaflet + OpenStreetMap
             let map, marker;
 
+            const sanMiguelPolygon = L.polygon([
+                [14.5632, 121.0799],
+                [14.5632, 121.0908],
+                [14.5719, 121.0908],
+                [14.5719, 121.0799]
+            ], {
+                color: 'blue',
+                fillColor: '#blue',
+                fillOpacity: 0.1
+            }).addTo(map);
+
             // Define bounding box for Barangay San Miguel, Pasig
             const sanMiguelBounds = L.latLngBounds(
                 [14.563200, 121.079900], // Southwest
