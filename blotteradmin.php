@@ -757,7 +757,7 @@ function sidepanel($google_picture, $google_name) {
 
             <div class="flex justify-end space-x-3">
                 <button id="editBtn" class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">I-edit</button>
-                <button type="submit" form="blotterForm" name="submit_complaint" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Magsalita</button>
+                <button type="submit" form="blotterForm" name="submit_complaint" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Ipasa</button>
             </div>
         </div>
     </div>
