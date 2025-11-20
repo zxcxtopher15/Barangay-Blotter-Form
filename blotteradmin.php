@@ -115,7 +115,7 @@ if (isset($_POST['submit_complaint'])) {
         $desk_officer_name,
     ];
     
-    $types = "sssddssssisssssssisssssssisssssssissssiis";
+    $types = "sssssssssisssssssisssssssisssssssissssiis";
     $stmt->bind_param($types, ...$params);
 
     if ($stmt->execute()) {
