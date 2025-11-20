@@ -833,8 +833,13 @@ function sidepanel($google_picture, $google_name) {
 
                 // Hide/show tabs based on selections
                 if (sameAsVictimCheckbox.checked) {
-                    // Keep Nagrereklamo tab visible - data will be auto-filled from Biktima
-                    // Keep required validation
+                    // If complainant is same as victim, copy victim data to complainant on form submit
+                    window.complainantIsVictim = true;
+                    // Remove required from Nagrereklamo tab since it will be auto-filled
+                    document.getElementById('tab2').querySelectorAll('[required]').forEach(field => {
+                        field.removeAttribute('required');
+                        field.setAttribute('data-was-required', 'true'); // Mark for re-enabling if needed
+                    });
                 }
 
                 if (noWitnessCheckbox.checked) {
@@ -843,6 +848,7 @@ function sidepanel($google_picture, $google_name) {
                     // Remove required from Saksi fields
                     document.getElementById('tab4').querySelectorAll('[required]').forEach(field => {
                         field.removeAttribute('required');
+                        field.setAttribute('data-was-required', 'true');
                     });
                 }
 
@@ -852,12 +858,8 @@ function sidepanel($google_picture, $google_name) {
                     // Remove required from Inireklamo fields
                     document.getElementById('tab5').querySelectorAll('[required]').forEach(field => {
                         field.removeAttribute('required');
+                        field.setAttribute('data-was-required', 'true');
                     });
-                }
-
-                // If complainant is same as victim, copy victim data to complainant on form submit
-                if (sameAsVictimCheckbox.checked) {
-                    window.complainantIsVictim = true;
                 }
 
                 // Close modal
