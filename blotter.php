@@ -1497,51 +1497,40 @@ function sidepanel($google_picture, $google_name) {
                             "model": "llama-3.3-70b-versatile",
                             "messages": [{
                                     "role": "system",
-                                    "content": `You are a complaint classification expert for a Barangay (village) in the Philippines. Analyze the complaint statement and determine the EXACT, SPECIFIC crime or incident type.
+                                    "content": `You are an expert crime classifier for Philippine Barangay incidents. Analyze the complaint carefully and identify the PRIMARY crime.
 
-IMPORTANT INSTRUCTIONS:
-1. Return ONLY ONE specific crime/incident type from the list below
-2. DO NOT add any explanation, category label, or extra text
-3. Return the exact name as shown in the list
-4. Choose the MOST SPECIFIC type that matches the incident
-5. If multiple crimes are mentioned, choose the most serious one
+CRITICAL CLASSIFICATION RULES:
+1. THEFT = Taking property WITHOUT force/threat (pickpocket, burglary, sneaking)
+2. ROBBERY = Taking property WITH force/threats/weapons (holdap, armadong pagnanakaw)
+3. KIDNAPPING = Illegally detaining/taking a person, hostage situations, human trafficking
+4. PHYSICAL ASSAULT = Attacking someone WITH intent to harm (suntok, sipa, bugbog)
+5. PHYSICAL INJURIES = Harm from accident or minor altercation (sugat, gasgas)
+6. MURDER = Intentional killing with planning/aggravating circumstances
+7. HOMICIDE = Killing without premeditation
 
-SERIOUS CRIMES:
-- Murder
-- Homicide
-- Rape
-- Robbery
-- Theft
-- Physical Assault
-- Carnapping
-- Arson
-- Kidnapping
-- Drug-related
-- Illegal Gambling
-- Illegal Possession of Firearms
-- Violation of Special Laws
+RESPONSE FORMAT:
+- Return ONLY ONE crime type from the list
+- NO explanations, categories, or extra words
+- Use EXACT spelling from the list
 
-MINOR COMPLAINTS:
-- Physical Injuries
-- Vandalism
-- Noise Complaints
-- Domestic Violence
-- Trespassing
-- Boundary Disputes
-- Property Disputes
+CRIME TYPES:
+Murder | Homicide | Rape | Robbery | Theft | Physical Assault | Carnapping | Arson | Kidnapping | Drug-related | Illegal Gambling | Illegal Possession of Firearms | Violation of Special Laws | Physical Injuries | Vandalism | Noise Complaints | Domestic Violence | Trespassing | Boundary Disputes | Property Disputes
 
 EXAMPLES:
-Statement: "Ninakaw ang aking cellphone sa kalsada"
-Response: Theft
-
-Statement: "May armadong lalaki na nagnakaw ng pera sa tindahan"
-Response: Robbery
-
-Statement: "Pinatay ang aking kaibigan"
-Response: Murder
-
-Statement: "Nasaktan ako ng kapitbahay ko"
-Response: Physical Injuries`
+"Ninakaw ang wallet ko sa jeep" → Theft
+"Hinoldap ako, tinakot ng baril at kinuha ang pera" → Robbery
+"May lalaking pumasok sa bahay at nagnakaw ng laptop" → Theft
+"Biglang hinila ako at tinutukan ng kutsilyo sa leeg" → Kidnapping
+"Sinuntok ako ng kapitbahay dahil sa alitan" → Physical Assault
+"Nasaktan ako nung nabundol ako ng bisikleta" → Physical Injuries
+"Pinatay ng asawa ang kanyang misis" → Murder
+"Nagtulakan kami at nabaril ko siya ng aksidente" → Homicide
+"Sinaktan ako ng asawa ko" → Domestic Violence
+"Nagnakaw ng motor gamit ang baril" → Robbery
+"Kinidnap ang anak ko at hiningan ng ransom" → Kidnapping
+"Ginahasa ako ng lalaking di ko kilala" → Rape
+"Sinunog ang bahay ng kapitbahay" → Arson
+"Ninakaw ang kotse ko sa parking" → Carnapping`
                                 },
                                 {
                                     "role": "user",

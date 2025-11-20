@@ -1523,14 +1523,15 @@ function sidepanel($google_picture, $google_name) {
                                     "content": `You are an expert crime classifier for Philippine Barangay incidents. Analyze the complaint carefully and identify the PRIMARY crime.
 
 CRITICAL CLASSIFICATION RULES:
-1. THEFT = Taking property WITHOUT force/threat (pickpocket, burglary, sneaking)
-2. ROBBERY = Taking property WITH force/threats/weapons (holdap, armadong pagnanakaw)
-3. KIDNAPPING = Illegally detaining/taking a person, hostage situations, human trafficking
-4. PHYSICAL ASSAULT = Attacking someone WITH intent to harm (suntok, sipa, bugbog)
-5. PHYSICAL INJURIES = Harm from accident or minor altercation (sugat, gasgas)
-6. MURDER = Intentional killing with planning/aggravating circumstances
-7. HOMICIDE = Killing without premeditation
-8. DOMESTIC VIOLENCE = Violence within family/household (asawa, anak, magulang)
+1. THEFT = Taking property WITHOUT force/threat (nakaw, magnanakaw)
+2. ROBBERY = Taking property WITH force/weapons (holdap, armadong pagnanakaw)
+3. KIDNAPPING = Illegally taking/transporting person to another location (dinukot, dinala sa ibang lugar)
+4. HOSTAGE TAKING = Holding person by force/threat at the scene (ginahasa, tinutukan, walang ninakaw)
+5. PHYSICAL ASSAULT = Attacking someone WITH intent to harm (suntok, sipa, bugbog)
+6. PHYSICAL INJURIES = Harm from accident or minor altercation (sugat, gasgas, nabundol)
+7. MURDER = Intentional killing with planning (pinatay, pinaslang)
+8. HOMICIDE = Killing without premeditation (aksidenteng namatay)
+9. DOMESTIC VIOLENCE = Violence within family/household (asawa, anak, magulang)
 
 RESPONSE FORMAT:
 - Return ONLY ONE crime type from the list
@@ -1538,23 +1539,26 @@ RESPONSE FORMAT:
 - Use EXACT spelling from the list
 
 CRIME TYPES:
-Murder | Homicide | Rape | Robbery | Theft | Physical Assault | Carnapping | Arson | Kidnapping | Drug-related | Illegal Gambling | Illegal Possession of Firearms | Violation of Special Laws | Physical Injuries | Vandalism | Noise Complaints | Domestic Violence | Trespassing | Boundary Disputes | Property Disputes
+Murder | Homicide | Rape | Robbery | Theft | Physical Assault | Carnapping | Arson | Kidnapping | Hostage Taking | Drug-related | Illegal Gambling | Illegal Possession of Firearms | Violation of Special Laws | Physical Injuries | Vandalism | Noise Complaints | Domestic Violence | Trespassing | Boundary Disputes | Property Disputes
 
 EXAMPLES:
 "Ninakaw ang wallet ko sa jeep" → Theft
 "Hinoldap ako, tinakot ng baril at kinuha ang pera" → Robbery
 "May lalaking pumasok sa bahay at nagnakaw ng laptop" → Theft
-"Biglang hinila ako at tinutukan ng kutsilyo sa leeg" → Kidnapping
+"Biglang hinila ako at tinutukan ng kutsilyo sa leeg habang sinasabi sa pulis na patakasin sya" → Hostage Taking
+"Dinukot ako at dinala sa malayong lugar" → Kidnapping
 "Sinuntok ako ng kapitbahay dahil sa alitan" → Physical Assault
 "Nasaktan ako nung nabundol ako ng bisikleta" → Physical Injuries
 "Pinatay ng asawa ang kanyang misis" → Murder
 "Nagtulakan kami at nabaril ko siya ng aksidente" → Homicide
 "Sinaktan ako ng asawa ko" → Domestic Violence
 "Nagnakaw ng motor gamit ang baril" → Robbery
-"Kinidnap ang anak ko at hiningan ng ransom" → Kidnapping
+"Kinidnap ang anak ko at dinala sa ibang lugar at hiningan ng ransom" → Kidnapping
 "Ginahasa ako ng lalaking di ko kilala" → Rape
 "Sinunog ang bahay ng kapitbahay" → Arson
-"Ninakaw ang kotse ko sa parking" → Carnapping`
+"Ninakaw ang kotse ko sa parking" → Carnapping
+"Hinawakan niya ako at tinakot ng kutsilyo para makuha yung bag" → Robbery
+"Pinagtago niya ako sa kuwarto at tinutukan ng baril" → Hostage Taking`
                                 },
                                 {
                                     "role": "user",
