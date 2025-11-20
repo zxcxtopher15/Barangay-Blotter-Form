@@ -78,7 +78,7 @@ foreach ($csvData as $row) {
         $data = array_combine($headers, $row);
 
         // Extract data from CSV
-        $incident_date = trim($data['DATE'] ?? '');
+        $incident_date_raw = trim($data['DATE'] ?? '');
         $case_no = trim($data['CASE NO.'] ?? '');
         $case_title = trim($data['CASE TITLE'] ?? '');
         $complainant_last = trim($data['COMPLAINANT LAST NAME'] ?? '');
@@ -91,6 +91,9 @@ foreach ($csvData as $row) {
         $respondent_middle = trim($data['RESPONDENT MIDDLE NAME'] ?? '');
         $respondent_address = trim($data['RESPONDENT ADDRESS'] ?? '');
         $respondent_phone = trim($data['RESPONDENT CONTACT NO.'] ?? '');
+
+        // Parse date - handle multiple formats (M/D/YYYY, Y-m-d, etc.)
+        $incident_date = parseDate($incident_date_raw);
 
         // Validate required fields
         if (empty($case_title) || empty($incident_date) || empty($complainant_first) || empty($complainant_last)) {
@@ -121,12 +124,6 @@ foreach ($csvData as $row) {
             ? $complainant_address
             : 'San Miguel, Pasig City';
 
-        // For now, skip AI and use fallback to test if import works
-        $salaysay = "Ito ay reklamo tungkol sa: $case_title. Ang nag-reklamo ay si $complainant_full laban kay $respondent_full. Nangyari ito sa $location.";
-        $complaint_description = 'Physical Injuries';
-        $pnp_recommendation = 'BARANGAY_ACTION';
-
-        /* AI generation disabled temporarily for testing
         // Generate AI statement (salaysay) based on case title
         try {
             $salaysay = generateSalaysay($case_title, $complainant_full, $complainant_full, $respondent_full, $location);
@@ -146,7 +143,22 @@ foreach ($csvData as $row) {
             $complaint_description = 'Physical Injuries';
             $pnp_recommendation = 'BARANGAY_ACTION';
         }
-        */
+
+        // Geocode address using Nominatim API (San Miguel, Pasig City only)
+        $incident_latitude = null;
+        $incident_longitude = null;
+
+        if (!empty($complainant_address) && $complainant_address !== 'N/A') {
+            try {
+                $geocoded = geocodeAddress($complainant_address);
+                $incident_latitude = $geocoded['lat'];
+                $incident_longitude = $geocoded['lon'];
+            } catch (Exception $e) {
+                // Geocoding failed, leave as null
+                $incident_latitude = null;
+                $incident_longitude = null;
+            }
+        }
 
         // Generate realistic test data for missing fields
         $genders = ['Male', 'Female'];
@@ -171,13 +183,13 @@ foreach ($csvData as $row) {
         flush();
 
         $stmt = $conn->prepare("INSERT INTO complaints (
-            incident_datetime, complaint_description, pnp_recommendation, incident_location,
+            incident_datetime, complaint_description, pnp_recommendation, incident_location, incident_latitude, incident_longitude,
             complainant_first_name, complainant_middle_name, complainant_last_name,
             complainant_dob, complainant_age, complainant_gender, complainant_phone, complainant_address,
             respondent_first_name, respondent_middle_name, respondent_last_name,
             respondent_dob, respondent_age, respondent_gender, respondent_phone, respondent_address,
             complaint_statement, reported_by, is_affirmed, desk_officer_name
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, ?)");
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, ?)");
 
         if (!$stmt) {
             echo json_encode([
@@ -196,11 +208,13 @@ foreach ($csvData as $row) {
         flush();
 
         $bind_result = $stmt->bind_param(
-            "ssssssssisssssssisssss",
+            "ssssddsssississississss",
             $incident_datetime,
             $complaint_description,
             $pnp_recommendation,
             $location,
+            $incident_latitude,
+            $incident_longitude,
             $complainant_first,
             $complainant_middle,
             $complainant_last,
@@ -428,5 +442,77 @@ Examples:
 
     // Throw exception if AI fails so we can use fallback
     throw new Exception("AI API returned HTTP $httpCode");
+}
+
+// Helper function to geocode address using Nominatim API
+function geocodeAddress($address) {
+    // Ensure address is in San Miguel, Pasig City
+    if (stripos($address, 'San Miguel') === false || stripos($address, 'Pasig') === false) {
+        $address .= ', San Miguel, Pasig City, Philippines';
+    }
+
+    // Use Nominatim API for geocoding
+    $query = urlencode($address);
+    $url = "https://nominatim.openstreetmap.org/search?q={$query}&format=json&limit=1&countrycodes=ph";
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'User-Agent: Barangay-Blotter-System/1.0'
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    if ($curlError) {
+        throw new Exception("Geocoding failed: $curlError");
+    }
+
+    if ($httpCode === 200) {
+        $result = json_decode($response, true);
+        if (!empty($result) && isset($result[0]['lat']) && isset($result[0]['lon'])) {
+            return [
+                'lat' => floatval($result[0]['lat']),
+                'lon' => floatval($result[0]['lon'])
+            ];
+        }
+    }
+
+    throw new Exception("Geocoding failed: No results found");
+}
+
+// Helper function to parse dates in various formats
+function parseDate($dateString) {
+    if (empty($dateString)) {
+        return null;
+    }
+
+    // Try to parse using DateTime
+    $formats = [
+        'm/d/Y',     // 1/30/2025
+        'n/j/Y',     // 1/30/2025 (without leading zeros)
+        'Y-m-d',     // 2025-01-30
+        'd/m/Y',     // 30/01/2025
+        'm-d-Y',     // 01-30-2025
+        'Y/m/d',     // 2025/01/30
+    ];
+
+    foreach ($formats as $format) {
+        $date = DateTime::createFromFormat($format, $dateString);
+        if ($date !== false) {
+            return $date->format('Y-m-d');
+        }
+    }
+
+    // If all formats fail, try strtotime
+    $timestamp = strtotime($dateString);
+    if ($timestamp !== false) {
+        return date('Y-m-d', $timestamp);
+    }
+
+    return null;
 }
 ?>
