@@ -305,6 +305,12 @@
                             <input type="date" id="end-date" class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-secondary" value="<?= htmlspecialchars($end_date) ?>">
                         </div>
                         <div class="flex-grow flex justify-end gap-4">
+                            <button id="import-btn" class="h-10 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                Import Data
+                            </button>
                             <button id="archive-toggle-btn" class="w-32 h-10 flex items-center justify-center rounded-lg <?= $is_archive_mode ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' ?>">
                                 <?= $is_archive_mode ? 'View Active' : 'View Archived' ?>
                             </button>
@@ -416,6 +422,88 @@
             <div class="flex justify-end space-x-3">
                 <button id="cancel-action" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">Cancel</button>
                 <button id="confirm-action" class="px-4 py-2 rounded-lg"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Data Modal -->
+    <div id="import-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="text-2xl font-bold text-gray-800">Import Complaint Data</h3>
+                <button id="close-import-modal" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mb-6">
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <p class="text-sm text-blue-700">
+                                <strong>CSV Format Required:</strong> case_title, incident_date, incident_time, complainant_name, victim_name, respondent_name, location
+                            </p>
+                            <p class="text-xs text-blue-600 mt-2">
+                                AI will automatically generate detailed salaysay (statement) based on the case title.
+                            </p>
+                            <a href="actions/download_import_template.php" class="text-xs text-blue-600 underline mt-2 inline-block">Download CSV Template</a>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="import-form" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select CSV File</label>
+                        <input type="file" id="import-file" name="import_file" accept=".csv" class="w-full p-2 border border-gray-300 rounded-md" required>
+                    </div>
+
+                    <div id="import-preview" class="hidden mb-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Preview (First 5 rows)</h4>
+                        <div class="max-h-60 overflow-auto border rounded">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr id="preview-headers"></tr>
+                                </thead>
+                                <tbody id="preview-body" class="bg-white divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="import-progress" class="hidden mb-4">
+                        <div class="relative pt-1">
+                            <div class="flex mb-2 items-center justify-between">
+                                <div>
+                                    <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">
+                                        Processing
+                                    </span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs font-semibold inline-block text-blue-600">
+                                        <span id="progress-current">0</span> / <span id="progress-total">0</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200">
+                                <div id="progress-bar" style="width:0%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500 transition-all duration-300"></div>
+                            </div>
+                        </div>
+                        <div id="progress-log" class="max-h-40 overflow-auto bg-gray-50 p-3 rounded text-xs font-mono"></div>
+                    </div>
+
+                    <div id="import-results" class="hidden mb-4"></div>
+
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancel-import" class="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">Cancel</button>
+                        <button type="submit" id="start-import" class="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Start Import</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -1118,6 +1206,181 @@
             setEditMode(false); // <--- ADD THIS LINE
         }
     });
+
+    // Import Modal Functionality
+    const importBtn = document.getElementById('import-btn');
+    const importModal = document.getElementById('import-modal');
+    const closeImportModal = document.getElementById('close-import-modal');
+    const cancelImportBtn = document.getElementById('cancel-import');
+    const importForm = document.getElementById('import-form');
+    const importFile = document.getElementById('import-file');
+    const importPreview = document.getElementById('import-preview');
+    const importProgress = document.getElementById('import-progress');
+    const importResults = document.getElementById('import-results');
+    const progressBar = document.getElementById('progress-bar');
+    const progressCurrent = document.getElementById('progress-current');
+    const progressTotal = document.getElementById('progress-total');
+    const progressLog = document.getElementById('progress-log');
+
+    // Open import modal
+    importBtn.addEventListener('click', () => {
+        importModal.classList.remove('hidden');
+        resetImportForm();
+    });
+
+    // Close import modal
+    closeImportModal.addEventListener('click', () => {
+        importModal.classList.add('hidden');
+    });
+
+    cancelImportBtn.addEventListener('click', () => {
+        importModal.classList.add('hidden');
+    });
+
+    // Reset import form
+    function resetImportForm() {
+        importForm.reset();
+        importPreview.classList.add('hidden');
+        importProgress.classList.add('hidden');
+        importResults.classList.add('hidden');
+        progressLog.innerHTML = '';
+    }
+
+    // Preview CSV file
+    importFile.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split('\n').filter(line => line.trim());
+
+                if (lines.length > 0) {
+                    const headers = lines[0].split(',').map(h => h.trim());
+                    const previewRows = lines.slice(1, 6);
+
+                    // Display headers
+                    const headerRow = document.getElementById('preview-headers');
+                    headerRow.innerHTML = headers.map(h => `<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">${h}</th>`).join('');
+
+                    // Display preview rows
+                    const previewBody = document.getElementById('preview-body');
+                    previewBody.innerHTML = previewRows.map(row => {
+                        const cells = row.split(',').map(c => c.trim());
+                        return `<tr>${cells.map(c => `<td class="px-4 py-2 text-xs">${c}</td>`).join('')}</tr>`;
+                    }).join('');
+
+                    importPreview.classList.remove('hidden');
+                }
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    // Handle import form submission
+    importForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const file = importFile.files[0];
+        if (!file) {
+            alert('Please select a CSV file');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('import_file', file);
+
+        // Show progress
+        importProgress.classList.remove('hidden');
+        importResults.classList.add('hidden');
+        document.getElementById('start-import').disabled = true;
+
+        try {
+            const response = await fetch('actions/import_complaints.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const {done, value} = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, {stream: true});
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // Keep incomplete line in buffer
+
+                lines.forEach(line => {
+                    if (line.trim()) {
+                        try {
+                            const data = JSON.parse(line);
+                            handleProgressUpdate(data);
+                        } catch (e) {
+                            console.error('Error parsing JSON:', e, line);
+                        }
+                    }
+                });
+            }
+
+            // Process any remaining buffer
+            if (buffer.trim()) {
+                try {
+                    const data = JSON.parse(buffer);
+                    handleProgressUpdate(data);
+                } catch (e) {
+                    console.error('Error parsing final JSON:', e);
+                }
+            }
+
+        } catch (error) {
+            console.error('Import error:', error);
+            progressLog.innerHTML += `<div class="text-red-600">Error: ${error.message}</div>`;
+        } finally {
+            document.getElementById('start-import').disabled = false;
+        }
+    });
+
+    function handleProgressUpdate(data) {
+        if (data.type === 'progress') {
+            const percent = (data.current / data.total) * 100;
+            progressBar.style.width = percent + '%';
+            progressCurrent.textContent = data.current;
+            progressTotal.textContent = data.total;
+            progressLog.innerHTML += `<div class="text-gray-600">${data.message}</div>`;
+            progressLog.scrollTop = progressLog.scrollHeight;
+        } else if (data.type === 'error') {
+            progressLog.innerHTML += `<div class="text-red-600">❌ ${data.message}</div>`;
+            progressLog.scrollTop = progressLog.scrollHeight;
+        } else if (data.type === 'success') {
+            progressLog.innerHTML += `<div class="text-green-600">✅ ${data.message}</div>`;
+            progressLog.scrollTop = progressLog.scrollHeight;
+        } else if (data.type === 'complete') {
+            importResults.classList.remove('hidden');
+            importResults.innerHTML = `
+                <div class="bg-green-50 border-l-4 border-green-500 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-green-700">
+                                <strong>Import Complete!</strong><br>
+                                Successfully imported: ${data.success}<br>
+                                Failed: ${data.failed}<br>
+                                Total processed: ${data.total}
+                            </p>
+                            <button onclick="location.reload()" class="mt-2 text-xs text-green-600 underline">Refresh page to see new records</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }
 
 });
     </script>
