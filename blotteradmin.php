@@ -60,12 +60,12 @@ if (isset($_POST['submit_complaint'])) {
 
     $stmt = $conn->prepare("INSERT INTO complaints (
         incident_datetime, complaint_description, incident_location, incident_latitude, incident_longitude,
-        complainant_first_name, complainant_middle_name, complainant_last_name, complainant_age, complainant_gender, complainant_phone, complainant_address,
-        victim_first_name, victim_middle_name, victim_last_name, victim_age, victim_gender, victim_phone, victim_address,
-        witness_first_name, witness_middle_name, witness_last_name, witness_age, witness_gender, witness_phone, witness_address,
-        respondent_first_name, respondent_middle_name, respondent_last_name, respondent_age, respondent_gender, respondent_phone, respondent_address,
+        complainant_first_name, complainant_middle_name, complainant_last_name, complainant_dob, complainant_age, complainant_gender, complainant_phone, complainant_address,
+        victim_first_name, victim_middle_name, victim_last_name, victim_dob, victim_age, victim_gender, victim_phone, victim_address,
+        witness_first_name, witness_middle_name, witness_last_name, witness_dob, witness_age, witness_gender, witness_phone, witness_address,
+        respondent_first_name, respondent_middle_name, respondent_last_name, respondent_dob, respondent_age, respondent_gender, respondent_phone, respondent_address,
         complaint_statement, reported_by, is_affirmed, desk_officer_name
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
     $desk_officer_name = $google_name;
     $reported_by = isset($_POST['reported_by']) ? 1 : 0;
@@ -80,6 +80,7 @@ if (isset($_POST['submit_complaint'])) {
         empty($_POST['complainant_first_name']) ? null : $_POST['complainant_first_name'],
         empty($_POST['complainant_middle_name']) ? null : $_POST['complainant_middle_name'],
         empty($_POST['complainant_last_name']) ? null : $_POST['complainant_last_name'],
+        empty($_POST['complainant_dob']) ? null : $_POST['complainant_dob'],
         empty($_POST['complainant_age']) ? null : $_POST['complainant_age'],
         empty($_POST['complainant_gender']) ? null : $_POST['complainant_gender'],
         empty($_POST['complainant_phone']) ? null : $_POST['complainant_phone'],
@@ -87,6 +88,7 @@ if (isset($_POST['submit_complaint'])) {
         empty($_POST['victim_first_name']) ? null : $_POST['victim_first_name'],
         empty($_POST['victim_middle_name']) ? null : $_POST['victim_middle_name'],
         empty($_POST['victim_last_name']) ? null : $_POST['victim_last_name'],
+        empty($_POST['victim_dob']) ? null : $_POST['victim_dob'],
         empty($_POST['victim_age']) ? null : $_POST['victim_age'],
         empty($_POST['victim_gender']) ? null : $_POST['victim_gender'],
         empty($_POST['victim_phone']) ? null : $_POST['victim_phone'],
@@ -94,6 +96,7 @@ if (isset($_POST['submit_complaint'])) {
         empty($_POST['witness_first_name']) ? null : $_POST['witness_first_name'],
         empty($_POST['witness_middle_name']) ? null : $_POST['witness_middle_name'],
         empty($_POST['witness_last_name']) ? null : $_POST['witness_last_name'],
+        empty($_POST['witness_dob']) ? null : $_POST['witness_dob'],
         empty($_POST['witness_age']) ? null : $_POST['witness_age'],
         empty($_POST['witness_gender']) ? null : $_POST['witness_gender'],
         empty($_POST['witness_phone']) ? null : $_POST['witness_phone'],
@@ -101,6 +104,7 @@ if (isset($_POST['submit_complaint'])) {
         empty($_POST['respondent_first_name']) ? null : $_POST['respondent_first_name'],
         empty($_POST['respondent_middle_name']) ? null : $_POST['respondent_middle_name'],
         empty($_POST['respondent_last_name']) ? null : $_POST['respondent_last_name'],
+        empty($_POST['respondent_dob']) ? null : $_POST['respondent_dob'],
         empty($_POST['respondent_age']) ? null : $_POST['respondent_age'],
         empty($_POST['respondent_gender']) ? null : $_POST['respondent_gender'],
         empty($_POST['respondent_phone']) ? null : $_POST['respondent_phone'],
@@ -111,7 +115,7 @@ if (isset($_POST['submit_complaint'])) {
         $desk_officer_name,
     ];
 
-    $types = "sssddsssissssssissssssissssssissssiss";
+    $types = "sssddssssissssssissssssissssssissssiss";
     $stmt->bind_param($types, ...$params);
 
     if ($stmt->execute()) {
@@ -128,18 +132,18 @@ if (isset($_POST['submit_complaint'])) {
 }
 
 function sidepanel($google_picture, $google_name) {
-    $currentPage = basename($_SERVER['PHP_SELF']);
-    $activeClasses = 'bg-blue-500 text-white shadow';
-    $inactiveClasses = 'text-gray-600 hover:bg-gray-100';
+        $currentPage = basename($_SERVER['PHP_SELF']);
+        $activeClasses = 'bg-blue-500 text-white shadow';
+        $inactiveClasses = 'text-gray-600 hover:bg-gray-100';
 
-    // Prevents reloading the page when clicking the active link
-    $dashboardClick = ($currentPage === 'dashboardadmin.php') ? 'onclick="event.preventDefault()"' : '';
-    $blotterClick   = ($currentPage === 'blotteradmin.php')   ? 'onclick="event.preventDefault()"' : '';
-    $reportsClick   = ($currentPage === 'reportsadmin.php')   ? 'onclick="event.preventDefault()"' : '';
-    $accountsClick  = ($currentPage === 'accountsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
-    $settingsClick  = ($currentPage === 'settingsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
+        // Prevents reloading the page when clicking the active link
+        $dashboardClick = ($currentPage === 'dashboardadmin.php') ? 'onclick="event.preventDefault()"' : '';
+        $blotterClick   = ($currentPage === 'blotteradmin.php')   ? 'onclick="event.preventDefault()"' : '';
+        $reportsClick   = ($currentPage === 'reportsadmin.php')   ? 'onclick="event.preventDefault()"' : '';
+        $accountsClick  = ($currentPage === 'accountsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
+        $settingsClick  = ($currentPage === 'settingsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
 
-    echo '
+        echo '
         <!-- START: Sidebar -->
         <div id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white text-secondary flex flex-col p-4 items-center shadow-lg z-20">
             <div class="text-center py-4">
@@ -431,11 +435,10 @@ function sidepanel($google_picture, $google_name) {
 
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Edad</label>
-                                    <select name="complainant_age" class="w-full p-2 border border-gray-300 rounded-md">
-                                        <option value="">Pumili ng Edad</option>
-                                        <?php for ($i = 18; $i <= 100; $i++): ?><option value="<?= $i ?>"><?= $i ?></option><?php endfor; ?>
-                                    </select>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan</label>
+                                    <input type="date" name="complainant_dob" id="complainant_dob" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <input type="hidden" name="complainant_age" id="complainant_age">
+                                    <p class="text-xs text-gray-500 mt-1">Edad: <span id="complainant_age_display">-</span></p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Kasarian</label>
@@ -456,20 +459,62 @@ function sidepanel($google_picture, $google_name) {
                                 <div class="grid md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs text-gray-600 mb-1">Region *</label>
-                                        <input type="text" class="w-full p-2 border border-gray-300 rounded-md" value="National Capital Region" readonly>
+                                        <input type="text" class="w-full p-2 border border-gray-300 rounded-md bg-gray-100" value="National Capital Region" readonly>
                                     </div>
                                     <div>
                                         <label class="block text-xs text-gray-600 mb-1">City / Municipality *</label>
-                                        <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Select City/Municipality">
+                                        <input type="text" id="complainant_city" list="cities" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Start typing...">
+                                        <datalist id="cities">
+                                            <option value="Pasig City">
+                                            <option value="Quezon City">
+                                            <option value="Mandaluyong City">
+                                            <option value="Makati City">
+                                            <option value="Taguig City">
+                                            <option value="Manila">
+                                            <option value="Marikina City">
+                                            <option value="San Juan City">
+                                        </datalist>
                                     </div>
                                 </div>
                                 <div class="mt-2">
                                     <label class="block text-xs text-gray-600 mb-1">Barangay *</label>
-                                    <input type="text" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Select Barangay">
+                                    <input type="text" id="complainant_barangay" list="pasig_barangays" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Start typing...">
+                                    <datalist id="pasig_barangays">
+                                        <option value="San Miguel">
+                                        <option value="Bagong Ilog">
+                                        <option value="Bagong Katipunan">
+                                        <option value="Bambang">
+                                        <option value="Buting">
+                                        <option value="Caniogan">
+                                        <option value="Dela Paz">
+                                        <option value="Kalawaan">
+                                        <option value="Kapasigan">
+                                        <option value="Kapitolyo">
+                                        <option value="Malinao">
+                                        <option value="Manggahan">
+                                        <option value="Maybunga">
+                                        <option value="Oranbo">
+                                        <option value="Palatiw">
+                                        <option value="Pinagbuhatan">
+                                        <option value="Pineda">
+                                        <option value="Rosario">
+                                        <option value="Sagad">
+                                        <option value="San Antonio">
+                                        <option value="San Joaquin">
+                                        <option value="San Jose">
+                                        <option value="San Nicolas">
+                                        <option value="Santa Cruz">
+                                        <option value="Santa Lucia">
+                                        <option value="Santa Rosa">
+                                        <option value="Santo Tomas">
+                                        <option value="Santolan">
+                                        <option value="Sumilang">
+                                        <option value="Ugong">
+                                    </datalist>
                                 </div>
                                 <div class="mt-2">
                                     <label class="block text-xs text-gray-600 mb-1">Street Name, Building, House No. *</label>
-                                    <input type="text" name="complainant_address" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter detailed street address">
+                                    <input type="text" name="complainant_address" id="complainant_street" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter detailed street address">
                                 </div>
                             </div>
 
@@ -500,11 +545,10 @@ function sidepanel($google_picture, $google_name) {
 
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Edad</label>
-                                    <select name="victim_age" class="w-full p-2 border border-gray-300 rounded-md" required>
-                                        <option value="">Pumili ng Edad</option>
-                                        <?php for ($i = 1; $i <= 100; $i++): ?><option value="<?= $i ?>"><?= $i ?></option><?php endfor; ?>
-                                    </select>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan</label>
+                                    <input type="date" name="victim_dob" id="victim_dob" class="w-full p-2 border border-gray-300 rounded-md" required>
+                                    <input type="hidden" name="victim_age" id="victim_age" required>
+                                    <p class="text-xs text-gray-500 mt-1">Edad: <span id="victim_age_display">-</span></p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Kasarian</label>
@@ -552,11 +596,10 @@ function sidepanel($google_picture, $google_name) {
 
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Edad</label>
-                                    <select name="witness_age" class="w-full p-2 border border-gray-300 rounded-md">
-                                        <option value="">Pumili ng Edad</option>
-                                        <?php for ($i = 1; $i <= 100; $i++): ?><option value="<?= $i ?>"><?= $i ?></option><?php endfor; ?>
-                                    </select>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan</label>
+                                    <input type="date" name="witness_dob" id="witness_dob" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <input type="hidden" name="witness_age" id="witness_age">
+                                    <p class="text-xs text-gray-500 mt-1">Edad: <span id="witness_age_display">-</span></p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Kasarian</label>
@@ -604,11 +647,10 @@ function sidepanel($google_picture, $google_name) {
 
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Edad</label>
-                                    <select name="respondent_age" class="w-full p-2 border border-gray-300 rounded-md">
-                                        <option value="">Pumili ng Edad</option>
-                                        <?php for ($i = 1; $i <= 100; $i++): ?><option value="<?= $i ?>"><?= $i ?></option><?php endfor; ?>
-                                    </select>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan</label>
+                                    <input type="date" name="respondent_dob" id="respondent_dob" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <input type="hidden" name="respondent_age" id="respondent_age">
+                                    <p class="text-xs text-gray-500 mt-1">Edad: <span id="respondent_age_display">-</span></p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Kasarian</label>
@@ -899,88 +941,106 @@ function sidepanel($google_picture, $google_name) {
             // Initialize Map with Leaflet + OpenStreetMap
             let map, marker;
 
-            // Initialize map first
-            map = L.map('map', {
-                maxBoundsViscosity: 1.0
-            }).setView([14.5678, 121.0854], 16);
+            // Barangay San Miguel, Pasig City boundaries (approximate)
+            // These coordinates define the polygon boundary of the barangay
+            const barangayBounds = L.polygon([
+                [14.5745, 121.0795], // Northwest corner
+                [14.5755, 121.0885], // Northeast corner
+                [14.5680, 121.0910], // Southeast corner
+                [14.5645, 121.0885], // South point
+                [14.5635, 121.0835], // Southwest corner
+                [14.5660, 121.0780]  // West point
+            ], {
+                color: 'blue',
+                weight: 2,
+                opacity: 0.6,
+                fillColor: '#3388ff',
+                fillOpacity: 0.1
+            });
 
-            // Add tiles
+            // Initialize map centered on Barangay San Miguel, Pasig City
+            map = L.map('map').setView([14.5690, 121.0850], 15);
+
+            // Add OpenStreetMap tiles (free!)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors',
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                 maxZoom: 19
             }).addTo(map);
 
-            const sanMiguelPolygon = L.polygon([
-                [14.5632, 121.0799],
-                [14.5632, 121.0908],
-                [14.5719, 121.0908],
-                [14.5719, 121.0799]
-            ], {
-                color: 'blue',
-                fillColor: 'blue',
-                fillOpacity: 0.1,
-                interactive: false
-            }).addTo(map);
+            // Add barangay boundary to map
+            barangayBounds.addTo(map);
+            barangayBounds.bindPopup('Barangay San Miguel Boundary');
 
-            // Fit map to polygon
-            map.fitBounds(sanMiguelPolygon.getBounds());
+            // Function to check if point is within barangay
+            function isWithinBarangay(lat, lng) {
+                const point = L.latLng(lat, lng);
+                return barangayBounds.getBounds().contains(point);
+            }
 
-            // CLICK EVENT
+            // Add click event to place pin
             map.on('click', function(e) {
-                const latlng = e.latlng;
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
 
-                // Check if click is inside polygon using leaflet-pip
-                const inside = leafletPip.pointInLayer(latlng, sanMiguelPolygon);
-
-                if (inside.length === 0) {
-                    alert("You can only pin inside Barangay San Miguel, Pasig City.");
+                // Check if click is within barangay boundaries
+                if (!isWithinBarangay(lat, lng)) {
+                    alert('Mangyaring pumili ng lokasyon sa loob ng Barangay San Miguel lamang.\nPlease select a location within Barangay San Miguel only.');
                     return;
                 }
 
+                // Remove existing marker if any
                 if (marker) {
                     map.removeLayer(marker);
                 }
 
-                marker = L.marker(latlng, {
+                // Add new marker
+                marker = L.marker([lat, lng], {
                     draggable: true
                 }).addTo(map);
 
-                document.getElementById('incident_latitude').value = latlng.lat;
-                document.getElementById('incident_longitude').value = latlng.lng;
+                // Save coordinates to hidden fields
+                document.getElementById('incident_latitude').value = lat;
+                document.getElementById('incident_longitude').value = lng;
 
-                // Reverse geocode
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}&zoom=18&addressdetails=1`)
-                    .then(r => r.json())
+                // Reverse geocode using Nominatim (free OpenStreetMap service)
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+                    .then(response => response.json())
                     .then(data => {
                         if (data.display_name) {
                             document.getElementById('incident_location_display').value = data.display_name;
                             document.getElementById('incident_location').value = data.display_name;
                         }
+                    })
+                    .catch(error => {
+                        console.error('Geocoding error:', error);
+                        document.getElementById('incident_location_display').value = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
                     });
 
-                // DRAG EVENT
+                // Make marker draggable and update location on drag
                 marker.on('dragend', function(e) {
-                    const newLatLng = e.target.getLatLng();
+                    const newLat = e.target.getLatLng().lat;
+                    const newLng = e.target.getLatLng().lng;
 
-                    const insideDrag = leafletPip.pointInLayer(newLatLng, sanMiguelPolygon);
-
-                    if (insideDrag.length === 0) {
-                        alert("Pin must stay inside Barangay San Miguel.");
-                        marker.setLatLng(latlng); // revert to original click position
+                    // Check if new position is within barangay
+                    if (!isWithinBarangay(newLat, newLng)) {
+                        alert('Mangyaring ilagay ang marker sa loob ng Barangay San Miguel lamang.\nPlease place the marker within Barangay San Miguel only.');
+                        // Reset marker to previous valid position or center
+                        marker.setLatLng([14.5690, 121.0850]);
                         return;
                     }
 
-                    document.getElementById('incident_latitude').value = newLatLng.lat;
-                    document.getElementById('incident_longitude').value = newLatLng.lng;
+                    document.getElementById('incident_latitude').value = newLat;
+                    document.getElementById('incident_longitude').value = newLng;
 
-                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLatLng.lat}&lon=${newLatLng.lng}&zoom=18&addressdetails=1`)
-                        .then(r => r.json())
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}&zoom=18&addressdetails=1`)
+                        .then(response => response.json())
                         .then(data => {
                             if (data.display_name) {
                                 document.getElementById('incident_location_display').value = data.display_name;
                                 document.getElementById('incident_location').value = data.display_name;
                             }
-                        });
+                        })
+                        .catch(error => console.error('Geocoding error:', error));
                 });
             });
 
@@ -1246,6 +1306,15 @@ function sidepanel($google_picture, $google_name) {
 
             // Form submission: Copy victim data to complainant if they're the same
             document.getElementById('blotterForm').addEventListener('submit', function(e) {
+                // Build full complainant address
+                const street = document.getElementById('complainant_street')?.value || '';
+                const barangay = document.getElementById('complainant_barangay')?.value || '';
+                const city = document.getElementById('complainant_city')?.value || '';
+                if (street || barangay || city) {
+                    const fullAddress = [street, barangay, city, 'National Capital Region'].filter(Boolean).join(', ');
+                    document.querySelector('[name="complainant_address"]').value = fullAddress;
+                }
+
                 if (window.complainantIsVictim) {
                     // Copy victim data to complainant fields
                     document.querySelector('[name="complainant_first_name"]').value = document.querySelector('[name="victim_first_name"]').value;
@@ -1256,6 +1325,47 @@ function sidepanel($google_picture, $google_name) {
                     document.querySelector('[name="complainant_phone"]').value = document.querySelector('[name="victim_phone"]').value;
                     document.querySelector('[name="complainant_address"]').value = document.querySelector('[name="victim_address"]').value;
                 }
+            });
+
+            // Auto-calculate age from DOB
+            function calculateAge(dob) {
+                if (!dob) return null;
+                const birthDate = new Date(dob);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                return age >= 0 ? age : null;
+            }
+
+            // Complainant DOB
+            document.getElementById('complainant_dob')?.addEventListener('change', function() {
+                const age = calculateAge(this.value);
+                document.getElementById('complainant_age').value = age || '';
+                document.getElementById('complainant_age_display').textContent = age !== null ? age + ' taong gulang' : '-';
+            });
+
+            // Victim DOB
+            document.getElementById('victim_dob')?.addEventListener('change', function() {
+                const age = calculateAge(this.value);
+                document.getElementById('victim_age').value = age || '';
+                document.getElementById('victim_age_display').textContent = age !== null ? age + ' taong gulang' : '-';
+            });
+
+            // Witness DOB
+            document.getElementById('witness_dob')?.addEventListener('change', function() {
+                const age = calculateAge(this.value);
+                document.getElementById('witness_age').value = age || '';
+                document.getElementById('witness_age_display').textContent = age !== null ? age + ' taong gulang' : '-';
+            });
+
+            // Respondent DOB
+            document.getElementById('respondent_dob')?.addEventListener('change', function() {
+                const age = calculateAge(this.value);
+                document.getElementById('respondent_age').value = age || '';
+                document.getElementById('respondent_age_display').textContent = age !== null ? age + ' taong gulang' : '-';
             });
 
             // Sidebar Toggle
