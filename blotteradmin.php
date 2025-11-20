@@ -123,7 +123,7 @@ if (isset($_POST['submit_complaint'])) {
     // respondent: fname, mname, lname, dob, age, gender, phone, address = ssssiss (8)
     // final: statement, reported_by, is_affirmed, officer = siis (4)
     // Total: 5 + 8 + 8 + 8 + 8 + 4 = 41
-    $types = "sssddssssissssssissssssissssssisssiis";
+    $types = "sssddssssissssssissssssissssssisssiiis";
     $stmt->bind_param($types, ...$params);
 
     if ($stmt->execute()) {
