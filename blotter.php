@@ -1507,6 +1507,7 @@ CRITICAL CLASSIFICATION RULES:
 5. PHYSICAL INJURIES = Harm from accident or minor altercation (sugat, gasgas)
 6. MURDER = Intentional killing with planning/aggravating circumstances
 7. HOMICIDE = Killing without premeditation
+8. DOMESTIC VIOLENCE = Violence within family/household (asawa, anak, magulang)
 
 RESPONSE FORMAT:
 - Return ONLY ONE crime type from the list
