@@ -362,13 +362,17 @@ function sidepanel($google_picture, $google_name) {
                             </div>
 
                             <div class="mb-6">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Lugar ng Pinangyarihan</label>
-                                <p class="text-xs text-gray-500 mb-2">I-click ang mapa upang pumili ng lokasyon</p>
-                                <div id="map" class="mb-3"></div>
-                                <input type="text" name="incident_location_display" id="incident_location_display" class="w-full p-2 border border-gray-300 rounded-md mb-2 bg-gray-50" placeholder="Awtomatikong papunan mula sa mapa..." readonly>
-                                <input type="text" name="incident_location" id="incident_location" class="w-full p-2 border border-gray-300 rounded-md" placeholder="O mag-type ng lokasyon dito" required>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Magtype ng Lokasyon o Mag-pin sa Mapa</label>
+                                <input type="text" name="incident_location" id="incident_location" list="san_miguel_streets" class="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Pumili ng kalsada/lugar sa San Miguel o mag-click sa mapa" required>
+                                <datalist id="san_miguel_streets">
+                                    <!-- Streets will be loaded dynamically via JavaScript -->
+                                </datalist>
+                                <div id="map" class="mb-2"></div>
                                 <input type="hidden" name="incident_latitude" id="incident_latitude">
                                 <input type="hidden" name="incident_longitude" id="incident_longitude">
+                                <p class="text-xs text-gray-500 mt-2">
+                                    <span class="text-blue-600">💡 Tip:</span> Pumili sa dropdown ng mga kalsada o mag-click sa mapa para mag-pin ng eksaktong lokasyon
+                                </p>
                             </div>
 
                             <div class="flex justify-end">
@@ -456,66 +460,7 @@ function sidepanel($google_picture, $google_name) {
 
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Tirahan</label>
-                                <div class="grid md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-xs text-gray-600 mb-1">Region *</label>
-                                        <input type="text" class="w-full p-2 border border-gray-300 rounded-md bg-gray-100" value="National Capital Region" readonly>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs text-gray-600 mb-1">City / Municipality *</label>
-                                        <input type="text" id="complainant_city" list="cities" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Start typing...">
-                                        <datalist id="cities">
-                                            <option value="Pasig City">
-                                            <option value="Quezon City">
-                                            <option value="Mandaluyong City">
-                                            <option value="Makati City">
-                                            <option value="Taguig City">
-                                            <option value="Manila">
-                                            <option value="Marikina City">
-                                            <option value="San Juan City">
-                                        </datalist>
-                                    </div>
-                                </div>
-                                <div class="mt-2">
-                                    <label class="block text-xs text-gray-600 mb-1">Barangay *</label>
-                                    <input type="text" id="complainant_barangay" list="pasig_barangays" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Start typing...">
-                                    <datalist id="pasig_barangays">
-                                        <option value="San Miguel">
-                                        <option value="Bagong Ilog">
-                                        <option value="Bagong Katipunan">
-                                        <option value="Bambang">
-                                        <option value="Buting">
-                                        <option value="Caniogan">
-                                        <option value="Dela Paz">
-                                        <option value="Kalawaan">
-                                        <option value="Kapasigan">
-                                        <option value="Kapitolyo">
-                                        <option value="Malinao">
-                                        <option value="Manggahan">
-                                        <option value="Maybunga">
-                                        <option value="Oranbo">
-                                        <option value="Palatiw">
-                                        <option value="Pinagbuhatan">
-                                        <option value="Pineda">
-                                        <option value="Rosario">
-                                        <option value="Sagad">
-                                        <option value="San Antonio">
-                                        <option value="San Joaquin">
-                                        <option value="San Jose">
-                                        <option value="San Nicolas">
-                                        <option value="Santa Cruz">
-                                        <option value="Santa Lucia">
-                                        <option value="Santa Rosa">
-                                        <option value="Santo Tomas">
-                                        <option value="Santolan">
-                                        <option value="Sumilang">
-                                        <option value="Ugong">
-                                    </datalist>
-                                </div>
-                                <div class="mt-2">
-                                    <label class="block text-xs text-gray-600 mb-1">Street Name, Building, House No. *</label>
-                                    <input type="text" name="complainant_address" id="complainant_street" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Enter detailed street address">
-                                </div>
+                                <input type="text" name="complainant_address" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Halimbawa: 123 Main St, San Miguel, Pasig City">
                             </div>
 
                             <div class="flex justify-between">
@@ -941,25 +886,48 @@ function sidepanel($google_picture, $google_name) {
             // Initialize Map with Leaflet + OpenStreetMap
             let map, marker;
 
-            // Barangay San Miguel, Pasig City boundaries (approximate)
-            // These coordinates define the polygon boundary of the barangay
+            // Barangay San Miguel, Pasig City - Complete boundary coverage
+            // Coordinates traced to cover the entire barangay area
             const barangayBounds = L.polygon([
-                [14.5745, 121.0795], // Northwest corner
-                [14.5755, 121.0885], // Northeast corner
-                [14.5680, 121.0910], // Southeast corner
-                [14.5645, 121.0885], // South point
-                [14.5635, 121.0835], // Southwest corner
-                [14.5660, 121.0780]  // West point
+                [14.5765, 121.0825],  // North 1
+                [14.5763, 121.0848],  // North 2
+                [14.5759, 121.0870],  // North 3
+                [14.5753, 121.0892],  // Northeast 1
+                [14.5745, 121.0905],  // Northeast 2
+                [14.5735, 121.0912],  // East 1
+                [14.5720, 121.0918],  // East 2
+                [14.5705, 121.0920],  // East 3
+                [14.5690, 121.0918],  // East 4
+                [14.5678, 121.0910],  // Southeast 1
+                [14.5670, 121.0900],  // Southeast 2
+                [14.5665, 121.0888],  // Southeast 3
+                [14.5660, 121.0875],  // South 1
+                [14.5655, 121.0860],  // South 2
+                [14.5650, 121.0845],  // South 3
+                [14.5648, 121.0830],  // South 4
+                [14.5650, 121.0815],  // Southwest 1
+                [14.5655, 121.0800],  // Southwest 2
+                [14.5662, 121.0788],  // Southwest 3
+                [14.5670, 121.0780],  // West 1
+                [14.5680, 121.0775],  // West 2
+                [14.5692, 121.0773],  // West 3
+                [14.5705, 121.0775],  // West 4
+                [14.5718, 121.0780],  // West 5
+                [14.5730, 121.0788],  // Northwest 1
+                [14.5742, 121.0798],  // Northwest 2
+                [14.5752, 121.0808],  // Northwest 3
+                [14.5760, 121.0817]   // Northwest 4 (back to start)
             ], {
-                color: 'blue',
-                weight: 2,
-                opacity: 0.6,
-                fillColor: '#3388ff',
-                fillOpacity: 0.1
+                color: '#1e40af',
+                weight: 3,
+                opacity: 0.8,
+                fillColor: '#3b82f6',
+                fillOpacity: 0.15,
+                interactive: false  // Make polygon non-interactive so clicks pass through
             });
 
             // Initialize map centered on Barangay San Miguel, Pasig City
-            map = L.map('map').setView([14.5690, 121.0850], 15);
+            map = L.map('map').setView([14.5700, 121.0850], 15);
 
             // Add OpenStreetMap tiles (free!)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -967,14 +935,26 @@ function sidepanel($google_picture, $google_name) {
                 maxZoom: 19
             }).addTo(map);
 
-            // Add barangay boundary to map
+            // Add barangay boundary to map (no popup since it's non-interactive)
             barangayBounds.addTo(map);
-            barangayBounds.bindPopup('Barangay San Miguel Boundary');
 
-            // Function to check if point is within barangay
+            // Function to check if point is ACTUALLY within the polygon (not just bounding box)
             function isWithinBarangay(lat, lng) {
+                // Use Leaflet's built-in point-in-polygon check
                 const point = L.latLng(lat, lng);
-                return barangayBounds.getBounds().contains(point);
+                const polygonCoords = barangayBounds.getLatLngs()[0];
+
+                // Ray casting algorithm for point-in-polygon
+                let inside = false;
+                for (let i = 0, j = polygonCoords.length - 1; i < polygonCoords.length; j = i++) {
+                    const xi = polygonCoords[i].lat, yi = polygonCoords[i].lng;
+                    const xj = polygonCoords[j].lat, yj = polygonCoords[j].lng;
+
+                    const intersect = ((yi > lng) !== (yj > lng)) &&
+                        (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
+                    if (intersect) inside = !inside;
+                }
+                return inside;
             }
 
             // Add click event to place pin
@@ -1007,13 +987,12 @@ function sidepanel($google_picture, $google_name) {
                     .then(response => response.json())
                     .then(data => {
                         if (data.display_name) {
-                            document.getElementById('incident_location_display').value = data.display_name;
                             document.getElementById('incident_location').value = data.display_name;
                         }
                     })
                     .catch(error => {
                         console.error('Geocoding error:', error);
-                        document.getElementById('incident_location_display').value = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+                        document.getElementById('incident_location').value = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
                     });
 
                 // Make marker draggable and update location on drag
@@ -1025,7 +1004,7 @@ function sidepanel($google_picture, $google_name) {
                     if (!isWithinBarangay(newLat, newLng)) {
                         alert('Mangyaring ilagay ang marker sa loob ng Barangay San Miguel lamang.\nPlease place the marker within Barangay San Miguel only.');
                         // Reset marker to previous valid position or center
-                        marker.setLatLng([14.5690, 121.0850]);
+                        marker.setLatLng([14.5700, 121.0850]);
                         return;
                     }
 
@@ -1036,12 +1015,98 @@ function sidepanel($google_picture, $google_name) {
                         .then(response => response.json())
                         .then(data => {
                             if (data.display_name) {
-                                document.getElementById('incident_location_display').value = data.display_name;
                                 document.getElementById('incident_location').value = data.display_name;
                             }
                         })
                         .catch(error => console.error('Geocoding error:', error));
                 });
+            });
+
+            // Load streets from API and setup autocomplete
+            let streetsData = [];
+
+            fetch('api/get_streets.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.streets) {
+                        streetsData = data.streets;
+                        const datalist = document.getElementById('san_miguel_streets');
+
+                        // Populate datalist with street options
+                        data.streets.forEach(street => {
+                            const option = document.createElement('option');
+                            option.value = street.display;
+                            option.setAttribute('data-lat', street.lat);
+                            option.setAttribute('data-lon', street.lon);
+                            datalist.appendChild(option);
+                        });
+
+                        console.log(`Loaded ${data.streets.length} streets/locations from ${data.source}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading streets:', error);
+                });
+
+            // Listen for location selection and auto-pin on map
+            const locationInput = document.getElementById('incident_location');
+            locationInput.addEventListener('change', function() {
+                const selectedValue = this.value;
+
+                // Find matching street in the data
+                const selectedStreet = streetsData.find(street => street.display === selectedValue);
+
+                if (selectedStreet && selectedStreet.lat && selectedStreet.lon) {
+                    const lat = parseFloat(selectedStreet.lat);
+                    const lon = parseFloat(selectedStreet.lon);
+
+                    // Check if within barangay
+                    if (!isWithinBarangay(lat, lon)) {
+                        alert('Ang napiling lokasyon ay nasa labas ng Barangay San Miguel.\nThe selected location is outside Barangay San Miguel.');
+                        return;
+                    }
+
+                    // Remove existing marker
+                    if (marker) {
+                        map.removeLayer(marker);
+                    }
+
+                    // Add marker at selected location
+                    marker = L.marker([lat, lon], {
+                        draggable: true
+                    }).addTo(map);
+
+                    // Pan map to marker
+                    map.setView([lat, lon], 17);
+
+                    // Save coordinates
+                    document.getElementById('incident_latitude').value = lat;
+                    document.getElementById('incident_longitude').value = lon;
+
+                    // Make marker draggable
+                    marker.on('dragend', function(e) {
+                        const newLat = e.target.getLatLng().lat;
+                        const newLng = e.target.getLatLng().lng;
+
+                        if (!isWithinBarangay(newLat, newLng)) {
+                            alert('Mangyaring ilagay ang marker sa loob ng Barangay San Miguel lamang.\nPlease place the marker within Barangay San Miguel only.');
+                            marker.setLatLng([14.5700, 121.0850]);
+                            return;
+                        }
+
+                        document.getElementById('incident_latitude').value = newLat;
+                        document.getElementById('incident_longitude').value = newLng;
+
+                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}&zoom=18&addressdetails=1`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.display_name) {
+                                    document.getElementById('incident_location').value = data.display_name;
+                                }
+                            })
+                            .catch(error => console.error('Geocoding error:', error));
+                    });
+                }
             });
 
             // Tab Navigation
@@ -1306,15 +1371,6 @@ function sidepanel($google_picture, $google_name) {
 
             // Form submission: Copy victim data to complainant if they're the same
             document.getElementById('blotterForm').addEventListener('submit', function(e) {
-                // Build full complainant address
-                const street = document.getElementById('complainant_street')?.value || '';
-                const barangay = document.getElementById('complainant_barangay')?.value || '';
-                const city = document.getElementById('complainant_city')?.value || '';
-                if (street || barangay || city) {
-                    const fullAddress = [street, barangay, city, 'National Capital Region'].filter(Boolean).join(', ');
-                    document.querySelector('[name="complainant_address"]').value = fullAddress;
-                }
-
                 if (window.complainantIsVictim) {
                     // Copy victim data to complainant fields
                     document.querySelector('[name="complainant_first_name"]').value = document.querySelector('[name="victim_first_name"]').value;
