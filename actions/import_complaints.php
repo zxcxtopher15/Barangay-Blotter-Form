@@ -298,20 +298,28 @@ mysqli_close($conn);
 function generateSalaysay($case_title, $complainant, $victim, $respondent, $location) {
     $groq_api_key = "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";
 
-    $prompt = "You are a Filipino police report writer. Based on this case title, write a detailed salaysay (statement) in Tagalog.\n\n";
-    $prompt .= "Case Title: $case_title\n";
-    $prompt .= "Complainant: $complainant\n";
-    $prompt .= "Victim: $victim\n";
+    $prompt = "Sumulat ng salaysay (statement) sa Tagalog base sa sumusunod na impormasyon:\n\n";
+    $prompt .= "Uri ng Kaso: $case_title\n";
+    $prompt .= "Nag-reklamo: $complainant\n";
+    $prompt .= "Biktima: $victim\n";
     $prompt .= "Respondent: $respondent\n";
-    $prompt .= "Location: $location\n\n";
-    $prompt .= "Write a detailed 3-5 sentence statement in Tagalog describing what happened. Make it realistic and professional. DO NOT include any labels or prefixes, just the statement itself.";
+    $prompt .= "Lugar: $location\n\n";
+    $prompt .= "IMPORTANTE: \n";
+    $prompt .= "- Gumamit ng TUNAY na impormasyon na ibinigay sa itaas\n";
+    $prompt .= "- HUWAG gumamit ng placeholders tulad ng [petsa], [oras], [lokasyon], [halaga]\n";
+    $prompt .= "- Gawing simple at direkta ang salaysay\n";
+    $prompt .= "- 2-3 pangungusap lang\n";
+    $prompt .= "- Isulat kung ANO ang nangyari, SINO ang involved, at SAAN nangyari\n";
+    $prompt .= "- Gamitin ang format: 'Noong [araw/gabi], si [respondent] ay [ginawa]. Ako si [complainant] ay [resulta]. Nangyari ito sa [lugar].'\n\n";
+    $prompt .= "Halimbawa para sa 'Pagbabanta': 'Noong hapon ng nakaraang linggo, si Juan Dela Cruz ay nanakot at nagbanta sa akin na sasaktan ako. Nakaramdam ako ng takot at nag-alala sa aking kaligtasan. Nangyari ito sa aming barangay sa San Miguel, Pasig City.'\n\n";
+    $prompt .= "Sumulat ng salaysay ngayon:";
 
     $data = [
         'model' => 'llama-3.3-70b-versatile',
         'messages' => [
             [
                 'role' => 'system',
-                'content' => 'You are a professional police report writer in the Philippines. Write detailed, realistic statements in Tagalog based on case information. Keep it concise (3-5 sentences) and professional.'
+                'content' => 'Ikaw ay manunulat ng police report sa Pilipinas. Sumulat ng simple at malinaw na salaysay sa Tagalog. HUWAG gumamit ng placeholders. Gumamit lang ng totoong impormasyon na ibinigay. 2-3 pangungusap lang.'
             ],
             [
                 'role' => 'user',
@@ -319,7 +327,7 @@ function generateSalaysay($case_title, $complainant, $victim, $respondent, $loca
             ]
         ],
         'temperature' => 0.7,
-        'max_tokens' => 200
+        'max_tokens' => 250
     ];
 
     $ch = curl_init('https://api.groq.com/openai/v1/chat/completions');
