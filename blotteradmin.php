@@ -896,70 +896,7 @@ function sidepanel($google_picture, $google_name) {
                 initialQuestionsModal.style.display = 'none';
             });
 
-            // Initialize Map with Leaflet + OpenStreetMap
-            let map, marker;
-
-            // Initialize map centered on Barangay San Miguel, Pasig City
-            map = L.map('map').setView([14.5678, 121.0854], 16);
-
-            // Add OpenStreetMap tiles (free!)
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                maxZoom: 19
-            }).addTo(map);
-
-            // Add click event to place pin
-            map.on('click', function(e) {
-                const lat = e.latlng.lat;
-                const lng = e.latlng.lng;
-
-                // Remove existing marker if any
-                if (marker) {
-                    map.removeLayer(marker);
-                }
-
-                // Add new marker
-                marker = L.marker([lat, lng], {
-                    draggable: true
-                }).addTo(map);
-
-                // Save coordinates to hidden fields
-                document.getElementById('incident_latitude').value = lat;
-                document.getElementById('incident_longitude').value = lng;
-
-                // Reverse geocode using Nominatim (free OpenStreetMap service)
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.display_name) {
-                            document.getElementById('incident_location_display').value = data.display_name;
-                            document.getElementById('incident_location').value = data.display_name;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Geocoding error:', error);
-                        document.getElementById('incident_location_display').value = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
-                    });
-
-                // Make marker draggable and update location on drag
-                marker.on('dragend', function(e) {
-                    const newLat = e.target.getLatLng().lat;
-                    const newLng = e.target.getLatLng().lng;
-
-                    document.getElementById('incident_latitude').value = newLat;
-                    document.getElementById('incident_longitude').value = newLng;
-
-                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}&zoom=18&addressdetails=1`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.display_name) {
-                                document.getElementById('incident_location_display').value = data.display_name;
-                                document.getElementById('incident_location').value = data.display_name;
-                            }
-                        })
-                        .catch(error => console.error('Geocoding error:', error));
-                });
-            });
+           
 
             // Tab Navigation
             const tabs = document.querySelectorAll('.tab-button');
