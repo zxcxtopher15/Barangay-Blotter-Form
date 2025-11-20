@@ -1508,16 +1508,15 @@ function sidepanel($google_picture, $google_name) {
 
             async function detectComplaintType(statement) {
                 try {
-                    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    // Using Groq API - Get your free API key from https://console.groq.com/
+                    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                         method: "POST",
                         headers: {
-                            "Authorization": "Bearer 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",
-                            "HTTP-Referer": window.location.href,
-                            "X-Title": "Barangay Blotter System",
+                            "Authorization": "Bearer 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",
                             "Content-Type": "application/json"
                         },
                         body: JSON.stringify({
-                            "model": "meta-llama/llama-3.3-70b-instruct:free",
+                            "model": "llama-3.3-70b-versatile",
                             "messages": [
                                 {
                                     "role": "system",
