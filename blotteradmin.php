@@ -492,7 +492,7 @@ function sidepanel($google_picture, $google_name) {
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan</label>
                                     <input type="date" name="victim_dob" id="victim_dob" class="w-full p-2 border border-gray-300 rounded-md" required>
-                                    <input type="hidden" name="victim_age" id="victim_age" required>
+                                    <input type="hidden" name="victim_age" id="victim_age">
                                     <p class="text-xs text-gray-500 mt-1">Edad: <span id="victim_age_display">-</span></p>
                                 </div>
                                 <div>
@@ -1239,6 +1239,29 @@ function sidepanel($google_picture, $google_name) {
                         return false;
                     }
                 }
+
+                // Additional validation: Check if DOB fields have corresponding age calculated
+                const dobFields = currentTabContent.querySelectorAll('input[type="date"][name$="_dob"]');
+                for (let dobField of dobFields) {
+                    if (dobField.value && dobField.hasAttribute('required')) {
+                        const personType = dobField.name.replace('_dob', '');
+                        const ageField = document.getElementById(personType + '_age');
+                        if (ageField && !ageField.value) {
+                            dobField.focus();
+                            dobField.classList.add('border-red-500');
+                            setTimeout(() => dobField.classList.remove('border-red-500'), 3000);
+
+                            const errorMsg = document.createElement('div');
+                            errorMsg.className = 'fixed top-20 right-5 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                            errorMsg.textContent = 'Pakipili ng wastong petsa ng kapanganakan';
+                            document.body.appendChild(errorMsg);
+                            setTimeout(() => errorMsg.remove(), 3000);
+
+                            return false;
+                        }
+                    }
+                }
+
                 return true;
             }
 
