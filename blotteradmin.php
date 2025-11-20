@@ -899,6 +899,18 @@ function sidepanel($google_picture, $google_name) {
             // Initialize Map with Leaflet + OpenStreetMap
             let map, marker;
 
+            // Initialize map first
+            map = L.map('map', {
+                maxBoundsViscosity: 1.0
+            }).setView([14.5678, 121.0854], 16);
+
+            // Add tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Define exact polygon (replace with real boundary later)
             const sanMiguelPolygon = L.polygon([
                 [14.5632, 121.0799],
                 [14.5632, 121.0908],
@@ -906,35 +918,21 @@ function sidepanel($google_picture, $google_name) {
                 [14.5719, 121.0799]
             ], {
                 color: 'blue',
-                fillColor: '#blue',
+                fillColor: 'blue',
                 fillOpacity: 0.1
             }).addTo(map);
 
-            // Define bounding box for Barangay San Miguel, Pasig
-            const sanMiguelBounds = L.latLngBounds(
-                [14.563200, 121.079900], // Southwest
-                [14.571900, 121.090800] // Northeast
-            );
+            // Fit map to polygon
+            map.fitBounds(sanMiguelPolygon.getBounds());
 
-            // Initialize map centered on San Miguel
-            map = L.map('map', {
-                maxBounds: sanMiguelBounds, // Restrict view
-                maxBoundsViscosity: 1.0 // Prevent moving outside bounds
-            }).setView([14.5678, 121.0854], 16);
-
-            // Add OpenStreetMap tiles
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors',
-                maxZoom: 19
-            }).addTo(map);
-
-            // Add click event to place pin
+            // CLICK EVENT
             map.on('click', function(e) {
-                const lat = e.latlng.lat;
-                const lng = e.latlng.lng;
+                const latlng = e.latlng;
 
-                // Check if clicked location is inside San Miguel only
-                if (!sanMiguelBounds.contains([lat, lng])) {
+                // Check if click is inside polygon using leaflet-pip
+                const inside = leafletPip.pointInLayer(latlng, sanMiguelPolygon);
+
+                if (inside.length === 0) {
                     alert("You can only pin inside Barangay San Miguel, Pasig City.");
                     return;
                 }
@@ -943,15 +941,15 @@ function sidepanel($google_picture, $google_name) {
                     map.removeLayer(marker);
                 }
 
-                marker = L.marker([lat, lng], {
+                marker = L.marker(latlng, {
                     draggable: true
                 }).addTo(map);
 
-                document.getElementById('incident_latitude').value = lat;
-                document.getElementById('incident_longitude').value = lng;
+                document.getElementById('incident_latitude').value = latlng.lat;
+                document.getElementById('incident_longitude').value = latlng.lng;
 
                 // Reverse geocode
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}&zoom=18&addressdetails=1`)
                     .then(r => r.json())
                     .then(data => {
                         if (data.display_name) {
@@ -960,24 +958,22 @@ function sidepanel($google_picture, $google_name) {
                         }
                     });
 
-                // Marker drag event
+                // DRAG EVENT
                 marker.on('dragend', function(e) {
-                    const newLat = e.target.getLatLng().lat;
-                    const newLng = e.target.getLatLng().lng;
+                    const newLatLng = e.target.getLatLng();
 
-                    // Prevent dragging outside San Miguel
-                    if (!sanMiguelBounds.contains([newLat, newLng])) {
+                    const insideDrag = leafletPip.pointInLayer(newLatLng, sanMiguelPolygon);
+
+                    if (insideDrag.length === 0) {
                         alert("Pin must stay inside Barangay San Miguel.");
-
-                        // Move marker back inside the boundary
-                        marker.setLatLng([lat, lng]);
+                        marker.setLatLng(latlng); // revert to original click position
                         return;
                     }
 
-                    document.getElementById('incident_latitude').value = newLat;
-                    document.getElementById('incident_longitude').value = newLng;
+                    document.getElementById('incident_latitude').value = newLatLng.lat;
+                    document.getElementById('incident_longitude').value = newLatLng.lng;
 
-                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}&zoom=18&addressdetails=1`)
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLatLng.lat}&lon=${newLatLng.lng}&zoom=18&addressdetails=1`)
                         .then(r => r.json())
                         .then(data => {
                             if (data.display_name) {
