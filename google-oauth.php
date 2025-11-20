@@ -103,17 +103,15 @@ if (isset($_GET['code']) && !empty($_GET['code'])) {
                 exit('Access denied! Your email address (' . htmlspecialchars($profile['email']) . ') is not authorized or does not have the required role to access this application.');
             }
 
-            // Get the full name from Google profile
-            $google_name = isset($profile['name']) ? $profile['name'] : (
-                (isset($profile['given_name']) ? $profile['given_name'] : '') . ' ' .
-                (isset($profile['family_name']) ? $profile['family_name'] : '')
-            );
+            $google_name_parts = [];
+            $google_name_parts[] = isset($profile['given_name']) ? preg_replace('/[^a-zA-Z0-9]/s', '', $profile['given_name']) : '';
+            $google_name_parts[] = isset($profile['family_name']) ? preg_replace('/[^a-zA-Z0-9]/s', '', $profile['family_name']) : '';
 
             // Authenticate the user and set session variables
             session_regenerate_id();
             $_SESSION['google_loggedin'] = TRUE;
             $_SESSION['google_email'] = $profile['email'];
-            $_SESSION['google_name'] = trim($google_name);
+            $_SESSION['google_name'] = implode(' ', $google_name_parts);
             $_SESSION['google_picture'] = isset($profile['picture']) ? $profile['picture'] : '';
             $_SESSION['login_time'] = time(); // Store login timestamp
             $_SESSION['user_role'] = $user_role; // Store the user's role in the session
