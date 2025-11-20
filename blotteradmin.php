@@ -914,7 +914,8 @@ function sidepanel($google_picture, $google_name) {
                 weight: 3,
                 opacity: 0.8,
                 fillColor: '#3b82f6',
-                fillOpacity: 0.15
+                fillOpacity: 0.15,
+                interactive: false  // Make polygon non-interactive so clicks pass through
             });
 
             // Initialize map centered on Barangay San Miguel, Pasig City
@@ -926,14 +927,26 @@ function sidepanel($google_picture, $google_name) {
                 maxZoom: 19
             }).addTo(map);
 
-            // Add barangay boundary to map
+            // Add barangay boundary to map (no popup since it's non-interactive)
             barangayBounds.addTo(map);
-            barangayBounds.bindPopup('Barangay San Miguel Boundary');
 
-            // Function to check if point is within barangay
+            // Function to check if point is ACTUALLY within the polygon (not just bounding box)
             function isWithinBarangay(lat, lng) {
+                // Use Leaflet's built-in point-in-polygon check
                 const point = L.latLng(lat, lng);
-                return barangayBounds.getBounds().contains(point);
+                const polygonCoords = barangayBounds.getLatLngs()[0];
+
+                // Ray casting algorithm for point-in-polygon
+                let inside = false;
+                for (let i = 0, j = polygonCoords.length - 1; i < polygonCoords.length; j = i++) {
+                    const xi = polygonCoords[i].lat, yi = polygonCoords[i].lng;
+                    const xj = polygonCoords[j].lat, yj = polygonCoords[j].lng;
+
+                    const intersect = ((yi > lng) !== (yj > lng)) &&
+                        (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
+                    if (intersect) inside = !inside;
+                }
+                return inside;
             }
 
             // Add click event to place pin
