@@ -208,18 +208,8 @@ foreach ($csvData as $row) {
         ]) . "\n";
         flush();
 
-        // Type string breakdown (30 params total):
-        // incident_datetime(s), complaint_description(s), pnp_recommendation(s), incident_location(s),
-        // complainant_first_name(s), complainant_middle_name(s), complainant_last_name(s),
-        // complainant_dob(s), complainant_age(i), complainant_gender(s), complainant_phone(s), complainant_address(s),
-        // victim_first_name(s), victim_middle_name(s), victim_last_name(s),
-        // victim_dob(s), victim_age(i), victim_gender(s), victim_phone(s), victim_address(s),
-        // respondent_first_name(s), respondent_middle_name(s), respondent_last_name(s),
-        // respondent_dob(s), respondent_age(i), respondent_gender(s), respondent_phone(s), respondent_address(s),
-        // complaint_statement(s), desk_officer_name(s)
-
         $bind_result = $stmt->bind_param(
-            "ssssssssississississississss",
+            "ssssssssisssssssisssssisissssiis",
             $incident_datetime,
             $complaint_description,
             $pnp_recommendation,
