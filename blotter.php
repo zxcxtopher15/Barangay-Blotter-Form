@@ -374,7 +374,7 @@ function sidepanel($google_picture, $google_name) {
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Unang Pangalan</label>
-                                    <input type="text" name="complainant_first_name" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <input type="text" name="complainant_first_name" class="w-full p-2 border border-gray-300 rounded-md" required>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Gitnang Pangalan</label>
@@ -382,20 +382,20 @@ function sidepanel($google_picture, $google_name) {
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Apelyido</label>
-                                    <input type="text" name="complainant_last_name" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <input type="text" name="complainant_last_name" class="w-full p-2 border border-gray-300 rounded-md" required>
                                 </div>
                             </div>
 
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan (18 taong gulang pataas)</label>
-                                    <input type="date" name="complainant_dob" id="complainant_dob" class="w-full p-2 border border-gray-300 rounded-md" max="<?php echo date('Y-m-d', strtotime('-18 years')); ?>">
+                                    <input type="date" name="complainant_dob" id="complainant_dob" class="w-full p-2 border border-gray-300 rounded-md" max="<?php echo date('Y-m-d', strtotime('-18 years')); ?>" required>
                                     <input type="hidden" name="complainant_age" id="complainant_age">
                                     <p class="text-xs text-gray-500 mt-1">Edad: <span id="complainant_age_display">-</span></p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Kasarian</label>
-                                    <select name="complainant_gender" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <select name="complainant_gender" class="w-full p-2 border border-gray-300 rounded-md" required>
                                         <option value="">Pumili ng Kasarian</option>
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
@@ -403,13 +403,13 @@ function sidepanel($google_picture, $google_name) {
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Telepono</label>
-                                    <input type="tel" name="complainant_phone" placeholder="0xxx-xxx-xxxx" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <input type="tel" name="complainant_phone" placeholder="0xxx-xxx-xxxx" class="w-full p-2 border border-gray-300 rounded-md" required>
                                 </div>
                             </div>
 
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Tirahan</label>
-                                <input type="text" name="complainant_address" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Halimbawa: 123 Main St, San Miguel, Pasig City">
+                                <input type="text" name="complainant_address" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Halimbawa: 123 Main St, San Miguel, Pasig City" required>
                             </div>
 
                             <div class="flex justify-between">
@@ -476,7 +476,7 @@ function sidepanel($google_picture, $google_name) {
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Unang Pangalan</label>
-                                    <input type="text" name="witness_first_name" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <input type="text" name="witness_first_name" class="w-full p-2 border border-gray-300 rounded-md" required>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Middle Name</label>
@@ -484,20 +484,20 @@ function sidepanel($google_picture, $google_name) {
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Apelyido</label>
-                                    <input type="text" name="witness_last_name" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <input type="text" name="witness_last_name" class="w-full p-2 border border-gray-300 rounded-md" required>
                                 </div>
                             </div>
 
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan (10 taong gulang pataas)</label>
-                                    <input type="date" name="witness_dob" id="witness_dob" class="w-full p-2 border border-gray-300 rounded-md" max="<?php echo date('Y-m-d', strtotime('-10 years')); ?>">
+                                    <input type="date" name="witness_dob" id="witness_dob" class="w-full p-2 border border-gray-300 rounded-md" max="<?php echo date('Y-m-d', strtotime('-10 years')); ?>" required>
                                     <input type="hidden" name="witness_age" id="witness_age">
                                     <p class="text-xs text-gray-500 mt-1">Edad: <span id="witness_age_display">-</span></p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Kasarian</label>
-                                    <select name="witness_gender" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <select name="witness_gender" class="w-full p-2 border border-gray-300 rounded-md" required>
                                         <option value="">Pumili ng Kasarian</option>
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
@@ -505,13 +505,13 @@ function sidepanel($google_picture, $google_name) {
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Telepono</label>
-                                    <input type="tel" name="witness_phone" placeholder="0xxx-xxx-xxxx" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <input type="tel" name="witness_phone" placeholder="0xxx-xxx-xxxx" class="w-full p-2 border border-gray-300 rounded-md" required>
                                 </div>
                             </div>
 
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Tirahan</label>
-                                <textarea name="witness_address" rows="3" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+                                <textarea name="witness_address" rows="3" class="w-full p-2 border border-gray-300 rounded-md" required></textarea>
                             </div>
 
                             <div class="flex justify-between">
@@ -527,7 +527,7 @@ function sidepanel($google_picture, $google_name) {
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Unang Pangalan</label>
-                                    <input type="text" name="respondent_first_name" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <input type="text" name="respondent_first_name" class="w-full p-2 border border-gray-300 rounded-md" required>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Middle Name</label>
@@ -535,20 +535,20 @@ function sidepanel($google_picture, $google_name) {
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Apelyido</label>
-                                    <input type="text" name="respondent_last_name" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <input type="text" name="respondent_last_name" class="w-full p-2 border border-gray-300 rounded-md" required>
                                 </div>
                             </div>
 
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Petsa ng Kapanganakan (18 taong gulang pataas)</label>
-                                    <input type="date" name="respondent_dob" id="respondent_dob" class="w-full p-2 border border-gray-300 rounded-md" max="<?php echo date('Y-m-d', strtotime('-18 years')); ?>">
+                                    <input type="date" name="respondent_dob" id="respondent_dob" class="w-full p-2 border border-gray-300 rounded-md" max="<?php echo date('Y-m-d', strtotime('-18 years')); ?>" required>
                                     <input type="hidden" name="respondent_age" id="respondent_age">
                                     <p class="text-xs text-gray-500 mt-1">Edad: <span id="respondent_age_display">-</span></p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Kasarian</label>
-                                    <select name="respondent_gender" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <select name="respondent_gender" class="w-full p-2 border border-gray-300 rounded-md" required>
                                         <option value="">Pumili ng Kasarian</option>
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
@@ -556,13 +556,13 @@ function sidepanel($google_picture, $google_name) {
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Telepono</label>
-                                    <input type="tel" name="respondent_phone" placeholder="0xxx-xxx-xxxx" class="w-full p-2 border border-gray-300 rounded-md">
+                                    <input type="tel" name="respondent_phone" placeholder="0xxx-xxx-xxxx" class="w-full p-2 border border-gray-300 rounded-md" required>
                                 </div>
                             </div>
 
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Tirahan</label>
-                                <textarea name="respondent_address" rows="3" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+                                <textarea name="respondent_address" rows="3" class="w-full p-2 border border-gray-300 rounded-md" required></textarea>
                             </div>
 
                             <div class="flex justify-between">
@@ -1587,7 +1587,40 @@ Examples:
                 }
             }
 
-            // Form submission: Copy victim data to complainant if they're the same
+            /**
+             * Text Normalization Function
+             * Converts text to lowercase and removes emojis/excess whitespace
+             * Preserves key content elements like stop words and punctuation
+             */
+            function normalizeText(text) {
+                if (!text || typeof text !== 'string') return text;
+
+                // Convert to lowercase
+                let normalized = text.toLowerCase();
+
+                // Remove emojis and special unicode characters
+                // This regex removes emoji ranges, pictographs, and other decorative unicode
+                normalized = normalized.replace(/[\u{1F600}-\u{1F64F}]/gu, ''); // Emoticons
+                normalized = normalized.replace(/[\u{1F300}-\u{1F5FF}]/gu, ''); // Misc Symbols and Pictographs
+                normalized = normalized.replace(/[\u{1F680}-\u{1F6FF}]/gu, ''); // Transport and Map
+                normalized = normalized.replace(/[\u{1F1E0}-\u{1F1FF}]/gu, ''); // Flags
+                normalized = normalized.replace(/[\u{2600}-\u{26FF}]/gu, '');   // Misc symbols
+                normalized = normalized.replace(/[\u{2700}-\u{27BF}]/gu, '');   // Dingbats
+                normalized = normalized.replace(/[\u{FE00}-\u{FE0F}]/gu, '');   // Variation Selectors
+                normalized = normalized.replace(/[\u{1F900}-\u{1F9FF}]/gu, ''); // Supplemental Symbols and Pictographs
+                normalized = normalized.replace(/[\u{1FA00}-\u{1FA6F}]/gu, ''); // Chess Symbols
+                normalized = normalized.replace(/[\u{1FA70}-\u{1FAFF}]/gu, ''); // Symbols and Pictographs Extended-A
+
+                // Remove excess whitespace (multiple spaces, tabs, newlines) but keep single spaces
+                normalized = normalized.replace(/\s+/g, ' ');
+
+                // Trim leading and trailing whitespace
+                normalized = normalized.trim();
+
+                return normalized;
+            }
+
+            // Form submission: Copy victim data to complainant if they're the same AND normalize all text inputs
             document.getElementById('blotterForm').addEventListener('submit', function(e) {
                 if (window.complainantIsVictim) {
                     // Copy victim data to complainant fields
@@ -1600,6 +1633,15 @@ Examples:
                     document.querySelector('[name="complainant_phone"]').value = document.querySelector('[name="victim_phone"]').value;
                     document.querySelector('[name="complainant_address"]').value = document.querySelector('[name="victim_address"]').value;
                 }
+
+                // Normalize all text and textarea inputs before submission
+                const form = this;
+                const textInputs = form.querySelectorAll('input[type="text"], input[type="tel"], textarea');
+                textInputs.forEach(input => {
+                    if (input.value && input.value.trim()) {
+                        input.value = normalizeText(input.value);
+                    }
+                });
             });
 
             // Sidebar Toggle
