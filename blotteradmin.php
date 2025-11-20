@@ -115,11 +115,6 @@ if (isset($_POST['submit_complaint'])) {
         $desk_officer_name,
     ];
 
-    // Type string: s=string, i=integer, d=double
-    // incident_datetime(s), complaint_description(s), pnp_recommendation(s), location(s), lat(d), lng(d),
-    // complainant(8: s,s,s,s,i,s,s,s), victim(8), witness(8), respondent(8),
-    // statement(s), reported_by(i), is_affirmed(i), desk_officer(s)
-    // Total: 3s + 1s + 2d + (8*4) + 1s + 2i + 1s = 3+1+2+32+1+2+1 = 42 parameters
     $types = "ssssssssssisssssssisssssssisssssssissssiis";
     $stmt->bind_param($types, ...$params);
 
