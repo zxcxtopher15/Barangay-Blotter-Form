@@ -890,9 +890,9 @@ function sidepanel($google_picture, $google_name) {
             // Coordinates traced to cover the entire barangay area
             const barangayBounds = L.polygon([
                 [14.570073, 121.081888],  // North 1
-                [14.5763, 121.0848],  // North 2
-                [14.5759, 121.0870],  // North 3
-                [14.5753, 121.0892],  // Northeast 1
+                [14.567808, 121.081612],  // North 2
+                [14.567575, 121.081543],  // North 3
+                [14.567770, 121.080826],  // Northeast 1
                 [14.5745, 121.0905],  // Northeast 2
                 [14.5735, 121.0912],  // East 1
                 [14.5720, 121.0918],  // East 2
