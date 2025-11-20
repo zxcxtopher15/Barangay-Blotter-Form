@@ -57,21 +57,23 @@ if (isset($_POST['submit_complaint'])) {
     $complaint_description = $_POST['complaint_description'];
 
     $stmt = $conn->prepare("INSERT INTO complaints (
-        incident_datetime, complaint_description, incident_location, incident_latitude, incident_longitude,
+        incident_datetime, complaint_description, pnp_recommendation, incident_location, incident_latitude, incident_longitude,
         complainant_first_name, complainant_middle_name, complainant_last_name, complainant_dob, complainant_age, complainant_gender, complainant_phone, complainant_address,
         victim_first_name, victim_middle_name, victim_last_name, victim_dob, victim_age, victim_gender, victim_phone, victim_address,
         witness_first_name, witness_middle_name, witness_last_name, witness_dob, witness_age, witness_gender, witness_phone, witness_address,
         respondent_first_name, respondent_middle_name, respondent_last_name, respondent_dob, respondent_age, respondent_gender, respondent_phone, respondent_address,
         complaint_statement, reported_by, is_affirmed, desk_officer_name
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
     $desk_officer_name = $google_name;
     $reported_by = isset($_POST['reported_by']) ? 1 : 0;
     $is_affirmed = isset($_POST['is_affirmed']) ? 1 : 0;
+    $pnp_recommendation = $_POST['pnp_recommendation'] ?? 'BARANGAY_ACTION';
 
     $params = [
         $incident_datetime,
         $complaint_description,
+        $pnp_recommendation,
         empty($_POST['incident_location']) ? null : $_POST['incident_location'],
         empty($_POST['incident_latitude']) ? null : $_POST['incident_latitude'],
         empty($_POST['incident_longitude']) ? null : $_POST['incident_longitude'],
@@ -113,7 +115,12 @@ if (isset($_POST['submit_complaint'])) {
         $desk_officer_name,
     ];
     
-    $types = "sssssssssisssssssisssssssisssssssissssiis";
+    // Type string: s=string, i=integer, d=double
+    // incident_datetime(s), complaint_description(s), pnp_recommendation(s), location(s), lat(d), lng(d),
+    // complainant(8: s,s,s,s,i,s,s,s), victim(8), witness(8), respondent(8),
+    // statement(s), reported_by(i), is_affirmed(i), desk_officer(s)
+    // Total: 3s + 1s + 2d + (8*4) + 1s + 2i + 1s = 3+1+2+32+1+2+1 = 42 parameters
+    $types = "ssssddssssissssissssissssissssisssiis";
     $stmt->bind_param($types, ...$params);
 
     if ($stmt->execute()) {
@@ -382,8 +389,9 @@ function sidepanel($google_picture, $google_name) {
                         <div id="tab2" class="tab-content">
                             <h2 class="text-2xl font-bold text-gray-800 mb-6">Impormasyon ng Nagrereklamo</h2>
 
-                            <!-- Hidden field for AI-detected complaint type -->
+                            <!-- Hidden fields for AI-detected complaint type and recommendation -->
                             <input type="hidden" name="complaint_description" id="complaint_description" value="">
+                            <input type="hidden" name="pnp_recommendation" id="pnp_recommendation" value="">
 
                             <div class="grid md:grid-cols-3 gap-4 mb-4">
                                 <div>
@@ -1520,45 +1528,50 @@ function sidepanel($google_picture, $google_name) {
                             "messages": [
                                 {
                                     "role": "system",
-                                    "content": `You are an expert crime classifier for Philippine Barangay incidents. Analyze the complaint carefully and identify the PRIMARY crime.
+                                    "content": `You are an expert crime classifier and legal advisor for Philippine Barangay incidents. Analyze the complaint and provide TWO things:
 
-CRITICAL CLASSIFICATION RULES:
+1. CRIME TYPE: Identify the primary crime
+2. RECOMMENDATION: Determine if it needs PNP endorsement or Barangay action
+
+CLASSIFICATION RULES:
 1. THEFT = Taking property WITHOUT force/threat (nakaw, magnanakaw)
 2. ROBBERY = Taking property WITH force/weapons (holdap, armadong pagnanakaw)
-3. KIDNAPPING = Illegally taking/transporting person to another location (dinukot, dinala sa ibang lugar)
-4. HOSTAGE TAKING = Holding person by force/threat at the scene (ginahasa, tinutukan, walang ninakaw)
-5. PHYSICAL ASSAULT = Attacking someone WITH intent to harm (suntok, sipa, bugbog)
-6. PHYSICAL INJURIES = Harm from accident or minor altercation (sugat, gasgas, nabundol)
+3. KIDNAPPING = Illegally taking/transporting person to another location (dinukot, dinala)
+4. HOSTAGE TAKING = Holding person by force/threat at scene (tinutukan, hostage)
+5. PHYSICAL ASSAULT = Attacking WITH intent to harm (suntok, sipa, bugbog)
+6. PHYSICAL INJURIES = Harm from accident or minor fight (sugat, nabundol)
 7. MURDER = Intentional killing with planning (pinatay, pinaslang)
 8. HOMICIDE = Killing without premeditation (aksidenteng namatay)
-9. DOMESTIC VIOLENCE = Violence within family/household (asawa, anak, magulang)
+9. DOMESTIC VIOLENCE = Violence within family (asawa, anak, magulang)
 
-RESPONSE FORMAT:
-- Return ONLY ONE crime type from the list
-- NO explanations, categories, or extra words
-- Use EXACT spelling from the list
+PNP ENDORSEMENT CRITERIA:
+- Serious crimes: Murder, Homicide, Rape, Robbery (with weapon), Kidnapping, Hostage Taking, Carnapping, Arson, Drug-related, Illegal Firearms, Violation of Special Laws
+- High-value theft (>50,000 pesos or valuable items)
+- Crimes with weapons involved
+- Organized crime activities
+- Crimes requiring forensic investigation
 
-CRIME TYPES:
-Murder | Homicide | Rape | Robbery | Theft | Physical Assault | Carnapping | Arson | Kidnapping | Hostage Taking | Drug-related | Illegal Gambling | Illegal Possession of Firearms | Violation of Special Laws | Physical Injuries | Vandalism | Noise Complaints | Domestic Violence | Trespassing | Boundary Disputes | Property Disputes
+BARANGAY ACTION CRITERIA:
+- Minor disputes between neighbors
+- Small property damage
+- Noise complaints
+- Minor injuries without weapons
+- Petty theft (<5,000 pesos)
+- Trespassing without violence
+- Boundary disputes
 
-EXAMPLES:
-"Ninakaw ang wallet ko sa jeep" → Theft
-"Hinoldap ako, tinakot ng baril at kinuha ang pera" → Robbery
-"May lalaking pumasok sa bahay at nagnakaw ng laptop" → Theft
-"Biglang hinila ako at tinutukan ng kutsilyo sa leeg habang sinasabi sa pulis na patakasin sya" → Hostage Taking
-"Dinukot ako at dinala sa malayong lugar" → Kidnapping
-"Sinuntok ako ng kapitbahay dahil sa alitan" → Physical Assault
-"Nasaktan ako nung nabundol ako ng bisikleta" → Physical Injuries
-"Pinatay ng asawa ang kanyang misis" → Murder
-"Nagtulakan kami at nabaril ko siya ng aksidente" → Homicide
-"Sinaktan ako ng asawa ko" → Domestic Violence
-"Nagnakaw ng motor gamit ang baril" → Robbery
-"Kinidnap ang anak ko at dinala sa ibang lugar at hiningan ng ransom" → Kidnapping
-"Ginahasa ako ng lalaking di ko kilala" → Rape
-"Sinunog ang bahay ng kapitbahay" → Arson
-"Ninakaw ang kotse ko sa parking" → Carnapping
-"Hinawakan niya ako at tinakot ng kutsilyo para makuha yung bag" → Robbery
-"Pinagtago niya ako sa kuwarto at tinutukan ng baril" → Hostage Taking`
+RESPONSE FORMAT (EXACT):
+CRIME_TYPE|RECOMMENDATION
+
+Examples:
+"Ninakaw wallet ko sa jeep" → Theft|BARANGAY_ACTION
+"Hinoldap ako, tinakot ng baril" → Robbery|PNP_ENDORSEMENT
+"Biglang hinila at tinutukan ng kutsilyo habang sinasabi sa pulis na patakasin" → Hostage Taking|PNP_ENDORSEMENT
+"Sinuntok ako ng kapitbahay dahil sa alitan" → Physical Assault|BARANGAY_ACTION
+"Pinatay ng asawa ang misis" → Murder|PNP_ENDORSEMENT
+"Nabundol ako ng bisikleta, nasugatan" → Physical Injuries|BARANGAY_ACTION
+"Ninakaw ang kotse ko" → Carnapping|PNP_ENDORSEMENT
+"Maingay ang kapitbahay every night" → Noise Complaints|BARANGAY_ACTION`
                                 },
                                 {
                                     "role": "user",
@@ -1577,13 +1590,22 @@ EXAMPLES:
                         throw new Error(data.error?.message || `HTTP ${response.status}: ${response.statusText}`);
                     }
 
-                    const detectedType = data.choices[0].message.content.trim();
+                    const aiResponse = data.choices[0].message.content.trim();
+
+                    // Parse the AI response format: CRIME_TYPE|RECOMMENDATION
+                    const parts = aiResponse.split('|');
+                    const detectedType = parts[0]?.trim() || aiResponse;
+                    const recommendation = parts[1]?.trim() || 'BARANGAY_ACTION';
 
                     // Update UI
                     detectedTypeDisplay.textContent = detectedType;
                     complaintDescriptionField.value = detectedType;
 
+                    // Store recommendation in hidden field
+                    document.getElementById('pnp_recommendation').value = recommendation;
+
                     console.log('Detected complaint type:', detectedType);
+                    console.log('Recommendation:', recommendation);
 
                 } catch (error) {
                     console.error('Error detecting complaint type:', error);

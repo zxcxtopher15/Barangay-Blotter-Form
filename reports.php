@@ -740,7 +740,70 @@ function sidepanel($google_picture, $google_name) {
                         .then(data => {
                             if (data.success && data.data) {
                                 let htmlContent = `<form id="edit-report-form" data-case-no="${data.data.case_no}">`; // Wrap in a form
-                                htmlContent += `<p class="text-lg font-semibold mb-4">Case Number: ${data.data.case_no}</p>`;
+
+                                // Format case number
+                                let displayCaseNo = data.data.case_no;
+                                if (data.data.complaint_no && data.data.incident_datetime) {
+                                    const date = new Date(data.data.incident_datetime);
+                                    const year = date.getFullYear();
+                                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                                    const day = String(date.getDate()).padStart(2, '0');
+                                    const hours = String(date.getHours()).padStart(2, '0');
+                                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                                    const seconds = String(date.getSeconds()).padStart(2, '0');
+                                    displayCaseNo = `${data.data.complaint_no}-${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+                                }
+
+                                // Format datetime
+                                let formattedDateTime = 'N/A';
+                                if (data.data.incident_datetime) {
+                                    const date = new Date(data.data.incident_datetime);
+                                    formattedDateTime = date.toLocaleString('en-US', {
+                                        year: 'numeric',
+                                        month: '2-digit',
+                                        day: '2-digit',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: true
+                                    });
+                                }
+
+                                // Handle "Others" complaint type
+                                let complaintToShow = data.data.complaint_description;
+                                if (data.data.complaint_description === 'Others' && data.data.other_complaint) {
+                                    complaintToShow = data.data.other_complaint;
+                                }
+
+                                // Get AI-determined recommendation from database
+                                const aiRecommendation = data.data.pnp_recommendation || 'BARANGAY_ACTION';
+                                const isPNPEndorsement = aiRecommendation === 'PNP_ENDORSEMENT';
+                                const recommendationText = isPNPEndorsement ? 'Endorse to PNP' : 'Barangay Action';
+                                const recommendationColor = isPNPEndorsement ? 'red' : 'green';
+                                const recommendationBg = isPNPEndorsement ? 'bg-red-50' : 'bg-green-50';
+                                const recommendationBorder = isPNPEndorsement ? 'border-red-500' : 'border-green-500';
+
+                                htmlContent += `<div class="bg-blue-50 p-4 rounded-lg mb-4 border-l-4 border-blue-500">`;
+                                htmlContent += `<p class="text-xl font-bold text-blue-900">Case No: ${displayCaseNo}</p>`;
+                                htmlContent += `<p class="text-sm text-gray-600 mt-1">Incident Date/Time: ${formattedDateTime}</p>`;
+                                htmlContent += `</div>`;
+
+                                // Display Recommendation
+                                htmlContent += `<div class="${recommendationBg} p-4 rounded-lg mb-4 border-l-4 ${recommendationBorder}">`;
+                                htmlContent += `<p class="text-sm font-semibold text-gray-700">Recommendation:</p>`;
+                                htmlContent += `<p class="text-xl font-bold text-${recommendationColor}-700">⚠️ ${recommendationText}</p>`;
+                                if (isPNPEndorsement) {
+                                    htmlContent += `<p class="text-xs text-gray-600 mt-2">This incident requires PNP intervention due to its serious nature.</p>`;
+                                    htmlContent += `<div class="mt-3 text-xs text-gray-600">`;
+                                    htmlContent += `<p><strong>PNP Contact Information:</strong></p>`;
+                                    htmlContent += `<p>📧 Email: epd.pio@gmail.com</p>`;
+                                    htmlContent += `<p>📞 EPD Headquarters: 0998-598-7874</p>`;
+                                    htmlContent += `<p>📞 Pasig City Police: 0998-598-7880</p>`;
+                                    htmlContent += `<p>📞 Mandaluyong City Police: 0998-598-7882</p>`;
+                                    htmlContent += `</div>`;
+                                } else {
+                                    htmlContent += `<p class="text-xs text-gray-600 mt-2">This incident can be handled at the barangay level.</p>`;
+                                }
+                                htmlContent += `</div>`;
 
                                 const sections = {
                                     'Incident Details': ['incident_datetime', 'incident_location', 'complaint_description', 'other_complaint'],

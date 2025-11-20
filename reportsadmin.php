@@ -876,10 +876,39 @@
                         });
                     }
 
+                    // Get AI-determined recommendation from database
+                    const aiRecommendation = data.data.pnp_recommendation || 'BARANGAY_ACTION';
+                    const isPNPEndorsement = aiRecommendation === 'PNP_ENDORSEMENT';
+                    const recommendationText = isPNPEndorsement ? 'Endorse to PNP' : 'Barangay Action';
+                    const recommendationColor = isPNPEndorsement ? 'red' : 'green';
+                    const recommendationBg = isPNPEndorsement ? 'bg-red-50' : 'bg-green-50';
+                    const recommendationBorder = isPNPEndorsement ? 'border-red-500' : 'border-green-500';
+
                     // Display Case Number prominently with date/time
                     htmlContent += `<div class="bg-blue-50 p-4 rounded-lg mb-4 border-l-4 border-blue-500">`;
                     htmlContent += `<p class="text-xl font-bold text-blue-900">Case No: ${displayCaseNo}</p>`;
                     htmlContent += `<p class="text-sm text-gray-600 mt-1">Incident Date/Time: ${formattedDateTime}</p>`;
+                    htmlContent += `</div>`;
+
+                    // Display Recommendation
+                    htmlContent += `<div class="${recommendationBg} p-4 rounded-lg mb-4 border-l-4 ${recommendationBorder}">`;
+                    htmlContent += `<p class="text-sm font-semibold text-gray-700">Recommendation:</p>`;
+                    htmlContent += `<p class="text-xl font-bold text-${recommendationColor}-700">⚠️ ${recommendationText}</p>`;
+                    if (isPNPEndorsement) {
+                        htmlContent += `<p class="text-xs text-gray-600 mt-2">This incident requires PNP intervention due to its serious nature.</p>`;
+                        htmlContent += `<button id="send-pnp-email-btn" class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold">
+                            📧 Send Email to PNP
+                        </button>`;
+                        htmlContent += `<div class="mt-3 text-xs text-gray-600">`;
+                        htmlContent += `<p><strong>PNP Contact Information:</strong></p>`;
+                        htmlContent += `<p>📧 Email: epd.pio@gmail.com</p>`;
+                        htmlContent += `<p>📞 EPD Headquarters: 0998-598-7874</p>`;
+                        htmlContent += `<p>📞 Pasig City Police: 0998-598-7880</p>`;
+                        htmlContent += `<p>📞 Mandaluyong City Police: 0998-598-7882</p>`;
+                        htmlContent += `</div>`;
+                    } else {
+                        htmlContent += `<p class="text-xs text-gray-600 mt-2">This incident can be handled at the barangay level.</p>`;
+                    }
                     htmlContent += `</div>`;
 
                     // Show map if coordinates are available
@@ -948,6 +977,49 @@
                                 .openPopup();
                         }, 100);
                     }
+
+                    // Add event listener for Send Email button (if exists)
+                    setTimeout(() => {
+                        const sendEmailBtn = document.getElementById('send-pnp-email-btn');
+                        if (sendEmailBtn) {
+                            sendEmailBtn.addEventListener('click', function() {
+                                if (confirm('Send email endorsement to PNP (epd.pio@gmail.com)?')) {
+                                    sendEmailBtn.disabled = true;
+                                    sendEmailBtn.innerHTML = '⏳ Sending...';
+
+                                    fetch('actions/send_pnp_email.php', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            case_no: data.data.case_no,
+                                            is_archive_mode: isReportCurrentlyArchived
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(result => {
+                                        if (result.success) {
+                                            alert('✅ Email sent successfully to PNP!');
+                                            sendEmailBtn.innerHTML = '✅ Email Sent';
+                                            sendEmailBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                                            sendEmailBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                                        } else {
+                                            alert('❌ Failed to send email: ' + result.message);
+                                            sendEmailBtn.disabled = false;
+                                            sendEmailBtn.innerHTML = '📧 Send Email to PNP';
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error sending email:', error);
+                                        alert('❌ Error sending email. Please try again.');
+                                        sendEmailBtn.disabled = false;
+                                        sendEmailBtn.innerHTML = '📧 Send Email to PNP';
+                                    });
+                                }
+                            });
+                        }
+                    }, 100);
 
                 } else {
                     detailsModalContent.innerHTML = `<p class="text-center text-red-600">Failed to load details: ${data.message || 'Unknown error.'}</p>`;
