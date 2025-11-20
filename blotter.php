@@ -341,28 +341,16 @@ function sidepanel($google_picture, $google_name) {
 
                             <div class="mb-6">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Magtype ng Lokasyon o Mag-pin sa Mapa</label>
-                                <input type="text" id="incident_location_display" list="san_miguel_locations" class="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder="Pumili ng lokasyon sa San Miguel o mag-click sa mapa">
-                                <datalist id="san_miguel_locations">
-                                    <option value="San Miguel Elementary School, San Miguel, Pasig City">
-                                    <option value="San Miguel Public Market, San Miguel, Pasig City">
-                                    <option value="San Miguel Barangay Hall, San Miguel, Pasig City">
-                                    <option value="San Miguel Chapel, San Miguel, Pasig City">
-                                    <option value="Kanlaon Street, San Miguel, Pasig City">
-                                    <option value="Sierra Madre Street, San Miguel, Pasig City">
-                                    <option value="Mayon Street, San Miguel, Pasig City">
-                                    <option value="Taal Street, San Miguel, Pasig City">
-                                    <option value="Pinatubo Street, San Miguel, Pasig City">
-                                    <option value="Apo Street, San Miguel, Pasig City">
-                                    <option value="Banahaw Street, San Miguel, Pasig City">
-                                    <option value="Makiling Street, San Miguel, Pasig City">
-                                    <option value="San Miguel Industrial Area, San Miguel, Pasig City">
-                                    <option value="San Miguel Riverside, San Miguel, Pasig City">
+                                <input type="text" name="incident_location" id="incident_location" list="san_miguel_streets" class="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Pumili ng kalsada/lugar sa San Miguel o mag-click sa mapa" required>
+                                <datalist id="san_miguel_streets">
+                                    <!-- Streets will be loaded dynamically via JavaScript -->
                                 </datalist>
-                                <div id="map" class="mb-3"></div>
-                                <input type="text" name="incident_location" id="incident_location" class="w-full p-2 border border-gray-300 rounded-md" placeholder="O mag-type ng lokasyon dito" required>
+                                <div id="map" class="mb-2"></div>
                                 <input type="hidden" name="incident_latitude" id="incident_latitude">
                                 <input type="hidden" name="incident_longitude" id="incident_longitude">
-                                <p class="text-xs text-gray-500 mt-2">Tip: Mag-click sa mapa para mag-pin ng eksaktong lokasyon sa loob ng San Miguel</p>
+                                <p class="text-xs text-gray-500 mt-2">
+                                    <span class="text-blue-600">💡 Tip:</span> Pumili sa dropdown ng mga kalsada o mag-click sa mapa para mag-pin ng eksaktong lokasyon
+                                </p>
                             </div>
 
                             <div class="flex justify-end">
@@ -973,13 +961,12 @@ function sidepanel($google_picture, $google_name) {
                 .then(response => response.json())
                 .then(data => {
                     if (data.display_name) {
-                        document.getElementById('incident_location_display').value = data.display_name;
                         document.getElementById('incident_location').value = data.display_name;
                     }
                 })
                 .catch(error => {
                     console.error('Geocoding error:', error);
-                    document.getElementById('incident_location_display').value = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+                    document.getElementById('incident_location').value = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
                 });
 
             // Make marker draggable and update location on drag
@@ -1002,12 +989,98 @@ function sidepanel($google_picture, $google_name) {
                     .then(response => response.json())
                     .then(data => {
                         if (data.display_name) {
-                            document.getElementById('incident_location_display').value = data.display_name;
                             document.getElementById('incident_location').value = data.display_name;
                         }
                     })
                     .catch(error => console.error('Geocoding error:', error));
             });
+        });
+
+        // Load streets from API and setup autocomplete
+        let streetsData = [];
+
+        fetch('api/get_streets.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.streets) {
+                    streetsData = data.streets;
+                    const datalist = document.getElementById('san_miguel_streets');
+
+                    // Populate datalist with street options
+                    data.streets.forEach(street => {
+                        const option = document.createElement('option');
+                        option.value = street.display;
+                        option.setAttribute('data-lat', street.lat);
+                        option.setAttribute('data-lon', street.lon);
+                        datalist.appendChild(option);
+                    });
+
+                    console.log(`Loaded ${data.streets.length} streets/locations from ${data.source}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading streets:', error);
+            });
+
+        // Listen for location selection and auto-pin on map
+        const locationInput = document.getElementById('incident_location');
+        locationInput.addEventListener('change', function() {
+            const selectedValue = this.value;
+
+            // Find matching street in the data
+            const selectedStreet = streetsData.find(street => street.display === selectedValue);
+
+            if (selectedStreet && selectedStreet.lat && selectedStreet.lon) {
+                const lat = parseFloat(selectedStreet.lat);
+                const lon = parseFloat(selectedStreet.lon);
+
+                // Check if within barangay
+                if (!isWithinBarangay(lat, lon)) {
+                    alert('Ang napiling lokasyon ay nasa labas ng Barangay San Miguel.\nThe selected location is outside Barangay San Miguel.');
+                    return;
+                }
+
+                // Remove existing marker
+                if (marker) {
+                    map.removeLayer(marker);
+                }
+
+                // Add marker at selected location
+                marker = L.marker([lat, lon], {
+                    draggable: true
+                }).addTo(map);
+
+                // Pan map to marker
+                map.setView([lat, lon], 17);
+
+                // Save coordinates
+                document.getElementById('incident_latitude').value = lat;
+                document.getElementById('incident_longitude').value = lon;
+
+                // Make marker draggable
+                marker.on('dragend', function(e) {
+                    const newLat = e.target.getLatLng().lat;
+                    const newLng = e.target.getLatLng().lng;
+
+                    if (!isWithinBarangay(newLat, newLng)) {
+                        alert('Mangyaring ilagay ang marker sa loob ng Barangay San Miguel lamang.\nPlease place the marker within Barangay San Miguel only.');
+                        marker.setLatLng([14.5700, 121.0850]);
+                        return;
+                    }
+
+                    document.getElementById('incident_latitude').value = newLat;
+                    document.getElementById('incident_longitude').value = newLng;
+
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}&zoom=18&addressdetails=1`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.display_name) {
+                                document.getElementById('incident_location').value = data.display_name;
+                            }
+                        })
+                        .catch(error => console.error('Geocoding error:', error));
+                });
+            }
         });
 
         // Tab Navigation
