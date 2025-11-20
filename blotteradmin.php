@@ -1520,9 +1520,16 @@ function sidepanel($google_picture, $google_name) {
                             "messages": [
                                 {
                                     "role": "system",
-                                    "content": `You are a complaint classification system for a Barangay (village) in the Philippines. Analyze the complaint statement and classify it into ONE of these categories:
+                                    "content": `You are a complaint classification expert for a Barangay (village) in the Philippines. Analyze the complaint statement and determine the EXACT, SPECIFIC crime or incident type.
 
-SERIOUS CRIMES (For PNP Endorsement):
+IMPORTANT INSTRUCTIONS:
+1. Return ONLY ONE specific crime/incident type from the list below
+2. DO NOT add any explanation, category label, or extra text
+3. Return the exact name as shown in the list
+4. Choose the MOST SPECIFIC type that matches the incident
+5. If multiple crimes are mentioned, choose the most serious one
+
+SERIOUS CRIMES:
 - Murder
 - Homicide
 - Rape
@@ -1537,7 +1544,7 @@ SERIOUS CRIMES (For PNP Endorsement):
 - Illegal Possession of Firearms
 - Violation of Special Laws
 
-MINOR COMPLAINTS (Barangay Level):
+MINOR COMPLAINTS:
 - Physical Injuries
 - Vandalism
 - Noise Complaints
@@ -1546,10 +1553,18 @@ MINOR COMPLAINTS (Barangay Level):
 - Boundary Disputes
 - Property Disputes
 
-IMPORTANT:
-- Respond with ONLY the category name, nothing else.
-- Choose the most appropriate category based on the severity and nature of the incident.
-- If uncertain, classify based on the most serious aspect mentioned.`
+EXAMPLES:
+Statement: "Ninakaw ang aking cellphone sa kalsada"
+Response: Theft
+
+Statement: "May armadong lalaki na nagnakaw ng pera sa tindahan"
+Response: Robbery
+
+Statement: "Pinatay ang aking kaibigan"
+Response: Murder
+
+Statement: "Nasaktan ako ng kapitbahay ko"
+Response: Physical Injuries`
                                 },
                                 {
                                     "role": "user",
