@@ -132,31 +132,26 @@ foreach ($csvData as $row) {
             $salaysay = "Ito ay reklamo tungkol sa: $case_title. Ang nag-reklamo ay si $complainant_full laban kay $respondent_full. Nangyari ito sa $location.";
         }
 
-        // Use AI to classify crime and get recommendation
-        try {
-            $classificationResult = classifyCrime($salaysay);
-            $parts = explode('|', $classificationResult);
-            $complaint_description = trim($parts[0] ?? 'Physical Injuries');
-            $pnp_recommendation = trim($parts[1] ?? 'BARANGAY_ACTION');
-        } catch (Exception $e) {
-            // Fallback classification
-            $complaint_description = 'Physical Injuries';
-            $pnp_recommendation = 'BARANGAY_ACTION';
-        }
+        // Use case title as complaint description
+        $complaint_description = $case_title;
+        $pnp_recommendation = 'BARANGAY_ACTION';
 
         // Geocode address using Nominatim API (San Miguel, Pasig City only)
-        $incident_latitude = null;
-        $incident_longitude = null;
+        // Skip geocoding for now due to rate limits - can be done later in batch
+        $incident_latitude = 14.5764; // Default to San Miguel, Pasig City center
+        $incident_longitude = 121.0851;
 
         if (!empty($complainant_address) && $complainant_address !== 'N/A') {
             try {
+                // Rate limit: sleep 1 second between requests to respect Nominatim policy
+                sleep(1);
                 $geocoded = geocodeAddress($complainant_address);
                 $incident_latitude = $geocoded['lat'];
                 $incident_longitude = $geocoded['lon'];
             } catch (Exception $e) {
-                // Geocoding failed, leave as null
-                $incident_latitude = null;
-                $incident_longitude = null;
+                // Geocoding failed, use default San Miguel, Pasig City coordinates
+                $incident_latitude = 14.5764;
+                $incident_longitude = 121.0851;
             }
         }
 
