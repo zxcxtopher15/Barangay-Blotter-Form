@@ -95,42 +95,38 @@ if (isset($_GET['code']) && !empty($_GET['code'])) {
                 $user_role = strtolower($result['role']);
             }
 
-            // Define allowed roles for access
+            // Allowed roles
             $allowed_roles = ['admin', 'desk officer'];
 
-            // Check if the user's email was found and their role is one of the allowed roles
             if (!$user_role || !in_array($user_role, $allowed_roles)) {
                 exit('Access denied! Your email address (' . htmlspecialchars($profile['email']) . ') is not authorized or does not have the required role to access this application.');
             }
 
-            $google_name_parts = [];
-            $google_name_parts[] = isset($profile['given_name']) ? preg_replace('/[^a-zA-Z0-9]/s', '', $profile['given_name']) : '';
-            $google_name_parts[] = isset($profile['family_name']) ? preg_replace('/[^a-zA-Z0-9]/s', '', $profile['family_name']) : '';
+            // Use the full name as is, no filtering
+            $google_name = trim(($profile['given_name'] ?? '') . ' ' . ($profile['family_name'] ?? ''));
 
-            // Authenticate the user and set session variables
+            // Authenticate user and set session variables
             session_regenerate_id();
             $_SESSION['google_loggedin'] = TRUE;
             $_SESSION['google_email'] = $profile['email'];
-            $_SESSION['google_name'] = implode(' ', $google_name_parts);
-            $_SESSION['google_picture'] = isset($profile['picture']) ? $profile['picture'] : '';
-            $_SESSION['login_time'] = time(); // Store login timestamp
-            $_SESSION['user_role'] = $user_role; // Store the user's role in the session
+            $_SESSION['google_name'] = $google_name;
+            $_SESSION['google_picture'] = $profile['picture'] ?? '';
+            $_SESSION['login_time'] = time();
+            $_SESSION['user_role'] = $user_role;
 
-            // Set a longer session lifetime (optional - 30 days)
+            // Set session lifetime etc...
             ini_set('session.gc_maxlifetime', 30 * 24 * 60 * 60);
             session_set_cookie_params(30 * 24 * 60 * 60);
 
-            // Redirect based on the user's role
+            // Redirect based on role
             if ($user_role === 'admin') {
                 header('Location: dashboardadmin.php');
             } else if ($user_role === 'desk officer') {
                 header('Location: dashboard.php');
             } else {
-                // Fallback for other roles not explicitly handled
-                header('Location: dashboard.php'); // Or a generic user dashboard
+                header('Location: dashboard.php');
             }
             exit;
-
         } else {
             exit('Could not retrieve profile information! Please try again later!');
         }
@@ -150,5 +146,3 @@ if (isset($_GET['code']) && !empty($_GET['code'])) {
     header('Location: https://accounts.google.com/o/oauth2/auth?' . http_build_query($params));
     exit;
 }
-
-?>
