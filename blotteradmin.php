@@ -128,18 +128,18 @@ if (isset($_POST['submit_complaint'])) {
 }
 
 function sidepanel($google_picture, $google_name) {
-        $currentPage = basename($_SERVER['PHP_SELF']);
-        $activeClasses = 'bg-blue-500 text-white shadow';
-        $inactiveClasses = 'text-gray-600 hover:bg-gray-100';
+    $currentPage = basename($_SERVER['PHP_SELF']);
+    $activeClasses = 'bg-blue-500 text-white shadow';
+    $inactiveClasses = 'text-gray-600 hover:bg-gray-100';
 
-        // Prevents reloading the page when clicking the active link
-        $dashboardClick = ($currentPage === 'dashboardadmin.php') ? 'onclick="event.preventDefault()"' : '';
-        $blotterClick   = ($currentPage === 'blotteradmin.php')   ? 'onclick="event.preventDefault()"' : '';
-        $reportsClick   = ($currentPage === 'reportsadmin.php')   ? 'onclick="event.preventDefault()"' : '';
-        $accountsClick  = ($currentPage === 'accountsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
-        $settingsClick  = ($currentPage === 'settingsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
+    // Prevents reloading the page when clicking the active link
+    $dashboardClick = ($currentPage === 'dashboardadmin.php') ? 'onclick="event.preventDefault()"' : '';
+    $blotterClick   = ($currentPage === 'blotteradmin.php')   ? 'onclick="event.preventDefault()"' : '';
+    $reportsClick   = ($currentPage === 'reportsadmin.php')   ? 'onclick="event.preventDefault()"' : '';
+    $accountsClick  = ($currentPage === 'accountsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
+    $settingsClick  = ($currentPage === 'settingsadmin.php')  ? 'onclick="event.preventDefault()"' : '';
 
-        echo '
+    echo '
         <!-- START: Sidebar -->
         <div id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white text-secondary flex flex-col p-4 items-center shadow-lg z-20">
             <div class="text-center py-4">
@@ -896,7 +896,86 @@ function sidepanel($google_picture, $google_name) {
                 initialQuestionsModal.style.display = 'none';
             });
 
-           
+            // Initialize Map with Leaflet + OpenStreetMap
+            let map, marker;
+
+            // Define bounding box for Barangay San Miguel, Pasig
+            const sanMiguelBounds = L.latLngBounds(
+                [14.563200, 121.079900], // Southwest
+                [14.571900, 121.090800] // Northeast
+            );
+
+            // Initialize map centered on San Miguel
+            map = L.map('map', {
+                maxBounds: sanMiguelBounds, // Restrict view
+                maxBoundsViscosity: 1.0 // Prevent moving outside bounds
+            }).setView([14.5678, 121.0854], 16);
+
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Add click event to place pin
+            map.on('click', function(e) {
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+
+                // Check if clicked location is inside San Miguel only
+                if (!sanMiguelBounds.contains([lat, lng])) {
+                    alert("You can only pin inside Barangay San Miguel, Pasig City.");
+                    return;
+                }
+
+                if (marker) {
+                    map.removeLayer(marker);
+                }
+
+                marker = L.marker([lat, lng], {
+                    draggable: true
+                }).addTo(map);
+
+                document.getElementById('incident_latitude').value = lat;
+                document.getElementById('incident_longitude').value = lng;
+
+                // Reverse geocode
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.display_name) {
+                            document.getElementById('incident_location_display').value = data.display_name;
+                            document.getElementById('incident_location').value = data.display_name;
+                        }
+                    });
+
+                // Marker drag event
+                marker.on('dragend', function(e) {
+                    const newLat = e.target.getLatLng().lat;
+                    const newLng = e.target.getLatLng().lng;
+
+                    // Prevent dragging outside San Miguel
+                    if (!sanMiguelBounds.contains([newLat, newLng])) {
+                        alert("Pin must stay inside Barangay San Miguel.");
+
+                        // Move marker back inside the boundary
+                        marker.setLatLng([lat, lng]);
+                        return;
+                    }
+
+                    document.getElementById('incident_latitude').value = newLat;
+                    document.getElementById('incident_longitude').value = newLng;
+
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}&zoom=18&addressdetails=1`)
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.display_name) {
+                                document.getElementById('incident_location_display').value = data.display_name;
+                                document.getElementById('incident_location').value = data.display_name;
+                            }
+                        });
+                });
+            });
 
             // Tab Navigation
             const tabs = document.querySelectorAll('.tab-button');
