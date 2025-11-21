@@ -1427,30 +1427,58 @@ function sidepanel($google_picture, $google_name) {
                 return age >= 0 ? age : null;
             }
 
-            // Complainant DOB
+            // Complainant DOB (18+ years old)
             document.getElementById('complainant_dob')?.addEventListener('change', function() {
                 const age = calculateAge(this.value);
+                if (age !== null && age < 18) {
+                    alert('Ang nagrereklamo ay dapat 18 taong gulang pataas.');
+                    this.value = '';
+                    document.getElementById('complainant_age').value = '';
+                    document.getElementById('complainant_age_display').textContent = '-';
+                    return;
+                }
                 document.getElementById('complainant_age').value = age || '';
                 document.getElementById('complainant_age_display').textContent = age !== null ? age + ' taong gulang' : '-';
             });
 
-            // Victim DOB
+            // Victim DOB (1+ years old)
             document.getElementById('victim_dob')?.addEventListener('change', function() {
                 const age = calculateAge(this.value);
+                if (age !== null && age < 1) {
+                    alert('Ang biktima ay dapat 1 taong gulang pataas.');
+                    this.value = '';
+                    document.getElementById('victim_age').value = '';
+                    document.getElementById('victim_age_display').textContent = '-';
+                    return;
+                }
                 document.getElementById('victim_age').value = age || '';
                 document.getElementById('victim_age_display').textContent = age !== null ? age + ' taong gulang' : '-';
             });
 
-            // Witness DOB
+            // Witness DOB (10+ years old)
             document.getElementById('witness_dob')?.addEventListener('change', function() {
                 const age = calculateAge(this.value);
+                if (age !== null && age < 10) {
+                    alert('Ang saksi ay dapat 10 taong gulang pataas.');
+                    this.value = '';
+                    document.getElementById('witness_age').value = '';
+                    document.getElementById('witness_age_display').textContent = '-';
+                    return;
+                }
                 document.getElementById('witness_age').value = age || '';
                 document.getElementById('witness_age_display').textContent = age !== null ? age + ' taong gulang' : '-';
             });
 
-            // Respondent DOB
+            // Respondent DOB (18+ years old)
             document.getElementById('respondent_dob')?.addEventListener('change', function() {
                 const age = calculateAge(this.value);
+                if (age !== null && age < 18) {
+                    alert('Ang inireklamo ay dapat 18 taong gulang pataas.');
+                    this.value = '';
+                    document.getElementById('respondent_age').value = '';
+                    document.getElementById('respondent_age_display').textContent = '-';
+                    return;
+                }
                 document.getElementById('respondent_age').value = age || '';
                 document.getElementById('respondent_age_display').textContent = age !== null ? age + ' taong gulang' : '-';
             });
